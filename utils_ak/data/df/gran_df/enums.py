@@ -1,0 +1,7 @@
+LEVEL_ZERO = 0
+LEVEL_YEAR = 1
+LEVEL_MONTH = 2
+LEVEL_DAY = 3
+LEVEL_HOUR = 4
+
+LEVEL_KEYS = ['%Y', '%m', '%d', '%H']
