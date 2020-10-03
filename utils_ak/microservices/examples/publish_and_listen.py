@@ -3,7 +3,7 @@ import logging
 from utils_ak.zmq import endpoint
 from utils_ak.microservices import Microservice, run_listener_async
 
-from utils_ak.logging import configure_stream_logging
+from utils_ak.log import configure_stream_logging
 configure_stream_logging(level=logging.INFO)
 
 BROKER = 'zmq'

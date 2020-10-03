@@ -15,7 +15,7 @@ BACKEND = 'tqdm'
 #     pass
 
 
-class tqtb(object):
+class tqdm_ak(object):
     def __init__(self, *args, desc=None, postfix=None, show_timing=False, timing_format='%H:%M:%S', hook=None, **kwargs):
         tqdm_backend = tqdm_notebook if BACKEND == 'tqdm_notebook' else tqdm
         self.backend = tqdm_backend(*args, **kwargs)
@@ -66,5 +66,5 @@ if __name__ == '__main__':
             print('\nThis is a hook message', i)
 
 
-    for x in tqtb(range(1000), show_timing=True, desc=lambda i: i ** 2, postfix=lambda i: {'i': i // 10}, hook=sample_hook):
+    for x in tqdm_ak(range(1000), show_timing=True, desc=lambda i: i ** 2, postfix=lambda i: {'i': i // 10}, hook=sample_hook):
         time.sleep(0.01)

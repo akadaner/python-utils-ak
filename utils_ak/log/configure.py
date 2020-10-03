@@ -1,7 +1,7 @@
 import logging
 import logging.handlers
 
-from utils_ak.logging.extra_fields_logger import ExtraFieldsLogger
+from utils_ak.log.extra_fields_logger import ExtraFieldsLogger
 
 import os
 import sys

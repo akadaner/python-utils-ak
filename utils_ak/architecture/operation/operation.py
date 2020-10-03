@@ -142,7 +142,7 @@ class AsyncioTaskOperation(TaskOperation):
 
 if __name__ == '__main__':
     import time
-    from utils_ak.logging import configure_stream_logging
+    from utils_ak.log import configure_stream_logging
 
     configure_stream_logging(level=logging.DEBUG)
 

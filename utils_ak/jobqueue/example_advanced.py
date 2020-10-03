@@ -1,6 +1,6 @@
 import time
 from utils_ak import jobqueue as jq
-from utils_ak.logging import configure_logging
+from utils_ak.log import configure_logging
 from utils_ak.os_tools import makedirs
 import logging
 

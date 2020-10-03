@@ -161,7 +161,7 @@ class AvailabilityProxyGuard:
 
 
 if __name__ == '__main__':
-    from utils_ak.logging import configure_stream_logging
+    from utils_ak.log import configure_stream_logging
 
     configure_stream_logging(level=logging.DEBUG)
     import random

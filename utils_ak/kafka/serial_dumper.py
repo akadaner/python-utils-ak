@@ -80,7 +80,7 @@ class KafkaTopicSerialDumper:
 
 
 if __name__ == "__main__":
-    from utils_ak.logging import configure_stream_logging
+    from utils_ak.log import configure_stream_logging
     configure_stream_logging(level=logging.DEBUG)
 
     from utils_ak.data.storage import JsonGranularStorage

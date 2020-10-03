@@ -5,7 +5,7 @@ import random
 
 from utils_ak.microservices import Microservice
 
-from utils_ak.logging import configure_stream_logging
+from utils_ak.log import configure_stream_logging
 from utils_ak.zmq import endpoint
 
 configure_stream_logging(level=logging.INFO)

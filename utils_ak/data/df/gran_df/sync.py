@@ -2,7 +2,7 @@ from utils_ak.time.dt import *
 from utils_ak.pd_tools import find_row
 from utils_ak.os_tools import remove
 
-from utils_ak.tqtb import tqtb
+from utils_ak.tqdm_ak import tqdm_ak
 
 
 class GranularSync(object):
@@ -28,7 +28,7 @@ class GranularSync(object):
         last_struct_to_df = struct_to.groupby('key').agg('last')
         last_rows = last_struct_to_df.to_dict('index')
 
-        for key in tqtb(struct_from['key'].unique()):
+        for key in tqdm_ak(struct_from['key'].unique()):
             if key not in last_rows:
                 # key is not present in gran_to
                 df = gran_from.read(key)
