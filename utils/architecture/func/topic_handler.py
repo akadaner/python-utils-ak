@@ -1,4 +1,4 @@
-""" TopicHandler is a basic_objects of handlers, bound to certain topics as callbacks. """
+""" TopicHandler is a builtin of handlers, bound to certain topics as callbacks. """
 from .handler import Handler
 
 

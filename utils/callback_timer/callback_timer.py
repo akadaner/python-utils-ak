@@ -187,7 +187,7 @@ class ScheduleTimer:
 
 
 class CallbackTimers(object):
-    """ A basic_objects of callback timers. """
+    """ A builtin of callback timers. """
 
     def __init__(self):
         self.timers = []

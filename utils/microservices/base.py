@@ -28,12 +28,12 @@ class BaseMicroservice(object):
         # sync
         self.timers = []
 
-        # {basic_objects: callback}
+        # {builtin: callback}
         self.callbacks = {}
 
         self.broker_manager = BrokerManager(default_broker, brokers_config)
 
-        # {broker: f'{basic_objects}::{topic}'}
+        # {broker: f'{builtin}::{topic}'}
         self.subscribed_to = {}
 
         self.logger = logger or logging.getLogger('-'.join([os.path.basename(sys.argv[0])]))

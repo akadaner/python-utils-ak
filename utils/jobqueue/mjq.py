@@ -7,7 +7,7 @@ from utils.serialization import js as json
 from datetime import datetime, timedelta
 import traceback
 
-# todo: create smart basic_objects
+# todo: create smart builtin
 # todo: use tailable cursor like in pymjq
 # todo: handle mongodb connection errors!
 

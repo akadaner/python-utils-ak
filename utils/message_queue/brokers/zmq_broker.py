@@ -12,7 +12,7 @@ class ZMQBroker(Broker):
 
         self.endpoints = endpoints
 
-        # {endpoint: basic_objects}
+        # {endpoint: builtin}
         self.collections = {}
 
         for collection, config in endpoints.items():

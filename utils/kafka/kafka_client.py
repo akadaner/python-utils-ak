@@ -1,7 +1,7 @@
 from confluent_kafka import Producer, Consumer
 import uuid
 
-from utils.basic_objects import update_dic
+from utils.builtin import update_dic
 from copy import deepcopy
 
 # todo: make group_id properly

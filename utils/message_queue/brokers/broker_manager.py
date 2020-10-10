@@ -1,4 +1,4 @@
-""" Broker manager is a basic_objects of multiple brokers. """
+""" Broker manager is a builtin of multiple brokers. """
 from .kafka_broker import KafkaBroker
 from .zmq_broker import ZMQBroker
 
@@ -23,7 +23,7 @@ class BrokerManager:
 
         self.brokers = {}
 
-        # {broker: {basic_objects: [topic1, topic2, ...]}}
+        # {broker: {builtin: [topic1, topic2, ...]}}
         self.subscribed_to = {}
 
     def get_broker(self, broker_name=None):
