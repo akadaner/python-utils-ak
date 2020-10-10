@@ -1,4 +1,4 @@
-# mechanisms with async
+# mechanisms with async_tools
 from multiprocessing.dummy import Pool as ThreadPool
 from multiprocessing import Pool
 from functools import wraps
