@@ -1,1 +1,0 @@
-""" Table is a class to store table-like data in stream to files. """

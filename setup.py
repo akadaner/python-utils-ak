@@ -19,7 +19,7 @@ cmdclass = {}
 ext_modules = []
 
 
-setup(name='utils_ak',
+setup(name='utils',
       version='1.0.0',
       description='Quantribution Library',
       packages=find_packages(),
