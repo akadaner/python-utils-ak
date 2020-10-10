@@ -2,7 +2,7 @@ from utils_ak.time.dt import *
 from utils_ak.pd_tools import find_row
 from utils_ak.os_tools import remove
 
-from utils_ak.tqdm_ak import tqdm_ak
+from utils_ak.tqdm_tools import tqdm_ak
 
 
 class GranularSync(object):

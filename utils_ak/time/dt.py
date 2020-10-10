@@ -261,13 +261,16 @@ def cast_timedelta(td_obj):
     elif isinstance(td_obj, (int, float, np.integer)):
         return timedelta(seconds=td_obj)
     elif isinstance(td_obj, str):
+        try:
+            return timedelta(seconds=int(td_obj))
+        except:
+            pass
         return parse_freq(td_obj)
     else:
         raise Exception('Unknown td_obj format')
 
 
 cast_td = cast_timedelta
-
 
 def cast_sec(td_obj):
     if isinstance(td_obj, (int, float)):

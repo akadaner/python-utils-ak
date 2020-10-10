@@ -3,7 +3,7 @@ import json
 from multiprocessing import Process
 from threading import Thread
 from utils_ak.jobqueue.mjq import MongoJobQueue
-from utils_ak.tqdm_ak import tqdm_ak
+from utils_ak.tqdm_tools import tqdm_ak
 
 import logging
 

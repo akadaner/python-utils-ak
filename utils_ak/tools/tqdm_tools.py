@@ -15,7 +15,7 @@ BACKEND = 'tqdm'
 #     pass
 
 
-class tqdm_ak(object):
+class tqdm_ak:
     def __init__(self, *args, desc=None, postfix=None, show_timing=False, timing_format='%H:%M:%S', hook=None, **kwargs):
         tqdm_backend = tqdm_notebook if BACKEND == 'tqdm_notebook' else tqdm
         self.backend = tqdm_backend(*args, **kwargs)

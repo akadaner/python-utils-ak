@@ -14,10 +14,10 @@ class ScriptManager(object):
         self.config = {self.cast_name(name): path for name, path in config.items()}
 
     def start(self, name, cmd):
-        self.execute("screen -S {} -dm bash -c \" {}\"".format(name, cmd), async=True)
+        self.execute("screen -S {} -dm bash -c \" {}\"".format(name, cmd), is_async=True)
 
     def ls(self, by='time'):
-        output = self.execute('screen -ls', async=False)
+        output = self.execute('screen -ls', is_async=False)
         lines = output.split('\n')[1:-2]
         values = []
         for line in lines:
@@ -52,11 +52,11 @@ class ScriptManager(object):
     def kill_one(self, name):
         if name == 'jupyter':
             raise Exception('jupyter cannot be killed for safety measures')
-        return self.execute("screen -S " + name + " -X quit", async=False)
+        return self.execute("screen -S " + name + " -X quit", is_async=False)
 
     @staticmethod
-    def execute(cmd, async=False):
-        if async:
+    def execute(cmd, is_async=False):
+        if is_async:
             process = subprocess.Popen(cmd, shell=True)
         else:
             process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)

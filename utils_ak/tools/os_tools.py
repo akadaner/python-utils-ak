@@ -146,5 +146,15 @@ def open_atomic(filepath, *args, **kwargs):
         os.rename(tmppath, filepath)
 
 
+def getenv_boolean(var_name, default_value=False):
+    result = default_value
+    env_value = os.getenv(var_name)
+    if env_value is not None:
+        result = env_value.upper() in ('TRUE', '1')
+    return result
+
+
+
+
 if __name__ == '__main__':
     print(gen_tmp_fn(extension='.operation.canary'))

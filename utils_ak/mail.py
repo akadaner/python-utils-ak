@@ -76,4 +76,5 @@ def send_yandex(username, password, to_, subject, text, html=False, headers=[], 
 
 if __name__ == '__main__':
     msg = dict(a=u'аладушек', b=2)
-    print(send_gmail('email_from', 'password_here', ['emails_to'], 'subject', json.dumps(msg, indent=2, ensure_ascii=False).encode('utf-8')))
+    # print(send_gmail('email_from', 'password_here', ['emails_to'], 'subject', json.dumps(msg, indent=2, ensure_ascii=False).encode('utf-8')))
+    print(send_yandex('rainydai@yandex.ru', 'rlicu12MLP&$*', ['arseniikadaner@gmail.com'], 'subject', json.dumps(msg, indent=2, ensure_ascii=False).encode('utf-8')))

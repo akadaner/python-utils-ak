@@ -38,7 +38,7 @@ def validate(data):
         pass
 
 
-def cast_str(js_obj, *args, **kwargs):
+def cast_js(js_obj, *args, **kwargs):
     if isinstance(js_obj, str):
         return js_obj
     else:
@@ -52,9 +52,9 @@ def cast_dict(js_obj, *args, **kwargs):
         return json.loads(js_obj, *args, **kwargs)
 
 
-dumps = cast_str
+dumps = cast_js
 loads = cast_dict
 
 if __name__ == '__main__':
-    print(dumps({'a': 'фыва'}))
-    print(loads(dumps({'a': 'фыва', 'dec': Decimal('10.1'), 'today': datetime.now()})))
+    print(dumps({'a': 'foo'}))
+    print(loads(dumps({'a': 'foo', 'dec': Decimal('10.1'), 'today': datetime.now()})))

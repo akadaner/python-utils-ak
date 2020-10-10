@@ -7,7 +7,7 @@ Formats:
 """
 
 import re
-from utils_ak import re_tools
+from utils_ak.tools import re_tools
 
 # from here: https://stackoverflow.com/questions/106179/regular-expression-to-match-dns-hostname-or-ip-address
 IP_PAT = "(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])"
