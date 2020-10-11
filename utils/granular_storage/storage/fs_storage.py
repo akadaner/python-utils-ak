@@ -1,8 +1,8 @@
 import os
 
-from utils.os_tools import makedirs
+from utils.os.os import makedirs
 from utils.time.dt import cast_datetime
-from utils.limited_dict import LimitedDict
+from utils.dict.limited_dict import LimitedDict
 
 import time
 

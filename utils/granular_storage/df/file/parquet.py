@@ -1,7 +1,7 @@
 import os
 from utils.granular_storage.df.file.stream import StreamFile
 import pandas as pd
-from utils.os_tools import rename, remove
+from utils.os import rename, remove
 
 
 class ParquetFile(StreamFile):

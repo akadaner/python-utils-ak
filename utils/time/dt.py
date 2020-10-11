@@ -124,6 +124,15 @@ cast_ts = cast_timestamp
 def cast_mts(dt_obj):
     return cast_timestamp(dt_obj) * 1000
 
+def cast_str(dt, format=None):
+    if isinstance(dt, str):
+        return dt
+    elif isinstance(dt, datetime):
+        if not format:
+            return str(dt)
+        return dt.strftime(format)
+    else:
+        raise Exception('Unsupported type')
 
 def get_strptime_pattern(s):
     """

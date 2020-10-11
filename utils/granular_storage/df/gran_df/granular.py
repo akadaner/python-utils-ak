@@ -9,9 +9,9 @@ from utils.granular_storage.df.file import CSVFile, FeatherFile, MsgPackFile, Pa
 from utils.granular_storage.df.gran_df.enums import *
 
 from utils.time.dt import cast_timedelta, cast_datetime
-from utils.os_tools import list_files, makedirs, remove
-from utils.pd_tools import merge
-from utils import re_tools
+from utils.os import list_files, makedirs, remove
+from utils.pandas import merge
+from utils.re import re as re_tools
 
 
 # todo: optimize upd_struct usage. Minimize its usage

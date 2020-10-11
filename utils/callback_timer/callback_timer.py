@@ -4,7 +4,7 @@ import inspect
 
 from dateutil import rrule
 from datetime import datetime, timedelta
-from utils.time.dt import cast_sec, cast_timedelta
+from utils.time import cast_sec, cast_timedelta
 
 TIME_EPS = 0.001
 

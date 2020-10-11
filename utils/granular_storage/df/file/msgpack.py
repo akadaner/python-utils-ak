@@ -4,7 +4,7 @@ from datetime import timedelta
 
 from utils.granular_storage.df.file.stream import StreamFile
 from utils.time.dt import cast_datetime
-from utils.os_tools import rename, remove
+from utils.os import rename, remove
 
 import numpy as np
 

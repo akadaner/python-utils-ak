@@ -1,7 +1,7 @@
 import subprocess
 import os
 
-from utils.strtypes import cast_unicode
+from utils.str import cast_unicode
 
 
 def execute(cmd, async_=False):
