@@ -19,13 +19,12 @@ cmdclass = {}
 ext_modules = []
 
 
-setup(name='utils',
+setup(name='utils_ak',
       version='1.0.0',
-      description='Quantribution Library',
+      description='Personal Utils Package',
       packages=find_packages(),
       cmdclass=cmdclass,
       ext_modules=ext_modules,
-      install_requires=['joblib', 'h5py', 'anyconfig', 'retrypy', 'pymongo', 'slacker', 'requests-futures', 'empyrical',
-                        'filelock'],
+      install_requires=['joblib', 'h5py', 'anyconfig', 'retrypy', 'pymongo', 'slacker', 'requests-futures', 'empyrical', 'filelock'],
       include_dirs=[np.get_include()],
       zip_safe=False)
