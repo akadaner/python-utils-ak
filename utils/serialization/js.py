@@ -48,8 +48,13 @@ def cast_js(js_obj, *args, **kwargs):
 def cast_dict(js_obj, *args, **kwargs):
     if isinstance(js_obj, dict):
         return js_obj
-    else:
-        return json.loads(js_obj, *args, **kwargs)
+    try:
+        res = json.loads(js_obj, *args, **kwargs)
+        if isinstance(res, dict):
+            return res
+    except:
+        pass
+    raise Exception('Unknown type')
 
 
 dumps = cast_js
@@ -58,3 +63,5 @@ loads = cast_dict
 if __name__ == '__main__':
     print(dumps({'a': 'foo'}))
     print(loads(dumps({'a': 'foo', 'dec': Decimal('10.1'), 'today': datetime.now()})))
+    print(cast_dict('columns'))
+    print(cast_js(None))

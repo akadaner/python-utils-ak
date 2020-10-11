@@ -1,7 +1,8 @@
 """ Tqdm wrapper with more functionality. """
 import time
 from datetime import datetime
-from tqdm import tqdm, tqdm_notebook
+from tqdm import tqdm as tqdm_vanilla
+from tqdm import tqdm_notebook
 
 BACKEND = 'tqdm'
 
@@ -17,7 +18,7 @@ BACKEND = 'tqdm'
 
 class tqdm:
     def __init__(self, *args, desc=None, postfix=None, show_timing=False, timing_format='%H:%M:%S', hook=None, **kwargs):
-        tqdm_backend = tqdm_notebook if BACKEND == 'tqdm_notebook' else tqdm
+        tqdm_backend = tqdm_notebook if BACKEND == 'tqdm_notebook' else tqdm_vanilla
         self.backend = tqdm_backend(*args, **kwargs)
         self.desc = desc
         self.postfix = postfix
