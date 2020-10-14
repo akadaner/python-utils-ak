@@ -102,8 +102,9 @@ class Clock(object):
         self.checkpoints = {}
         self.laps = {}
 
-    def print_trie(self, by='sum', sep='/', precision=3):
-        # todo: use something better than pygtrie. It is not good. Not at all. It is very very ugly. But works here as mvp
+    def print_trie(self, by='sum', sep=None, precision=3):
+        sep = sep or self.sep
+
         import pygtrie
         t = pygtrie.StringTrie(separator=sep)
 

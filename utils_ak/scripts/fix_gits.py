@@ -21,7 +21,7 @@ logging.info('Done.')
 
 logging.info('Pulling repos...')
 # 2) pull all gits
-from utils_ak.git_tools import git_pull_many
+from utils_ak.git import git_pull_many
 from pprint import pprint
 
 pprint(git_pull_many(git_root_path, repos=gits))
