@@ -4,7 +4,7 @@ import scp
 import sys
 import glob
 
-from utils_ak.strtypes import cast_unicode
+from utils_ak.str import cast_unicode
 
 
 def progress(filename, size, sent):

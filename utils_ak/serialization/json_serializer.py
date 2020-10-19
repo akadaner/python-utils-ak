@@ -1,5 +1,5 @@
-from utils_ak.serialization.js import dumps, loads
-from utils_ak.serialization.serializer import Serializer
+from .js import dumps, loads
+from .serializer import Serializer
 
 
 class JsonSerializer(Serializer):

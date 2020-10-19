@@ -1,5 +1,5 @@
 """ PrefixHandler inherits a TopicHandler with callbacks triggered by prefix rule. """
-from utils_ak.strtypes import cast_unicode
+from utils_ak.str import cast_unicode
 from .topic_handler import TopicHandler
 
 

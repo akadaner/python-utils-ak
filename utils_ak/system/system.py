@@ -1,7 +1,7 @@
 import psutil
 
 import subprocess
-from utils_ak.strtypes import cast_unicode
+from utils_ak.str import cast_unicode
 
 import re
 

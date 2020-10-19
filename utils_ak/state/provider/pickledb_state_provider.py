@@ -2,7 +2,7 @@ import os
 import pickledb
 
 from utils_ak.state.provider.provider import StateProvider
-from utils_ak.os_tools import makedirs
+from utils_ak.os import makedirs
 
 
 class PickleDBStateProvider(StateProvider):

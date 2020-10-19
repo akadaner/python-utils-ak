@@ -7,12 +7,12 @@ import asyncio
 
 from utils_ak.callback_timer import CallbackTimer, ScheduleTimer, CallbackTimers
 from utils_ak.architecture.func import PrefixHandler
-from utils_ak.strtypes import cast_unicode
+from utils_ak.str import cast_unicode
 
 logger = logging.getLogger(__name__)
 
 from utils_ak.message_queue.brokers import BrokerManager
-from utils_ak.serialization.serializer import JsonSerializer
+from utils_ak.serialization import JsonSerializer
 
 TIME_EPS = 0.001
 

@@ -1,4 +1,4 @@
 """ Serialization functionality. """
 
 from .js import cast_dict, cast_js
-from .serializer.msgpack_serializer import MsgPackSerializer
+from .msgpack_serializer import MsgPackSerializer

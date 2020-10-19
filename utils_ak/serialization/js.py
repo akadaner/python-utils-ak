@@ -60,6 +60,9 @@ def cast_dict(js_obj, *args, **kwargs):
 dumps = cast_js
 loads = cast_dict
 
+
+
+
 if __name__ == '__main__':
     print(dumps({'a': 'foo'}))
     print(loads(dumps({'a': 'foo', 'dec': Decimal('10.1'), 'today': datetime.now()})))

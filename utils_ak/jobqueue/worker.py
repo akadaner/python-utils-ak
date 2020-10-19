@@ -3,7 +3,7 @@ import json
 from multiprocessing import Process
 from threading import Thread
 from utils_ak.jobqueue.mjq import MongoJobQueue
-from utils_ak.tqdm_tools import tqdm_ak
+from utils_ak.tqdm import tqdm
 
 import logging
 
@@ -25,9 +25,9 @@ def run(workers, is_async=False, update_timeout=1., auto_repair=True, use_thread
 
     # {'pending': 28, 'locked': 8, 'error': 0, 'success': 67}
     if show_size:
-        pbar = tqdm_ak(total=queue.size())
+        pbar = tqdm(total=queue.size())
     else:
-        pbar = tqdm_ak()
+        pbar = tqdm()
 
     pbar.backend.set_description('MJQ')
 
@@ -171,7 +171,7 @@ class Worker(object):
 
 if __name__ == '__main__':
     # {'pending': 28, 'locked': 8, 'error': 0, 'success': 67}
-    pbar = tqdm_ak(total=20)
+    pbar = tqdm(total=20)
     pbar.backend.set_description('MJQ')
 
     pbar.backend.update(1)
@@ -181,4 +181,4 @@ if __name__ == '__main__':
     time.sleep(1)
 
     pbar.backend.close()
-    pbar = tqdm_ak(total=20)
+    pbar = tqdm(total=20)

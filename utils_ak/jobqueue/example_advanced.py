@@ -1,7 +1,7 @@
 import time
 from utils_ak import jobqueue as jq
 from utils_ak.log import configure_logging
-from utils_ak.os_tools import makedirs
+from utils_ak.os import makedirs
 import logging
 
 mongodb_cs = 'mongodb+srv://arseniikadaner:Nash0lbanan@cluster0-2umoy.mongodb.net/test?retryWrites=true'
