@@ -40,10 +40,12 @@ def ext_hook(code, data):
 
 
 class MsgPackSerializer:
-    def encode(self, obj):
+    @staticmethod
+    def encode(obj):
         return msgpack.dumps(obj, default=default, use_bin_type=True)
 
-    def decode(self, obj):
+    @staticmethod
+    def decode(obj):
         return msgpack.loads(obj, ext_hook=ext_hook, raw=False)
 
 
