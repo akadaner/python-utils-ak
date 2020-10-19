@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "utils-ak2"
+name = "utils-ak"
 version = "0.1.0"
 description = "Lots of small utils"
 authors = ["akadaner <arseniikadaner@gmail.com>"]
