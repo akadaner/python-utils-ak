@@ -1,6 +1,6 @@
 import logging
 import json
-from utils_ak.serialization.serializer import JsonSerializer
+from utils_ak.serialization import JsonSerializer
 
 
 class SimpleCustomFieldFormatter(logging.Formatter):

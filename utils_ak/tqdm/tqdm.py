@@ -7,13 +7,13 @@ from tqdm import tqdm_notebook
 BACKEND = 'tqdm'
 
 
-# try:
-#     from IPython import get_ipython
-#     if 'IPKernelApp' in get_ipython().config:
-#         from tqdm import tqdm_notebook as tqdm_backend
-#         BACKEND = 'tqdm_notebook'
-# except:
-#     pass
+try:
+    from IPython import get_ipython
+    if 'IPKernelApp' in get_ipython().config:
+        from tqdm import tqdm_notebook as tqdm_backend
+        BACKEND = 'tqdm_notebook'
+except:
+    pass
 
 
 class tqdm:
