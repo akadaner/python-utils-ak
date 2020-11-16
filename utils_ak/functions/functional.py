@@ -34,6 +34,13 @@ def partial(function, *args, **kwargs):
     return partially_applied_function
 
 
+def repeat(f, obj, n):
+    res = obj
+    for i in range(n):
+        res = f(res)
+    return res
+
+
 if __name__ == '__main__':
     def go(left=1, right=100):
         return left, right
