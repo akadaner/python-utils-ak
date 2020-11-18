@@ -1,8 +1,6 @@
 """ Python reflexion-level functionality. """
 from functools import reduce
 import importlib
-import git
-import glob
 import os
 import inspect
 import sys
@@ -28,6 +26,17 @@ def load_module(module_fn, module_name=None):
     foo = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(foo)
     return foo
+
+
+def import_from_path(module_fn, module_name):
+    return load_module(module_fn, module_name)
+
+
+def from_path_import_all(module_fn, module_name):
+    module = load_module(module_fn, module_name)
+    for x in dir(module):
+        if not x.startswith('_'):
+            globals()[x] = getattr(module, x)
 
 
 def cast_module(obj):
