@@ -28,11 +28,11 @@ def load_module(module_fn, module_name=None):
     return foo
 
 
-def import_from_path(module_fn, module_name):
+def import_from_path(module_fn, module_name=None):
     return load_module(module_fn, module_name)
 
 
-def from_path_import_all(module_fn, module_name):
+def from_path_import_all(module_fn, module_name=None):
     module = load_module(module_fn, module_name)
     for x in dir(module):
         if not x.startswith('_'):
