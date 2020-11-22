@@ -38,7 +38,6 @@ def load(module_obj, module_name=None, reload=False, import_globals=False):
         for x in dir(module):
             if not x.startswith('_'):
                 globals()[x] = getattr(module, x)
-
     return module
 
 cast_module = load

@@ -195,6 +195,7 @@ def clockify(key=None):
             clock.start(_key)
             try:
                 res = f(*args, **kwargs)
+                clock.stop(_key)
             except:
                 clock.stop(_key)
                 raise
@@ -209,12 +210,21 @@ def clockify(key=None):
 def test_time():
     time.sleep(1)
 
+@clockify('time_with_exception')
+def test_time_with_exception():
+    time.sleep(1)
+    raise Exception('test')
+
 
 if __name__ == '__main__':
     # usage 1
     clock = Clock()
 
     test_time()
+    try:
+        test_time_with_exception()
+    except:
+        pass
     print(clock.stats())
     clock.reset()
 

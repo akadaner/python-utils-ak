@@ -6,7 +6,7 @@ import os
 import tempfile as tmp
 from contextlib import contextmanager
 
-from utils_ak.strtypes import cast_bytes
+from utils_ak.str import cast_bytes
 
 
 def makedirs(path):
