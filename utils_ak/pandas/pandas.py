@@ -9,7 +9,7 @@ from io import BytesIO
 
 # from IPython.display import HTML, display
 
-pd.set_option('display.max_colwidth', -1)
+pd.set_option('display.max_colwidth', None)
 
 
 def display_with_image_thumbnails(df, shape=None):

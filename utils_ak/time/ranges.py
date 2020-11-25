@@ -51,6 +51,12 @@ def iter_range(beg, end, period):
         beg = next_beg
 
 
+def datetime_range(beg, end, period):
+    while beg < end:
+        yield beg
+        beg = min(beg + period, end)
+
+
 if __name__ == '__main__':
     from utils_ak.time import cast_datetime, cast_timedelta
 
