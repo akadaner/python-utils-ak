@@ -46,11 +46,11 @@ def cast_js(js_obj, *args, **kwargs):
 
 
 def cast_dict(js_obj, *args, **kwargs):
-    if isinstance(js_obj, dict):
+    if isinstance(js_obj, (dict, list)):
         return js_obj
     try:
         res = json.loads(js_obj, *args, **kwargs)
-        if isinstance(res, dict):
+        if isinstance(res, (dict, list)):
             return res
     except:
         pass
@@ -68,3 +68,5 @@ if __name__ == '__main__':
     print(loads(dumps({'a': 'foo', 'dec': Decimal('10.1'), 'today': datetime.now()})))
     print(cast_dict('columns'))
     print(cast_js(None))
+
+    import apache_beam.transforms.window
