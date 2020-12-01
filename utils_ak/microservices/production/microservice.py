@@ -7,7 +7,7 @@ from utils_ak.config.config import get_config
 
 
 class ProductionMicroservice(SystemMicroservice):
-    def __init__(self, microservice_id=None, config=None, logger=None, heartbeat_freq=3, extra_config=None, default_broker=None, *args, **kwargs):
+    def __init__(self, microservice_id=None, config=None, logger=None, heartbeat_freq=3, extra_config=None, default_broker='zmq', *args, **kwargs):
         self.config = config or get_config(require_local=True)
         if extra_config:
             anyconfig.merge(self.config, extra_config, ac_merge=anyconfig.MS_DICTS)

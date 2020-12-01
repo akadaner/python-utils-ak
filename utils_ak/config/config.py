@@ -7,17 +7,6 @@ import sys
 from utils_ak.dict import dotdict
 from utils_ak.builtin import update_dic
 
-import yaml
-
-
-def load_yaml(fn):
-    with open(fn, 'r') as f:
-        return yaml.load(f)
-
-
-# will try to find these in directory with config.py file
-BASE_CONFIGS = ['common_config.yml', 'secret_config.yml', 'instance_config.yml']
-
 
 def cast_config(obj, required=False):
     if obj is None:
@@ -41,26 +30,31 @@ def cast_config(obj, required=False):
         raise Exception('Unknown config type')
 
 
-def get_config(configs=None, require_local=False):
-    cur_dir = os.getcwd()
+def get_config(configs=None, require_local=False, global_configs=('common_config.yml', 'secret_config.yml', 'instance_config.yml')):
     local_config_fn = os.path.splitext(os.path.abspath(sys.argv[0]))[0] + '.yml'
-
-    os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
     if not os.path.exists(local_config_fn):
         if require_local:
             raise Exception(f'Local config not found {local_config_fn}')
         local_config_fn = None
 
-    base_configs = [os.path.join(os.getcwd(), base_config) for base_config in BASE_CONFIGS]
+    res = []
+    # add global configs
+    for base_config in global_configs:
+        for dirname in [os.getcwd(), os.path.dirname(os.path.abspath(sys.argv[0]))]:
+            fn = os.path.join(dirname, base_config)
+            if os.path.exists(fn):
+                res.append(fn)
+                break
 
     configs = configs or []
-    configs = [os.path.join(cur_dir, config) for config in configs]
+    res += configs
 
-    os.chdir(cur_dir)
-    res = cast_config(base_configs + [local_config_fn] + configs)
-    # return dotdict(res) # todo: dotdict has a bug with pickle and threading
-    return res
+    # add local config
+    res.append(local_config_fn)
+
+    return cast_config(res)
+
 
 config = get_config()
 

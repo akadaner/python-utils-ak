@@ -27,7 +27,7 @@ class Ping(ProductionMicroservice):
         self.logger.info('This is a schedule function')
 
 
-class Pong(Microservice):
+class Pong(ProductionMicroservice):
     def __init__(self, *args, **kwargs):
         super().__init__('Pong microservice', *args, **kwargs)
         self.add_callback('pong', '', self.send_pong)
