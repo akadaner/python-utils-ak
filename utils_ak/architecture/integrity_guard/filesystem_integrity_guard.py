@@ -2,7 +2,7 @@ import os
 from uuid import uuid4
 
 from utils_ak.architecture.integrity_guard.integrity_guard import IntegrityGuard
-from utils_ak.os_tools import remove, gen_tmp_fn
+from utils_ak.os import remove, gen_tmp_fn
 
 import logging
 

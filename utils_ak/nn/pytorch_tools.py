@@ -71,7 +71,7 @@ class DynamicNet(nn.Module):
             print(*args)
 
 
-class NPYDataset(torch.utils.data.Dataset):
+class NPYDataset(torch.utils.datasets.Dataset):
     def __init__(self, images_path, labels_path=None, transform=None, train=True, train_size=0.9, shuffle=False, seed=12):
         self.images = np.load(images_path)
         if labels_path:

@@ -124,15 +124,13 @@ class BaseMicroservice(object):
                         received = await self.broker_manager.aiopoll(broker)
                     else:
                         received = self.broker_manager.poll(timeout, broker)
-
                     if not received:
                         await asyncio.sleep(0)
                         continue
 
                     collection, topic, msg = received
                     try:
-                        self.logger.debug(f'Received new message from {broker} broker',
-                                          custom={'topic': topic, 'msg': msg})
+                        self.logger.debug(f'Received new message from {broker} broker', custom={'topic': topic, 'msg': msg})
                         await self.callbacks[collection].aiocall(topic, msg)
 
                         if self.fail_count != 0:

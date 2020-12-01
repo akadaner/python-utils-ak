@@ -255,6 +255,7 @@ if __name__ == '__main__':
 
     # this stops all clocks
     clock.stop()
+    print('Auto close')
     print(clock.stats())
 
     clock = Clock()

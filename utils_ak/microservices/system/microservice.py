@@ -1,9 +1,9 @@
 from utils_ak.time.dt import cast_sec
 
-from .base import BaseMicroservice
+from utils_ak.microservices.base import BaseMicroservice
 
 
-class Microservice(BaseMicroservice):
+class SystemMicroservice(BaseMicroservice):
     def __init__(self, microservice_id, logger=None, heartbeat_freq=None, system_enabled=False,
                  microservice_name=None, serializer=None, default_broker='zmq', brokers_config=None,
                  asyncio_support=True):
@@ -17,13 +17,11 @@ class Microservice(BaseMicroservice):
         self.heartbeat_freq = heartbeat_freq
         if heartbeat_freq:
             self.heartbeat_sec = cast_sec(self.heartbeat_freq)
-            self.add_timer(self.publish_json, heartbeat_freq,
-                           args=('heartbeat', '', {'name': self.microservice_name},))
+            self.add_timer(self.publish_json, heartbeat_freq, args=('heartbeat', '', {'name': self.microservice_name},))
 
         # Subscribe to system commands
         if system_enabled:
-            self.add_callback('system', '', callback=self.on_stop,
-                              filter=[self.check_id, lambda topic, msg: msg['type'] == 'stop'])
+            self.add_callback('system', '', callback=self.on_stop, filter=[self.check_id, lambda topic, msg: msg['type'] == 'stop'])
 
     def check_id(self, topic, msg):
         if 'instance_id' not in msg:

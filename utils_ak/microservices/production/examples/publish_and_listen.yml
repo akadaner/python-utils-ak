@@ -1,0 +1,16 @@
+# necassary fields
+microservice_name: example_publish_listen
+configuration: default
+
+
+zmq:
+  endpoints:
+    heartbeat:
+      type: sub
+      endpoint: tcp://localhost:5555
+    system:
+      type: pub
+      endpoint: tcp://localhost:5556
+    col:
+      type: sub
+      endpoint: tcp://localhost:5557

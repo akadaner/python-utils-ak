@@ -1,4 +1,4 @@
-from confluent_kafka import Producer, Consumer, TopicPartition
+# from confluent_kafka import Producer, Consumer, TopicPartition
 import uuid
 
 

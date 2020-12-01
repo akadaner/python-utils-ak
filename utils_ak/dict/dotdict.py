@@ -51,7 +51,7 @@ class dotdict(dict):
 
         if key in self or self._as_default_dict:
             return self.get(key)
-        raise KeyError('Key not found {}'.format(key))
+        raise KeyError(key)
 
     def __setitem__(self, key, val):
         self._set(key, val)

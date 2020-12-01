@@ -3,18 +3,18 @@ import logging
 import asyncio
 import random
 
-from utils_ak.microservices import Microservice
+from utils_ak.microservices import SystemMicroservice, run_listener_async
 
 from utils_ak.log import configure_stream_logging
 from utils_ak.zmq import endpoint
 
-configure_stream_logging(level=logging.INFO)
+configure_stream_logging(stream_level=logging.INFO)
 
 PUBLISHER_ID = random.randint(0, 10 ** 6)
 BROKER = 'zmq'
 BROKERS_CONFIG = {'zmq': {'endpoints': {'system': {'type': 'pub', 'endpoint': endpoint('localhost', 6554)}}}}
 
-class Publisher(Microservice):
+class Publisher(SystemMicroservice):
     def __init__(self, *args, **kwargs):
         super().__init__(f'Publisher - {PUBLISHER_ID}', system_enabled=True, *args, **kwargs)
         self.add_callback('system', 'stop', callback=self.sure)
@@ -23,7 +23,7 @@ class Publisher(Microservice):
         self.logger.info('Publisher: ARE YOU SURE YOU WANNA DO THIS?')
 
 
-class Stopper(Microservice):
+class Stopper(SystemMicroservice):
     def __init__(self, *args, **kwargs):
         super().__init__('Stopper', system_enabled=True, *args, **kwargs)
         self.add_callback('system', 'stop', callback=self.sure)

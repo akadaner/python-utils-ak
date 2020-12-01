@@ -1,0 +1,2 @@
+microservice_name: send_msg
+configuration: default

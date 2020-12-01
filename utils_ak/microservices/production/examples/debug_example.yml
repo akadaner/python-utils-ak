@@ -1,0 +1,11 @@
+microservice_name: debug_example
+configuration: default
+broker: zmq
+zmq:
+    endpoints:
+      heartbeat:
+          type: sub
+          endpoint: tcp://localhost:5555
+      system:
+        type: sub
+        endpoint: tcp://localhost:5556

@@ -1,4 +1,4 @@
-from confluent_kafka import Producer, Consumer
+# from confluent_kafka import Producer, Consumer
 import uuid
 
 from utils_ak.builtin import update_dic

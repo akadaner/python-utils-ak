@@ -2,7 +2,7 @@ import time
 import logging
 import zmq
 
-from utils_ak.strtypes import b, u
+from utils_ak.str import b, u
 from utils_ak.serialization import js as json
 
 CONTEXT = zmq.Context()
