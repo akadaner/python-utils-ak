@@ -48,7 +48,6 @@ class CollectorWindow(Window):
 
 
 
-
 if __name__ == '__main__':
     collector = CollectorWindow('window_id', fields=['a', 'b'])
 
