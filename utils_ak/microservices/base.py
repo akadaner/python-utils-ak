@@ -179,7 +179,7 @@ class BaseMicroservice(object):
                         # some timer is ready
                         for timer in self.callback_timers.timers:
                             try:
-                                timer.check()
+                                timer.run_if_possible()
                             except Exception as e:
                                 self.on_exception(e, 'Exception occurred at the timer callback')
                             else:

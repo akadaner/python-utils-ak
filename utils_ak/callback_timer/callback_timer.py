@@ -31,7 +31,7 @@ class CallbackTimer:
     def next_call(self):
         return self.last_call + self.interval
 
-    def check(self):
+    def run_if_possible(self):
         if time.time() > self.next_call:
             if self.timer_type == "right":
 
@@ -198,7 +198,7 @@ class CallbackTimers(object):
     def check(self):
         if time.time() > self.next_call:
             for timer in self.timers:
-                timer.check()
+                timer.run_if_possible()
 
     @property
     def next_call(self):
@@ -213,7 +213,7 @@ class CallbackTimers(object):
     async def aiocheck(self):
         if time.time() > self.next_call:
             for timer in self.timers:
-                await timer.check()
+                await timer.run_if_possible()
 
 
 def ex_sequential():
@@ -224,8 +224,8 @@ def ex_sequential():
     timer1 = CallbackTimer(print_msg, 1)
     timer2 = CallbackTimer(print_msg, 1, args=('asdf',))
     for i in range(300):
-        timer1.check()
-        timer2.check()
+        timer1.run_if_possible()
+        timer2.run_if_possible()
         time.sleep(0.01)
 
     print('Timer 2')

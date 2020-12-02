@@ -75,7 +75,7 @@ class AvailabilityProxyGuard:
         while True:
             self.lock.acquire(True)
 
-            self.timer.check()
+            self.timer.run_if_possible()
 
             if any(available > 0 for proxy, available in self.available_counter.items()):
                 # found some available proxy. Note: lock is still acquired

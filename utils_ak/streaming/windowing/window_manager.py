@@ -1,5 +1,6 @@
 import logging
 
+
 class WindowManager:
     def add(self, key, value):
         raise NotImplemented()
