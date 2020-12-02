@@ -1,3 +1,4 @@
+from datetime import datetime
 from utils_ak.builtin import update_dic
 
 
@@ -13,30 +14,36 @@ class Window:
         raise NotImplemented()
 
 
-class IntervalWindow(Window):
-    def __init__(self, beg, end):
+class ProcessingSessionWindow(Window):
+    def __init__(self, gap):
+        """
+        :param gap: int, gap between sessions in seconds
+        """
         super().__init__()
-        self.beg = beg
-        self.end = end
+        self.values = []
+        self.last_processing_time = None
+        self.gap = gap
+
+    def add(self, value):
+        self.values.append(value)
+        self.last_processing_time = datetime.now()
+
+    def is_closeable(self):
+        return self.last_processing_time and (datetime.now() - self.last_processing_time).total_seconds() > self.gap
+
+    def close(self):
+        self.state = 'closed'
+        return self.values
 
 
 class CollectorWindow(Window):
-    def __init__(self, window_id, fields, sources=None):
+    def __init__(self, fields):
         super().__init__()
-        self.window_id = window_id
         self.filled = {}  # {field: {symbol: value}}
         self.fields = fields
-        self.sources = sources or []
 
-    def add(self, values, source=None):
-        if source and source not in self.sources:
-            return
-
-        if self.state == 'closed':
-            raise Exception('Cannot add to a closed window')
-
+    def add(self, values):
         values = {k: v for k, v in values.items() if k in self.fields}  # remove extra fields
-
         self.filled = update_dic(self.filled, values)
 
     def is_closeable(self):
@@ -49,7 +56,7 @@ class CollectorWindow(Window):
 
 
 if __name__ == '__main__':
-    collector = CollectorWindow('window_id', fields=['a', 'b'])
+    collector = CollectorWindow(fields=['a', 'b'])
 
     print(collector.add({'a': 1}))
     print(collector.is_closeable(), collector.state)
@@ -58,3 +65,15 @@ if __name__ == '__main__':
     print(collector.close())
     print(collector.is_closeable(), collector.state)
 
+    import time
+    session = ProcessingSessionWindow(2)
+    session.add('asdf')
+    print(session.is_closeable())
+    time.sleep(1)
+    session.add('asdf')
+    print(session.is_closeable())
+    time.sleep(1)
+    print(session.is_closeable())
+    time.sleep(1)
+    print(session.is_closeable())
+    print(session.close())
