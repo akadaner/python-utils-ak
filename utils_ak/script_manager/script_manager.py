@@ -1,10 +1,8 @@
-# from utils_ak.script_manager import ScriptManager
 import pandas as pd
-import subprocess
 import fnmatch
 import os
 
-from utils_ak.str import cast_unicode
+from utils_ak.os import execute
 
 
 class ScriptManager(object):
@@ -14,10 +12,10 @@ class ScriptManager(object):
         self.config = {self.cast_name(name): path for name, path in config.items()}
 
     def start(self, name, cmd):
-        self.execute("screen -S {} -dm bash -c \" {}\"".format(name, cmd), is_async=True)
+        execute("screen -S {} -dm bash -c \" {}\"".format(name, cmd), is_async=True)
 
     def ls(self, by='time'):
-        output = self.execute('screen -ls', is_async=False)
+        output = execute('screen -ls', is_async=False)
         lines = output.split('\n')[1:-2]
         values = []
         for line in lines:
@@ -52,16 +50,7 @@ class ScriptManager(object):
     def kill_one(self, name):
         if name == 'jupyter':
             raise Exception('jupyter cannot be killed for safety measures')
-        return self.execute("screen -S " + name + " -X quit", is_async=False)
-
-    @staticmethod
-    def execute(cmd, is_async=False):
-        if is_async:
-            process = subprocess.Popen(cmd, shell=True)
-        else:
-            process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-            output, error = process.communicate()
-            return ' '.join([cast_unicode(x) for x in [output, error] if x])
+        return execute("screen -S " + name + " -X quit", is_async=False)
 
     def run_python(self, name, path):
         if not os.path.exists(path):
