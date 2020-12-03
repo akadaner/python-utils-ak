@@ -29,3 +29,4 @@ from .serialization import *
 from .str import *
 from .time import *
 from .tqdm import *
+from .jupyter import *
