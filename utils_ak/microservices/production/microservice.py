@@ -2,7 +2,6 @@ import anyconfig
 
 from utils_ak.microservices import SystemMicroservice
 from utils_ak.serialization import MsgPackSerializer
-
 from utils_ak.config.config import get_config
 
 
@@ -11,6 +10,12 @@ class ProductionMicroservice(SystemMicroservice):
         self.config = config or get_config(require_local=True)
         if extra_config:
             anyconfig.merge(self.config, extra_config, ac_merge=anyconfig.MS_DICTS)
+
+        # # todo: make properly
+        # if 'microservice_name' not in self.config:
+        #     self.config['microservice_name'] = 'default'
+        # if 'configuration' not in self.config:
+        #     self.config['configuration'] = 'default'
 
         microservice_id = microservice_id or '-'.join([self.config['microservice_name'], self.config['configuration']])
 
