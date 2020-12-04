@@ -21,8 +21,7 @@ class BasicWindowManager:
 
         window.add(value)
 
-        if window.is_closeable():
-            return window.close()
+        # todo: try to close window if possible here?
 
     def close_if_possible(self):
         res = {k: w for k, w in self.windows.items() if w.state == 'open' and w.is_closeable()}
