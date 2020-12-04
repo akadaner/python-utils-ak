@@ -21,9 +21,9 @@ class SystemMicroservice(BaseMicroservice):
 
         # Subscribe to system commands
         if system_enabled:
-            self.add_callback('system', '', callback=self.on_stop, filter=[self.check_id, lambda topic, msg: msg['type'] == 'stop'])
+            self.add_callback('system', '', callback=self.on_stop, filter=[self.is_instance_id_in_receivers, lambda topic, msg: msg['type'] == 'stop'])
 
-    def check_id(self, topic, msg):
+    def is_instance_id_in_receivers(self, topic, msg):
         if 'instance_id' not in msg:
             return True
         else:
