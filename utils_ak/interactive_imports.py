@@ -9,6 +9,8 @@ import anyconfig
 from datetime import datetime, timedelta
 import inspect
 from pprint import pprint
+import pyperclip
+import glob
 
 from .builtin import *
 from .callback_timer import *

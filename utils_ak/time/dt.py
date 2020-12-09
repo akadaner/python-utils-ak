@@ -77,6 +77,16 @@ def cast_datetime(dt_obj, none_invariant=True):
             d, m, y = search.groups()
             return datetime(int(y), int(m), int(d))
 
+        # '01.08.20' type
+        for pat in [r'^(\d\d)\.(\d\d)\.(\d\d)$',
+                    r'^\d(\d\d)\.(\d\d)\.(\d\d)$',
+                    r'^\d(\d\d)\.(\d\d)\.(\d\d)^\d',
+                    r'^(\d\d)\.(\d\d)\.(\d\d)\d']:
+            search = re.search(pat, dt_obj)
+            if search:
+                d, m, y = search.groups()
+                return datetime(int(y) + 2000, int(m), int(d))
+
         dt = parse_date(dt_obj)
         if dt and dt.tzinfo:
             dt = dt.astimezone(tzutc()).replace(tzinfo=None)

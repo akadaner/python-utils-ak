@@ -36,6 +36,10 @@ def copy(path_from, path_to):
     shutil.copy(path_from, path_to)
 
 
+def touch(fn):
+    with open(fn, 'w') as f:
+        pass
+
 def remove_empty_folders(path, remove_root=True):
     '''Function to remove empty folders'''
     if not os.path.isdir(path):
@@ -85,7 +89,7 @@ def gen_tmp_fn(s=None, extension=None):
 
 
 @contextmanager
-def tempfile(suffix='', dir=None):
+def tempfile(*args, **kwargs):
     """ Context for temporary file.
 
     Will find a free temporary filename upon entering
@@ -99,7 +103,7 @@ def tempfile(suffix='', dir=None):
         optional directory to save temporary file in
     """
 
-    tf = tmp.NamedTemporaryFile(delete=False, suffix=suffix, dir=dir)
+    tf = tmp.NamedTemporaryFile(delete=False, *args, **kwargs)
     tf.file.close()
     try:
         yield tf.name
