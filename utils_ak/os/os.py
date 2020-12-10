@@ -158,6 +158,14 @@ def getenv_boolean(var_name, default_value=False):
     return result
 
 
+def open_file_in_os(fn):
+    import subprocess, os, platform
+    if platform.system() == 'Darwin':  # macOS
+        subprocess.call(('open', fn))
+    elif platform.system() == 'Windows':  # Windows
+        os.startfile(fn)
+    else:  # linux variants
+        subprocess.call(('xdg-open', fn))
 
 
 if __name__ == '__main__':

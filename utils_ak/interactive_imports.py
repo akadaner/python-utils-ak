@@ -11,6 +11,7 @@ import inspect
 from pprint import pprint
 import pyperclip
 import glob
+import logging
 
 from .builtin import *
 from .callback_timer import *
@@ -35,3 +36,4 @@ from .jupyter import *
 from .microservices import *
 from .config import *
 from .streaming import *
+from .properties import *
