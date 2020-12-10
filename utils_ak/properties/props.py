@@ -30,8 +30,16 @@ class Props:
         pv, v = cast_prop_values(parent, child, key)
         return v if v is not None else pv
 
-    def update(self, props):
+    def update(self, props, accumulate=False):
         self.relative_props.update(props)
+        if accumulate:
+            if accumulate is True:
+                keys = props.keys()
+            elif isinstance(accumulate, list):
+                keys = accumulate
+            else:
+                raise Exception('Unknown accumulation requested')
+            self.accumulate_static(keys=keys)
 
     def accumulate_static(self, keys=None, recursive=False):
         new_keys = keys or []
@@ -69,13 +77,14 @@ class Props:
             return accumulator(self.parent, self, item)
         elif item in self.static_props:
             return self.static_props[item]
-        elif item in self.relative_props and item not in self.static_accumulators:
-            # item would be in static if accumulated
-            return self.relative_props[item]
+        # todo: del
+        # elif item in self.relative_props and item not in self.static_accumulators:
+        #     item would be in static props if accumulated
+        #     return self.relative_props[item]
 
     def get(self, item, default=None):
         res = self[item]
-        if not res:
+        if res is None:
             res = default
         return res
 
