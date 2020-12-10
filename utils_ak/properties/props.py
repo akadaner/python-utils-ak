@@ -1,4 +1,4 @@
-def _cast_values(parent, child, key):
+def cast_prop_values(parent, child, key):
     if not parent:
         pv = None
     else:
@@ -9,10 +9,10 @@ def _cast_values(parent, child, key):
 
 
 class Props:
-    def __init__(self, dynamic_accumulators=None, dynamic_keys=None,
+    def __init__(self, props=None, dynamic_accumulators=None, dynamic_keys=None,
                  static_accumulators=None, required_static_keys=None):
 
-        self.relative_props = {}
+        self.relative_props = props or {}
         self.static_props = {}
 
         self.dynamic_accumulators = dynamic_accumulators or {}
@@ -25,30 +25,39 @@ class Props:
         self.parent = None
         self.children = []
 
+    @staticmethod
+    def default_accumulator(parent, child, key):
+        pv, v = cast_prop_values(parent, child, key)
+        return v if v is not None else pv
+
     def update(self, props):
         self.relative_props.update(props)
 
-    @staticmethod
-    def default_static_accumulator(parent, child, key):
-        pv, v = _cast_values(parent, child, key)
-        return v if v is not None else pv
+    def accumulate_static(self, keys=None, recursive=False):
+        new_keys = keys or []
+        new_keys = list(new_keys)
 
-    def accumulate_static(self, recursive=False):
-        self.static_props = {}
+        if not new_keys:
+            # reset static props
+            self.static_props = {}
 
         parent_static_props = {} if not self.parent else self.parent.static_props
 
-        keys = list(parent_static_props.keys()) + list(self.relative_props.keys()) + self.required_static_keys
-        keys = set(keys)
-        keys = [key for key in keys if key not in self.dynamic_keys]
+        all_relevant_keys = list(parent_static_props.keys()) + list(self.relative_props.keys()) + self.required_static_keys
+        all_relevant_keys = set(all_relevant_keys)
+        all_relevant_keys = [key for key in all_relevant_keys if key not in self.dynamic_keys]
 
-        for key in keys:
-            accumulator = self.static_accumulators.get(key, self.default_static_accumulator)
+        # if keys present - filter only necessary keys to accumulate
+        new_keys = all_relevant_keys if not new_keys else [key for key in new_keys if key in all_relevant_keys]
+
+        # update static keys
+        for key in new_keys:
+            accumulator = self.static_accumulators.get(key, self.default_accumulator)
             self.static_props[key] = accumulator(self.parent, self, key)
 
         if recursive:
             for child in self.children:
-                child.accumulate_static(recursive=recursive)
+                child.accumulate_static(keys=keys, recursive=recursive)
 
     def add_child(self, child):
         self.children.append(child)
@@ -56,17 +65,24 @@ class Props:
 
     def __getitem__(self, item):
         if item in self.dynamic_keys:
-            return self.dynamic_accumulators[item](self.parent, self, item)
-        else:
-            return self.static_props.get(item)
+            accumulator = self.dynamic_accumulators.get(item, self.default_accumulator)
+            return accumulator(self.parent, self, item)
+        elif item in self.static_props:
+            return self.static_props[item]
+        elif item in self.relative_props and item not in self.static_accumulators:
+            # item would be in static if accumulated
+            return self.relative_props[item]
 
-
+    def get(self, item, default=None):
+        res = self[item]
+        if not res:
+            res = default
+        return res
 
 
 if __name__ == '__main__':
-
     def t_acc(parent, child, key):
-        pv, v = _cast_values(parent, child, key)
+        pv, v = cast_prop_values(parent, child, key)
         pv = pv if pv else 0
         v = v if v else 0
         return pv + v
@@ -95,18 +111,24 @@ if __name__ == '__main__':
     STATIC_ACCUMULATORS = {'size': size_acc, 'time_size': time_size_acc}
 
 
-    def gen_props():
-        return Props(dynamic_accumulators=DYNAMIC_ACCUMULATORS,
+    def gen_props(props=None):
+        return Props(props=props, dynamic_accumulators=DYNAMIC_ACCUMULATORS,
                      static_accumulators=STATIC_ACCUMULATORS,
-                     required_static_keys=['size', 'time_size'])
+                     required_static_keys=['size', 'time_size'], dynamic_keys=['t', 'b'])
 
+    root = gen_props({'t': 1, 'size': 5, 'a': 'sadf', 'd': 1})
+    child1 = gen_props({'t': 2})
+    child2 = gen_props({'t': 3})
+    root.add_child(child1)
+    child1.add_child(child2)
 
-    root = gen_props()
-    child = gen_props()
-    root.add_child(child)
+    print(root['a'])
 
-    root.update({'t': 1, 'size': 5})
-    child.update({'t': 2})
     root.accumulate_static(recursive=True)
 
-    print(root.static_props, child.static_props, root['t'], child['t'])
+    print(root.static_props, child1.static_props, root['t'], child1['t'])
+    print(root.get('bad key', 'bad key default'))
+
+    root.update({'b': 5})
+    print(child1['b'])
+    print(child2['b'])
