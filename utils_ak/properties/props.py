@@ -132,3 +132,7 @@ if __name__ == '__main__':
     root.update({'b': 5})
     print(child1['b'])
     print(child2['b'])
+
+    root.update({'c': 6, 'd': 7})
+    root.accumulate_static(['d'], recursive=True)
+    print(child2.static_props)
