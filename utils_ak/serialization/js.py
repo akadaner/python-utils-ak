@@ -1,6 +1,7 @@
 import sys
 from decimal import Decimal
 from datetime import datetime
+import os
 
 # ultimate json tool for convenient json handling and stuff
 
@@ -48,12 +49,20 @@ def cast_js(js_obj, *args, **kwargs):
 def cast_dict(js_obj, *args, **kwargs):
     if isinstance(js_obj, (dict, list)):
         return js_obj
+
+    # load object from file if path exists
+    if isinstance(js_obj, str):
+        if os.path.exists(js_obj):
+            with open(js_obj, 'r') as f:
+                js_obj = f.read()
+
     try:
         res = json.loads(js_obj, *args, **kwargs)
         if isinstance(res, (dict, list)):
             return res
     except:
         pass
+
     raise Exception('Unknown type')
 
 

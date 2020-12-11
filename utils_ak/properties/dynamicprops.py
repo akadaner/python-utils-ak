@@ -42,6 +42,15 @@ class DynamicProps:
             res = default
         return res
 
+    # todo: optimize
+    def keys(self):
+        parent_keys = [] if not self.parent else self.parent.keys()
+        res = parent_keys + list(self.accumulators.keys()) + list(self.relative_props.keys()) + self.required_keys
+        return list(set(res))
+
+    def get_all_props(self):
+        return {key: self[key] for key in self.keys()}
+
 
 if __name__ == '__main__':
     def t_acc(parent, child, key):
@@ -88,3 +97,6 @@ if __name__ == '__main__':
             values.append([i, key, node[key]])
 
     print(pd.DataFrame(values))
+
+    for node in [root, child1, child2]:
+        print(node.keys(), node.get_all_props())
