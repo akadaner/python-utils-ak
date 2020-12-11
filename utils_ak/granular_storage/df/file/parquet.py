@@ -1,7 +1,7 @@
 import os
 from utils_ak.granular_storage.df.file.stream import StreamFile
 import pandas as pd
-from utils_ak.os import rename, remove
+from utils_ak.os import rename_path, remove_path
 
 
 class ParquetFile(StreamFile):
@@ -21,9 +21,9 @@ class ParquetFile(StreamFile):
             df.reset_index().to_parquet(self.fn, engine=self.engine, compression=self.compression)
         else:
             df.reset_index().to_parquet(self.swap1_fn, engine=self.engine, compression=self.compression)
-            rename(self.fn, self.swap2_fn)
-            rename(self.swap1_fn, self.fn)
-            remove(self.swap2_fn)
+            rename_path(self.fn, self.swap2_fn)
+            rename_path(self.swap1_fn, self.fn)
+            remove_path(self.swap2_fn)
 
     def append_stream(self, df):
         super().append_stream(df, 'default')

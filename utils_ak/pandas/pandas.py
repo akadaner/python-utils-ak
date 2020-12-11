@@ -95,7 +95,7 @@ def find_row(df, row):
     # time is considered discrete - no problem on rounding here
     df.index.name = 'index'
     df = df.reset_index()
-    tmp = df[df['index'] == row.index[0]].copy()
+    tmp = df[df['index'] == row.index[0]].copy_path()
     tmp.pop('index')
 
     if len(tmp) == 0:
@@ -125,7 +125,7 @@ def find_row(df, row):
 
 
 def merge_by_columns(dfs):
-    res_df = dfs[0].copy()
+    res_df = dfs[0].copy_path()
     for df in dfs[1:]:
         for key in df.columns:
             res_df[key] = df[key]

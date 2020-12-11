@@ -1,5 +1,5 @@
 from utils_ak.time.dt import *
-from utils_ak.os import list_files, remove, makedirs
+from utils_ak.os import list_files, remove_path, make_directories
 from utils_ak.granular_storage.df.gran_df.granular import GranularFeather, GranularCSV, GranularMsgPack, GranularParquet
 from utils_ak.granular_storage.df.gran_df.granular import LEVEL_ZERO, LEVEL_YEAR, LEVEL_HOUR
 from utils_ak.granular_storage.df.gran_df.streamer import GranularStreamer
@@ -12,7 +12,7 @@ import os
 class GranularStorage(object):
     def __init__(self, root='.'):
         self.root = self._fix_root(root)
-        makedirs(os.path.dirname(self.root))
+        make_directories(os.path.dirname(self.root))
 
     def __getitem__(self, item):
         return self.get_granular(item)
@@ -28,7 +28,7 @@ class GranularStorage(object):
         return os.path.exists(self._metadata_fn(path))
 
     def remove(self, path):
-        remove(self._full_path(path))
+        remove_path(self._full_path(path))
 
     def _full_path(self, path):
         path = self._fix_sep(path)

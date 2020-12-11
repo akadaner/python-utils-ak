@@ -8,7 +8,7 @@ def cast_prop_values(parent, child, key):
     return pv, v
 
 
-class Props:
+class MixedProps:
     def __init__(self, props=None, dynamic_accumulators=None, dynamic_keys=None,
                  static_accumulators=None, required_static_keys=None):
 
@@ -77,10 +77,9 @@ class Props:
             return accumulator(self.parent, self, item)
         elif item in self.static_props:
             return self.static_props[item]
-        # todo: del
-        # elif item in self.relative_props and item not in self.static_accumulators:
-        #     item would be in static props if accumulated
-        #     return self.relative_props[item]
+        elif item in self.relative_props and item not in self.static_accumulators:
+            # item would be in static props if accumulated
+            return self.relative_props[item]
 
     def get(self, item, default=None):
         res = self[item]
@@ -121,9 +120,9 @@ if __name__ == '__main__':
 
 
     def gen_props(props=None):
-        return Props(props=props, dynamic_accumulators=DYNAMIC_ACCUMULATORS,
-                     static_accumulators=STATIC_ACCUMULATORS,
-                     required_static_keys=['size', 'time_size'], dynamic_keys=['t', 'b'])
+        return MixedProps(props=props, dynamic_accumulators=DYNAMIC_ACCUMULATORS,
+                          static_accumulators=STATIC_ACCUMULATORS,
+                          required_static_keys=['size', 'time_size'], dynamic_keys=['t', 'b'])
 
     root = gen_props({'t': 1, 'size': 5, 'a': 'sadf', 'd': 1})
     child1 = gen_props({'t': 2})

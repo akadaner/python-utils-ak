@@ -1,6 +1,6 @@
 import os
 
-from utils_ak.os.os import makedirs
+from utils_ak.os.os import make_directories
 from utils_ak.time.dt import cast_datetime
 from utils_ak.dict.limited_dict import LimitedDict
 
@@ -10,7 +10,7 @@ import time
 class Storage:
     def __init__(self, root):
         self.root = root
-        makedirs(root)
+        make_directories(root)
 
     def __getitem__(self, db_name):
         return self.get_db(db_name)

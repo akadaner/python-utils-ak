@@ -9,7 +9,7 @@ from contextlib import contextmanager
 from utils_ak.str import cast_bytes
 
 
-def makedirs(path):
+def make_directories(path):
     dirname = os.path.dirname(path)
     if not dirname:
         return
@@ -17,7 +17,7 @@ def makedirs(path):
         os.makedirs(dirname)
 
 
-def remove(path):
+def remove_path(path):
     if not os.path.exists(path):
         return
     elif os.path.isfile(path):
@@ -28,19 +28,20 @@ def remove(path):
         raise Exception('Path {} is not a file or a dir'.format(path))
 
 
-def rename(path1, path2):
+def rename_path(path1, path2):
     os.rename(path1, path2)
 
 
-def copy(path_from, path_to):
+def copy_path(path_from, path_to):
     shutil.copy(path_from, path_to)
 
 
-def touch(fn):
+def touch_file(fn):
     with open(fn, 'w') as f:
         pass
 
-def remove_empty_folders(path, remove_root=True):
+
+def remove_empty_directories(path, remove_root=True):
     '''Function to remove empty folders'''
     if not os.path.isdir(path):
         return
@@ -51,7 +52,7 @@ def remove_empty_folders(path, remove_root=True):
     for fn in fns:
         fullpath = os.path.join(path, fn)
         if os.path.isdir(fullpath):
-            remove_empty_folders(fullpath)
+            remove_empty_directories(fullpath)
 
     # if folder empty, delete it
     fns = os.listdir(path)

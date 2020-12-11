@@ -5,7 +5,7 @@ import os
 import ipykernel
 import re
 
-from utils_ak.os import remove, execute
+from utils_ak.os import remove_path, execute
 
 
 def get_current_notebook_path():
@@ -37,7 +37,7 @@ def get_current_notebook_code():
     execute(s)
     with open(path.replace('.ipynb', '.py'), 'r') as f:
         code = f.read()
-    remove(path.replace('.ipynb', '.py'))
+    remove_path(path.replace('.ipynb', '.py'))
     return code
 
 

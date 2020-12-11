@@ -2,7 +2,7 @@ import os
 from uuid import uuid4
 
 from utils_ak.architecture.integrity_guard.integrity_guard import IntegrityGuard
-from utils_ak.os import remove, gen_tmp_fn
+from utils_ak.os import remove_path, gen_tmp_fn
 
 import logging
 
@@ -28,7 +28,7 @@ class FilesystemIntegrityGuard(IntegrityGuard):
 
     def leave_unstable_state(self):  # Call me if you think that operation ended
         logger.debug('Leaving unstable state')
-        remove(self.canary_path)
+        remove_path(self.canary_path)
 
 
 if __name__ == "__main__":

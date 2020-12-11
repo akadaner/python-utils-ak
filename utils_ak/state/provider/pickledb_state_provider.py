@@ -2,7 +2,7 @@ import os
 import pickledb
 
 from utils_ak.state.provider.provider import StateProvider
-from utils_ak.os import makedirs
+from utils_ak.os import make_directories
 
 
 class PickleDBStateProvider(StateProvider):
@@ -13,7 +13,7 @@ class PickleDBStateProvider(StateProvider):
 
         self.state_key = state_key
         self.fn = fn
-        makedirs(self.fn)
+        make_directories(self.fn)
         # crash canary
         self.canary_name = fn + ".canary"
 

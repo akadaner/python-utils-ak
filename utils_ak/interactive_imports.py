@@ -6,12 +6,15 @@ import math
 import numpy as np
 import pandas as pd
 import anyconfig
-from datetime import datetime, timedelta
-import inspect
-from pprint import pprint
+import copy
 import pyperclip
 import glob
 import logging
+
+
+import inspect
+from datetime import datetime, timedelta
+from pprint import pprint
 
 from .builtin import *
 from .callback_timer import *

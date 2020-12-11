@@ -1,7 +1,7 @@
 import time
 from utils_ak import jobqueue as jq
 from utils_ak.log import configure_logging
-from utils_ak.os import makedirs
+from utils_ak.os import make_directories
 import logging
 
 mongodb_cs = 'mongodb+srv://arseniikadaner:Nash0lbanan@cluster0-2umoy.mongodb.net/test?retryWrites=true'
@@ -22,7 +22,7 @@ class MyWorker(jq.Worker):
         self.logger.info('{}: Total tasks: {}'.format(self.worker_id, self.counter))
 
     def init_logging(self):
-        makedirs('logs/')
+        make_directories('logs/')
         configure_logging(file_stream=True, logs_path=f'logs/{self.worker_id}.log')
         self.logger = logging.getLogger(f'MJQLogger-{self.worker_id}' if self.worker_id is not None else 'MJQLogger')
 

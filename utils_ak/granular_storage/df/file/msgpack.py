@@ -4,7 +4,7 @@ from datetime import timedelta
 
 from utils_ak.granular_storage.df.file.stream import StreamFile
 from utils_ak.time.dt import cast_datetime
-from utils_ak.os import rename, remove
+from utils_ak.os import rename_path, remove_path
 
 import numpy as np
 
@@ -27,9 +27,9 @@ class MsgPackFile(StreamFile):
             df.reset_index().to_msgpack(self.fn)
         else:
             df.reset_index().to_msgpack(self.swap1_fn)
-            rename(self.fn, self.swap2_fn)
-            rename(self.swap1_fn, self.fn)
-            remove(self.swap2_fn)
+            rename_path(self.fn, self.swap2_fn)
+            rename_path(self.swap1_fn, self.fn)
+            remove_path(self.swap2_fn)
 
     def append_stream(self, df):
         super().append_stream(df, 'default')

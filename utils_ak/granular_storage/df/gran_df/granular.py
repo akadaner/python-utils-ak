@@ -9,7 +9,7 @@ from utils_ak.granular_storage.df.file import CSVFile, FeatherFile, MsgPackFile,
 from utils_ak.granular_storage.df.gran_df.enums import *
 
 from utils_ak.time.dt import cast_timedelta, cast_datetime
-from utils_ak.os import list_files, makedirs, remove
+from utils_ak.os import list_files, make_directories, remove_path
 from utils_ak.pandas import merge
 from utils_ak.re import re as re_tools
 
@@ -34,8 +34,8 @@ class Granular(object):
 
         self.mode = mode
         if mode == 'w':
-            remove(self.root)
-        makedirs(self.root)
+            remove_path(self.root)
+        make_directories(self.root)
 
         # put level and pattern into metadata
         # there is 2 formats for granular name due to refactoring bug
@@ -104,7 +104,7 @@ class Granular(object):
 
     def iter_granularity(self, df):
         # todo: optimize: do not create a copy!
-        df = df.copy()
+        df = df.copy_path()
 
         granular_keys = [f'_{i}' for i in range(self.level)]
         full_keys = ['year', 'month', 'day', 'hour']
@@ -463,7 +463,7 @@ def ex_basic(granular=GranularCSV, key1='granular_storage', key2='data2'):
 
     # append - false
     gran = granular('granular_storage/root', LEVEL_DAY, mode='w')
-    tmp = df1.iloc[1:].copy()
+    tmp = df1.iloc[1:].copy_path()
 
     # test append=False
     print("Remove")
