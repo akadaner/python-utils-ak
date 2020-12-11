@@ -67,6 +67,7 @@ if __name__ == '__main__':
         if size:
             return size * 5
         else:
+            assert time_size % 5 == 0
             return time_size
 
 
