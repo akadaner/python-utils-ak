@@ -1,15 +1,13 @@
 import os
 import glob
 
-from utils_ak.os import Path
 
 class SplitFile:
     def __init__(self, fn):
         self.fn = fn
-        self.path = Path(self.fn)
 
     def list(self):
-        return glob.glob(self.path.basename + '*')
+        return glob.glob(os.path.splitext(self.fn)[0] + '*')
 
     def get_indexes(self):
         cur_indexes = []
@@ -17,15 +15,17 @@ class SplitFile:
             if fn == self.fn:
                 cur_indexes.append(0)
             else:
-                cur_indexes.append(int(Path(fn).basename.rsplit('_', 1)[-1]))
+                cur_indexes.append(int(os.path.splitext(fn)[0].rsplit('_', 1)[-1]))
         return cur_indexes
 
     def get_current(self, max_size=None):
         cur_indexes = self.get_indexes()
+
         if not cur_indexes:
-            return self.fn
+            return
+
         suffix = '' if max(cur_indexes) == 0 else '_{}'.format(max(cur_indexes))
-        cur_fn = '{}{}{}'.format(self.path.basename, suffix, self.path.ext)
+        cur_fn = os.path.splitext(self.fn)[0] + suffix + os.path.splitext(self.fn)[-1]
 
         if max_size and os.path.getsize(cur_fn) > max_size:
             return self.get_new()
@@ -36,7 +36,9 @@ class SplitFile:
         cur_indexes = self.get_indexes()
         if not cur_indexes:
             return self.fn
-        return '{}_{}{}'.format(self.path.basename, max(cur_indexes) + 1, self.path.ext)
+
+        suffix = '_{}'.format(max(cur_indexes) + 1)
+        return os.path.splitext(self.fn)[0] + suffix + os.path.splitext(self.fn)[-1]
 
 
 if __name__ == '__main__':
