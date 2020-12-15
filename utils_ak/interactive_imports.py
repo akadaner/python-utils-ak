@@ -40,3 +40,4 @@ from .microservices import *
 from .config import *
 from .streaming import *
 from .properties import *
+from .naming import *

@@ -1,4 +1,5 @@
 import pandas as pd
+import os
 
 from utils_ak.split_file import SplitFile
 
@@ -9,10 +10,10 @@ class PandasCSVWriter:
         self.fn = fn
         self.buffer_values = []
         self.max_file_size = max_file_size
+        self.header = None
 
     def write_header(self, header):
-        with open(self.fn, 'w') as f:
-            f.write(','.join(header) + '\n')
+        self.header = header
 
     def write_values(self, values):
         self.buffer_values.extend(values)
@@ -23,7 +24,10 @@ class PandasCSVWriter:
     def flush(self):
         sf = SplitFile(self.fn)
         fn = sf.get_current(max_size=self.max_file_size)
-        pd.DataFrame(self.buffer_values).to_csv(fn, mode='a', index=False, header=False)
+        if os.path.exists(fn):
+            pd.DataFrame(self.buffer_values, columns=self.header).to_csv(fn, mode='a', index=False, header=False)
+        else:
+            pd.DataFrame(self.buffer_values, columns=self.header).to_csv(fn, mode='a', index=False)
         self.reset_buffer()
 
     def reset_buffer(self):
