@@ -182,6 +182,15 @@ def find_gaps(index, gap):
     return index_diff
 
 
+# todo: search for existing solutions
+def pd_read(fn, **kwargs):
+    ext = os.path.splitext(fn)[-1]
+    return getattr(pd, f'read_{ext[1:]}')(fn, **kwargs)
+
+def pd_to(fn, **kwargs):
+    ext = os.path.splitext(fn)[-1]
+    return getattr(pd, f'to_{ext[1:]}')(fn, **kwargs)
+
 if __name__ == '__main__':
     df1 = pd.DataFrame.from_dict({'a': [1, 2, 3], 'b': [4, 5, 6], 'c': [1, 1, 1]})
     df1 = df1.set_index('c')

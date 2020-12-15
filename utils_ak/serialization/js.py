@@ -46,7 +46,7 @@ def cast_js(js_obj, *args, **kwargs):
         return json.dumps(js_obj, cls=JsonEncoder, ensure_ascii=False, *args, **kwargs)
 
 
-def cast_dict(js_obj, *args, **kwargs):
+def cast_dict_or_list(js_obj, *args, **kwargs):
     if isinstance(js_obj, (dict, list)):
         return js_obj
 
@@ -67,7 +67,7 @@ def cast_dict(js_obj, *args, **kwargs):
 
 
 dumps = cast_js
-loads = cast_dict
+loads = cast_dict_or_list
 
 
 
@@ -75,7 +75,7 @@ loads = cast_dict
 if __name__ == '__main__':
     print(dumps({'a': 'foo'}))
     print(loads(dumps({'a': 'foo', 'dec': Decimal('10.1'), 'today': datetime.now()})))
-    print(cast_dict('columns'))
+    print(cast_dict_or_list('columns'))
     print(cast_js(None))
 
     import apache_beam.transforms.window
