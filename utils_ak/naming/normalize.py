@@ -17,5 +17,5 @@ def to_lower_name(upper_case_name):
 
 
 if __name__ == '__main__':
-    print(to_lower_name('camelCase'))
-    print(to_lower_name('UpperCase'))
+    print(to_lower_name('camelCase')) # camel_case
+    print(to_lower_name('UpperCase')) # upper_case
