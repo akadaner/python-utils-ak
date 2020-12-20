@@ -1,5 +1,4 @@
-from utils_ak.interactive_imports import *
-
+import pandas as pd
 
 def cast_prop_values(parent, child, key):
     if not parent:

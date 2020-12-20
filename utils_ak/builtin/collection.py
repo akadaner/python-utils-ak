@@ -3,7 +3,7 @@ import collections
 import numpy
 
 def delistify_single_list(lst):
-    return lst if len(lst) > 1 else lst[0]
+    return lst if (len(lst) > 1 or not lst) else lst[0]
 
 
 delistify = delistify_single_list
