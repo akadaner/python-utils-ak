@@ -41,3 +41,4 @@ from .config import *
 from .streaming import *
 from .properties import *
 from .naming import *
+from .simple_event_manager import *
