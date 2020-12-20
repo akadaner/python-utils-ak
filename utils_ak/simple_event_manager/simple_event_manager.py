@@ -1,11 +1,11 @@
 from utils_ak.architecture import PrefixHandler
-from sortedcollections import ItemSortedDict
+from sortedcollections import SortedList
 import logging
 
 
 class SimpleEventManager:
     def __init__(self):
-        self.events = ItemSortedDict(lambda k, v: k, {})  # sorted(ts: [topic, event])])
+        self.events = SortedList(key=lambda v: v[1])  # sorted(topic, ts, event)])
         self.prefix_handler = PrefixHandler()
         self.last_ts = 0
 
@@ -13,13 +13,13 @@ class SimpleEventManager:
         self.prefix_handler.add(topic, callback)
 
     def add_event(self, topic, ts, event):
-        self.events[ts] = [topic, event]
+        self.events.add((topic, ts, event))
 
     def run(self):
         while True:
             if not self.events:
                 return
-            ts, (topic, event) = self.events.popitem(0)
+            topic, ts, event = self.events.pop(0)
 
             if self.last_ts and ts < self.last_ts:
                 logging.warning('Old event was added to the events timeline')
