@@ -1,12 +1,13 @@
 """ TopicHandler is a builtin of handlers, bound to certain topics as callbacks. """
 from .handler import Handler
 from utils_ak.builtin import delistify
+from sortedcollections import OrderedDict
 
 class TopicHandler(object):
     """ Run handlers on events. Each event has topic as it's id, which is passed as argument to handler functions. """
 
     def __init__(self, topic_formatter=None, topic_filter=None, reducer=None):
-        self.handlers = {}  # {topic: handler}
+        self.handlers = OrderedDict()  # {topic: handler}
         self.topic_formatter = topic_formatter
         self.topic_filter = topic_filter or (lambda topic, received_ropic: topic == received_ropic)
         self.reducer = reducer or delistify

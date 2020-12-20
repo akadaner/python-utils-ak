@@ -74,7 +74,6 @@ if __name__ == '__main__':
         print('aiocallback', topic, msg)
         return 3
 
-
     loop = asyncio.get_event_loop()
 
     print('Test 7. AIO 1')
