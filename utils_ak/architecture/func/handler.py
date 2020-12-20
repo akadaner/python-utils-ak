@@ -20,7 +20,7 @@ class Handler(object):
     """ Complex func wrapper. Computational graph with multiple filters, multiple formatters and multiple callbacks.
     """
 
-    def __init__(self, callback=None, formatter=None, filter=None):
+    def __init__(self, callback=None, formatter=None, filter=None, reducer=None):
         """
         :param filter: callable or list of callable. Each filter should return True or False if rule is not specified (see Handler.add_filter for more)
         :param formatter: callable or list of callable. Each formatter should return args, kwargs tuple
@@ -36,6 +36,7 @@ class Handler(object):
         self.add_filter(filter)
         self.add_formatter(formatter)
         self.add_callback(callback)
+        self.reducer = reducer or delistify
 
     @property
     def is_aio(self):
@@ -68,7 +69,7 @@ class Handler(object):
         for formatter in self.formatters:
             args, kwargs = formatter(*args, **kwargs)
         if all(_filter(*args, **kwargs) for _filter in self.filters):
-            return delistify([callback(*args, **kwargs) for callback in self.callbacks])
+            return self.reducer([callback(*args, **kwargs) for callback in self.callbacks])
 
     def call(self, *args, **kwargs):
         return self.__call__(*args, **kwargs)
@@ -86,7 +87,7 @@ class Handler(object):
                         res.append(await callback(*args, **kwargs))
                 else:
                     res.append(callback(*args, **kwargs))
-            return delistify(res)
+            return self.reducer(res)
 
     def has_coroutine(self):
         return any(inspect.iscoroutinefunction(callback) for callback in self.callbacks)
@@ -95,7 +96,7 @@ class Handler(object):
         vals = []
         vals += [f'Formatter: {formatter}' for formatter in self.formatters]
         vals += [f'Filter: {filter}' for filter in self.filters]
-        vals += [f'Callback: {func}' for callback in self.callbacks]
+        vals += [f'Callback: {callback}' for callback in self.callbacks]
         return '\n'.join(vals)
 
     def __str__(self):

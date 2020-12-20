@@ -2,11 +2,13 @@
 from utils_ak.str import cast_unicode
 from .topic_handler import TopicHandler
 
-
+# one handler for one prefix
 class PrefixHandler(TopicHandler):
     def __call__(self, topic, *args, **kwargs):
-        # topic are in unicode
-        topic = cast_unicode(topic)
+        topic = cast_unicode(topic) # topic are in unicode
+        if self.topic_formatter:
+            topic = self.topic_formatter(topic)
+
         args = [topic] + list(args)
         res = []
         for _topic, handler in self.handlers.items():
