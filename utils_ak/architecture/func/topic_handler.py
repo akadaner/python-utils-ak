@@ -1,14 +1,15 @@
 """ TopicHandler is a builtin of handlers, bound to certain topics as callbacks. """
 from .handler import Handler
+from utils_ak.builtin import delistify
 
-# one topic for one handler
 class TopicHandler(object):
     """ Run handlers on events. Each event has topic as it's id, which is passed as argument to handler functions. """
 
-    def __init__(self, topic_formatter=None):
-        # {topic: handler}
-        self.handlers = {}
+    def __init__(self, topic_formatter=None, topic_filter=None, reducer=None):
+        self.handlers = {}  # {topic: handler}
         self.topic_formatter = topic_formatter
+        self.topic_filter = topic_filter or (lambda topic, received_ropic: topic == received_ropic)
+        self.reducer = reducer or delistify
 
     def add(self, topic, callback=None, formatter=None, filter=None, reducer=None):
         handler = Handler(reducer=reducer)
@@ -26,8 +27,11 @@ class TopicHandler(object):
         if self.topic_formatter:
             topic = self.topic_formatter(topic)
 
-        if topic in self.handlers:
-            return self.handlers[topic](*args, **kwargs)
+        res = []
+        for _topic, handler in self.handlers.items():
+            if self.topic_filter(_topic, topic):
+                res.append(handler(*args, **kwargs))
+        return self.reducer(res)
 
     def call(self, topic, *args, **kwargs):
         return self.__call__(topic, *args, **kwargs)
@@ -45,3 +49,10 @@ class TopicHandler(object):
 
     def __getitem__(self, item):
         return self.handlers[item]
+
+
+class PrefixHandler(TopicHandler):
+    def __init__(self, topic_formatter=None, reducer=None):
+        super().__init__(topic_formatter=topic_formatter,
+                         topic_filter=lambda topic, received_topic: received_topic.startswith(topic),
+                         reducer=reducer)
