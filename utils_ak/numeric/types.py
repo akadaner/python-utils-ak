@@ -7,6 +7,7 @@ def is_float(obj):
 def is_int(obj):
     return np.issubdtype(type(obj), np.integer)
 
+
 def is_int_like(obj):
     if isinstance(obj, str) or is_float(obj):
         obj = float(obj)
