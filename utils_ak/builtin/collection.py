@@ -23,9 +23,18 @@ def remove_duplicates(seq, key=None):
     # preserves order of sequence
     seen = set()
     seen_add = seen.add
-    if not key:
-        key = lambda x: x
+    key = key or (lambda x: x)
     return [x for x in seq if not (key(x) in seen or seen_add(key(x)))]
+
+
+def remove_neighbor_duplicates(seq, key=None):
+    key = key or (lambda x: x)
+    res = []
+    for x in seq:
+        if res and key(res[-1]) == key(x):
+            continue
+        res.append(x)
+    return res
 
 
 def apply_on_slice(f, lst, cond):
@@ -81,3 +90,5 @@ if __name__ == '__main__':
 
     print(apply_on_slice(lambda lst: [x ** 2 for x in lst], [1,2,3,4,5,6], lambda x: x % 2 == 0))
     # print(filter_dic({'k': 1, 'e': 2}, leave=2))
+    print(remove_duplicates([1,2,3, 4,5,1,1,]))
+    print(remove_neighbor_duplicates([1,2,3, 4,5,1,1,]))
