@@ -1,16 +1,18 @@
 """ Math functionality. """
 from decimal import ROUND_HALF_DOWN, ROUND_DOWN, ROUND_CEILING, ROUND_05UP, ROUND_FLOOR, ROUND_HALF_EVEN, ROUND_HALF_UP, ROUND_UP, Decimal as D
 
-ROUND_DIC = {'round': ROUND_HALF_EVEN,
-             'nearest': ROUND_HALF_EVEN,
+ROUND_DIC = {'even': ROUND_HALF_EVEN,
              'floor': ROUND_FLOOR,
              'ceil': ROUND_CEILING,
              'down': ROUND_DOWN,
              'zero': ROUND_DOWN,
-             'up': ROUND_UP}
+             'up': ROUND_UP,
+             'half_up': ROUND_HALF_UP,
+             'half_down': ROUND_HALF_DOWN,
+             '05_up': ROUND_05UP}
 
 
-def decimal_round(a, b, rounding='round', precision=0, strip=False):
+def decimal_round(a, b, rounding='even', precision=0, strip=False):
     a, b = D(a), D(b)
     n = a / b / D('.1') ** precision
     rounding = ROUND_DIC.get(rounding, rounding)
@@ -22,7 +24,7 @@ def decimal_round(a, b, rounding='round', precision=0, strip=False):
 
 
 # be careful to use this for precise values: rounding 5. to 1. with floor method may result in 4 due to python floating system (5. == 4.99999999999) in python and stuff
-def custom_round(a, b, rounding='round', precision=0):
+def custom_round(a, b, rounding='even', precision=0):
     n = a / b / 0.1 ** precision
     n = int(decimal_round(n, 1, rounding))
     return n * b * 0.1 ** precision
