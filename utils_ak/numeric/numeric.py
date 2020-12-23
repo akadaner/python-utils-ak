@@ -8,7 +8,7 @@ ROUND_DIC = {'nearest_half_even': ROUND_HALF_EVEN,
              'up': ROUND_UP,
              'nearest_half_up': ROUND_HALF_UP,
              'nearest_half_down': ROUND_HALF_DOWN,
-             'nearest_half_05_up': ROUND_05UP}
+             '05up': ROUND_05UP}
 
 
 def decimal_round(a, b, rounding='nearest_half_even', precision=0, strip=False):
