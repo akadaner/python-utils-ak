@@ -3,22 +3,32 @@ from functools import partial
 from utils_ak.properties import *
 
 
-from .block import Block
+from utils_ak.block_tree import Block
 
 
-def cumsum_acc(parent, child, key, default):
-    pv, v = cast_prop_values(parent, child, key)
-    pv = pv if pv else default()
-    v = v if v else default()
+def cumsum_acc(parent_props, child_props, key, default=None):
+    pv, v = cast_prop_values(parent_props, child_props, key)
+
+    if callable(default):
+        default = default()
+
+    pv = pv if pv is not None else default
+    v = v if v is not None else default
     return pv + v
 
 
-# todo: make sure than np.arrays are fast
+def relative_acc(parent_props, child_props, key, default=None):
+    if callable(default):
+        default = default()
+    return child_props.relative_props.get(key, default)
+
+
 class ParallelepipedBlock(Block):
-    def __init__(self, n_dims=2, **kwargs):
+    def __init__(self, block_class, n_dims=2, **kwargs):
         self.n_dims = n_dims
         kwargs.setdefault('props_accumulators', {}).setdefault('x', partial(cumsum_acc, default=lambda: np.zeros(n_dims)))
-        super().__init__(**kwargs)
+        kwargs.setdefault('props_accumulators', {}).setdefault('size', partial(relative_acc, default=lambda: np.zeros(n_dims)))
+        super().__init__(block_class, **kwargs)
 
     @property
     def x(self):
@@ -54,3 +64,18 @@ class ParallelepipedBlock(Block):
                 for i in range(self.n_dims):
                     values.append(max([0] + [c.y[i] - self.x[i] for c in self.children]))
                 return np.array(values)
+
+
+if __name__ == '__main__':
+    a = ParallelepipedBlock('a', n_dims=2, x=np.array([1, 2]))
+    b = ParallelepipedBlock('b', n_dims=2)
+    c = ParallelepipedBlock('c', n_dims=2, x=np.array([3, 4]), size=np.array([1, 5]))
+    a.add_child(b)
+    b.add_child(c)
+
+    print(a)
+    print(b)
+    print(c)
+    print(a.x, a.size, a.y)
+    print(b.x, b.size, b.y)
+    print(c.x, c.size, c.y)
