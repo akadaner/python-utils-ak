@@ -39,7 +39,7 @@ class IntParallelepipedBlock(Block):
         return self.x + self.size
 
     def __str__(self):
-        res = self.props["class"] + ' ' + ' x '.join([f'({self.x[i]}, {self.y[i]}]]' for i in range(self.n_dims)])
+        res = self.props["class"] + ' ' + ' x '.join([f'({self.x[i]}, {self.y[i]}]' for i in range(self.n_dims)])
         res += '\n'
 
         for child in self.children:
@@ -80,3 +80,6 @@ if __name__ == '__main__':
     print(a.x, a.size, a.y)
     print(b.x, b.size, b.y)
     print(c.x, c.size, c.y)
+
+    print()
+    print(a['b']['c'])

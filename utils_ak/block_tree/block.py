@@ -86,3 +86,6 @@ if __name__ == '__main__':
     print(a.props['t'])
     print(b.props['t'])
     print(c.props['t'])
+
+    print()
+    print(a['b']['c'])
