@@ -24,11 +24,11 @@ def relative_acc(parent_props, child_props, key, default=None):
 
 
 class IntParallelepipedBlock(Block):
-    def __init__(self, block_class, n_dims=2, **kwargs):
+    def __init__(self, block_class, n_dims=2, **props):
         self.n_dims = n_dims
-        kwargs.setdefault('props_accumulators', {}).setdefault('x', partial(cumsum_acc, default=lambda: np.zeros(n_dims).astype(int)))
-        kwargs.setdefault('props_accumulators', {}).setdefault('size', partial(relative_acc, default=lambda: np.zeros(n_dims).astype(int)))
-        super().__init__(block_class, **kwargs)
+        props.setdefault('props_accumulators', {}).setdefault('x', partial(cumsum_acc, default=lambda: np.zeros(n_dims).astype(int)))
+        props.setdefault('props_accumulators', {}).setdefault('size', partial(relative_acc, default=lambda: np.zeros(n_dims).astype(int)))
+        super().__init__(block_class, **props)
 
     @property
     def x(self):
@@ -53,17 +53,17 @@ class IntParallelepipedBlock(Block):
         size = self.props['size']
 
         if size is not None:
-            return size
+            return np.array(size).astype(int)
         else:
             # no size - get size from children!
             if not self.children:
-                return np.zeros(self.n_dims)
+                return np.zeros(self.n_dims).astype(int)
             else:
                 # orient is the same as in the children
                 values = []
                 for i in range(self.n_dims):
                     values.append(max([0] + [c.y[i] - self.x[i] for c in self.children]))
-                return np.array(values)
+                return np.array(values).astype(int)
 
 
 if __name__ == '__main__':
