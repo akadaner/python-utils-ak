@@ -33,6 +33,7 @@ def stack_push(parent, block):
     block.props.relative_props.setdefault('x', np.zeros(block.n_dims).astype(int))[axis] = cur_end
     return add_push(parent, block)
 
+
 def validate_disjoint_by_axis(b1, b2, axis=0):
     try:
         disposition = int(b1.y[axis] - b2.x[axis])

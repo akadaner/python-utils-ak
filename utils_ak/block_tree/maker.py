@@ -4,10 +4,10 @@ from utils_ak.block_tree.int_parallelepiped_block import IntParallelepipedBlock
 
 class BlockMaker:
     def __init__(self, root_obj='root', default_push_func=stack_push, block_factory=None, **props):
-        block_factory = block_factory or IntParallelepipedBlock
+        self.block_factory = block_factory or IntParallelepipedBlock
 
         if isinstance(root_obj, str):
-            self.root = block_factory(root_obj, **props)
+            self.root = self.block_factory(root_obj, **props)
         elif isinstance(root_obj, IntParallelepipedBlock):
             assert len(props) == 0  # not supported case
             self.root = root_obj
@@ -22,7 +22,7 @@ class BlockMaker:
         push_kwargs = push_kwargs or {}
 
         if isinstance(block_obj, str) or block_obj is None:
-            block = IntParallelepipedBlock(block_obj, **kwargs)
+            block = self.block_factory(block_obj, **kwargs)
         elif isinstance(block_obj, IntParallelepipedBlock):
             block = block_obj
         else:
