@@ -53,7 +53,7 @@ class IntParallelepipedBlock(Block):
     def size(self):
         size = self.props['size']
 
-        if size is not None:
+        if size is not None and np.sum(np.abs(size)) > 0:
             return np.array(size).astype(int)
         else:
             # no size - get size from children!
