@@ -4,7 +4,7 @@ from utils_ak.block_tree.int_parallelepiped_block import IntParallelepipedBlock
 
 class BlockMaker:
     def __init__(self, root_obj='root', default_push_func=stack_push, block_factory=None, **props):
-        block_factory = block_factory or (lambda block_class, **props: IntParallelepipedBlock(block_class, **props))
+        block_factory = block_factory or IntParallelepipedBlock
 
         if isinstance(root_obj, str):
             self.root = block_factory(root_obj, **props)

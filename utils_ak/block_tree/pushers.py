@@ -1,8 +1,7 @@
 import numpy as np
-from app.schedule_maker.utils.interval import calc_interval_length, cast_interval
 from utils_ak.serialization import cast_js
 from utils_ak import cast_dict_or_list
-
+from utils_ak.portion import *
 
 def simple_push(parent, block, validator=None, new_props=None):
     block.set_parent(parent)
@@ -44,6 +43,7 @@ def validate_disjoint_by_axis(b1, b2, axis=0):
     i2 = cast_interval(b2.x[axis], b2.y[axis])
 
     assert calc_interval_length(i1 & i2) == 0, cast_js({'disposition': disposition})
+
 
 # todo: rewrite
 def dummy_push(parent, block, max_tries=24, beg='last_end', end=288 * 10, axis='x', validator='x', iter_props=None):
