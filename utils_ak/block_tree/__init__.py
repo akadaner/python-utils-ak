@@ -1,2 +1,2 @@
 from .block import *
-from .parallelepiped_block import *
+from .int_parallelepiped_block import *
