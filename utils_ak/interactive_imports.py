@@ -15,6 +15,7 @@ import logging
 import inspect
 from datetime import datetime, timedelta
 from pprint import pprint
+from bson.objectid import *
 
 from .builtin import *
 from .callback_timer import *
@@ -43,4 +44,5 @@ from .properties import *
 from .naming import *
 from .simple_event_manager import *
 from .split_file import *
-from bson.objectid import *
+from .block_tree import *
+from .portion import *
