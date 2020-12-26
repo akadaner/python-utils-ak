@@ -1,12 +1,12 @@
 import numpy as np
 from functools import partial
 from utils_ak.properties import *
-
+from utils_ak.numeric import is_numeric
 
 from utils_ak.block_tree import Block
 
 
-def cumsum_acc(parent_props, child_props, key, default=None):
+def cumsum_acc(parent_props, child_props, key, default=None, formatter=None):
     pv, v = cast_prop_values(parent_props, child_props, key)
 
     if callable(default):
@@ -14,6 +14,9 @@ def cumsum_acc(parent_props, child_props, key, default=None):
 
     pv = pv if pv is not None else default
     v = v if v is not None else default
+
+    formatter = formatter or (lambda parent_props, child_props, x: x)
+    pv, v = formatter(parent_props, child_props, pv), formatter(parent_props, child_props, v)
     return pv + v
 
 
@@ -26,7 +29,7 @@ def relative_acc(parent_props, child_props, key, default=None):
 class IntParallelepipedBlock(Block):
     def __init__(self, block_class, n_dims=2, **props):
         self.n_dims = n_dims
-        props.setdefault('props_accumulators', {}).setdefault('x', partial(cumsum_acc, default=lambda: np.zeros(n_dims).astype(int)))
+        props.setdefault('props_accumulators', {}).setdefault('x', partial(cumsum_acc, default=lambda: np.zeros(n_dims).astype(int), formatter=lambda parent_props, child_props, v: np.array(v)))
         props.setdefault('props_accumulators', {}).setdefault('size', partial(relative_acc, default=lambda: np.zeros(n_dims).astype(int)))
         props.setdefault('props_accumulators', {}).setdefault('axis', partial(relative_acc, default=0))
         super().__init__(block_class, **props)
