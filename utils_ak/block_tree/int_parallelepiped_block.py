@@ -40,13 +40,12 @@ class IntParallelepipedBlock(Block):
 
     def __str__(self):
         res = self.props["class"] + ' ' + ' x '.join([f'({self.x[i]}, {self.y[i]}]' for i in range(self.n_dims)])
-        res += '\n'
 
         for child in self.children:
             for line in str(child).split('\n'):
                 if not line:
                     continue
-                res += '  ' + line + '\n'
+                res += '\n  ' + line
         return res
 
     @property

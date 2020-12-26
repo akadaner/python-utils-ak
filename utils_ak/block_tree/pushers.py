@@ -100,13 +100,17 @@ def stack_push(parent, block, axis=0):
 if __name__ == '__main__':
     from utils_ak.block_tree import IntParallelepipedBlock
 
-    a = IntParallelepipedBlock('a', n_dims=2, x=np.array([1, 0]), size=[4, 0])
-    b = IntParallelepipedBlock('b', n_dims=2, x=np.array([3, 0]), size=[3, 0])
-    try:
-        validate_disjoint_by_axis(a, b, 0)
-    except AssertionError as e:
-        print('AssertionError on disposition', e)
+    print('Validate disjoint test')
+    for t in range(0, 10):
+        a = IntParallelepipedBlock('a', n_dims=1, x=np.array([t]), size=[4])
+        b = IntParallelepipedBlock('b', n_dims=1, x=np.array([3]), size=[3])
+        print(a, b)
+        try:
+            validate_disjoint_by_axis(a, b, 0)
+        except AssertionError as e:
+            print('AssertionError on disposition', e)
 
+    print('Stack push test')
     root = IntParallelepipedBlock('root', n_dims=1, x=np.array([2]))
     a = IntParallelepipedBlock('a', n_dims=1, size=[4])
     b = IntParallelepipedBlock('b', n_dims=1, size=[3])
