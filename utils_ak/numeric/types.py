@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def is_float(obj):
     return np.issubdtype(type(obj), np.float)
 
@@ -7,6 +8,8 @@ def is_float(obj):
 def is_int(obj):
     return np.issubdtype(type(obj), np.integer)
 
+def is_numeric(obj):
+    return is_int(obj) or is_float(obj)
 
 def is_int_like(obj):
     if isinstance(obj, str) or is_float(obj):
