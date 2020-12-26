@@ -1,6 +1,5 @@
 import re
 
-
 def def_group(name, pat):
     return r'(?P<{}>{})'.format(name, pat)
 

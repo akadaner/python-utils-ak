@@ -43,3 +43,4 @@ from .properties import *
 from .naming import *
 from .simple_event_manager import *
 from .split_file import *
+from bson.objectid import *

@@ -7,7 +7,7 @@ import base64
 from PIL import Image
 from io import BytesIO
 
-# from IPython.display import HTML, display
+from IPython.display import HTML, display
 
 pd.set_option('display.max_colwidth', None)
 
@@ -205,18 +205,18 @@ if __name__ == '__main__':
 
     dfs = [df1, df2]
 
-    print(merge2(dfs, index=False, by='a'))
+    print(merge(dfs, index=False, by='a'))
     print()
-    print(merge2(dfs, index=True, by='a'))
+    print(merge(dfs, index=True, by='a'))
     print()
-    print(merge2(dfs, index=True, by=None))
+    print(merge(dfs, index=True, by=None))
     print()
-    print(merge2(dfs, index=True, by=None, keep='first'))
+    print(merge(dfs, index=True, by=None, keep='first'))
     print()
-    print(merge2(dfs, index=True, by='all', keep='first'))
+    print(merge(dfs, index=True, by='all', keep='first'))
 
     try:
-        print(merge2(dfs, index=False, by=None))
+        print(merge(dfs, index=False, by=None))
     except Exception as e:
         print(e)
     else:

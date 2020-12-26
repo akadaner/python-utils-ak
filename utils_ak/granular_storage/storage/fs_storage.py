@@ -1,6 +1,6 @@
 import os
 
-from utils_ak.os.os import make_directories
+from utils_ak.os.os_tools import make_directories
 from utils_ak.time.dt import cast_datetime
 from utils_ak.dict.limited_dict import LimitedDict
 
