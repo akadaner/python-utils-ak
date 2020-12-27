@@ -28,6 +28,7 @@ class BlockMaker:
             block = self.init(block_obj, **kwargs)
         elif isinstance(block_obj, IntParallelepipedBlock):
             block = block_obj
+            block.props.update(kwargs)
         else:
             raise Exception('Unknown block obj type')
 
@@ -58,8 +59,9 @@ if __name__ == '__main__':
     maker, make = init_block_maker('root', axis=0)
     make('a', size=[1, 0])
     make('b', size=[5, 0])
-    make('c', size=[2, 0])
+    make(maker.init('c', size=[2, 0]), test=5)
     print(maker.root)
+    print(maker.root['c'].props.get_all_props())
 
     print('Test 2')
     maker, make = init_block_maker('root', axis=1)
