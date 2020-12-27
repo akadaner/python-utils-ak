@@ -57,18 +57,16 @@ class IntParallelepipedBlock(Block):
     def size(self):
         size = self.props['size']
 
-        if size is not None and np.sum(np.abs(size)) > 0:
-            return np.array(size).astype(int)
-        else:
-            # no size - get size from children!
-            if not self.children:
-                return np.zeros(self.n_dims).astype(int)
+        values = []
+        for axis in range(self.n_dims):
+            if size[axis] == 0:
+                if not self.children:
+                    values.append(0)
+                else:
+                    values.append(max([c.y[axis] - self.x[axis] for c in self.children]))
             else:
-                # orient is the same as in the children
-                values = []
-                for i in range(self.n_dims):
-                    values.append(max([0] + [c.y[i] - self.x[i] for c in self.children]))
-                return np.array(values).astype(int)
+                values.append(size[axis])
+        return np.array(values)
 
 
 if __name__ == '__main__':

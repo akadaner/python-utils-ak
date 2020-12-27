@@ -43,14 +43,15 @@ class BlockMaker:
         push_func(self.blocks[-1], block, **push_kwargs)
         return BlockMakerContext(self, block)
 
-    def copy(self, block):
+    def copy(self, block, with_children=True):
         res = self.init(block.props['class'], **block.props.relative_props)
-        for child in block.children:
-            res.add_child(self.copy(child))
+        if with_children:
+            for child in block.children:
+                res.add_child(self.copy(child))
         return res
 
-    def copy_cut(self, block, keys=None):
-        res = self.copy(block)
+    def copy_cut(self, block, keys=None, with_children=True):
+        res = self.copy(block, with_children=with_children)
         props = block.props.get_all_props()
         if keys:
             props = {k: v for k, v in props if k in keys}
