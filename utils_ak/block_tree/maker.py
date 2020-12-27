@@ -46,6 +46,7 @@ class BlockMaker:
         props = block.props.get_all_props()
         if keys:
             props = {k: v for k, v in props if k in keys}
+        props = {k: v for k, v in props.items() if v is not None}
         res.props.update(props)
         return res
 
