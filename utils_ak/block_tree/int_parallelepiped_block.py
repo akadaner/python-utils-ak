@@ -1,7 +1,7 @@
-import numpy as np
 from functools import partial
 from utils_ak.properties import *
 from utils_ak.numeric import is_numeric
+from utils_ak.simple_vector import *
 
 from utils_ak.block_tree import Block
 
@@ -29,15 +29,15 @@ def relative_acc(parent_props, child_props, key, default=None):
 class IntParallelepipedBlock(Block):
     def __init__(self, block_class, n_dims=2, **props):
         self.n_dims = n_dims
-        props.setdefault('props_accumulators', {}).setdefault('x', partial(cumsum_acc, default=lambda: np.zeros(n_dims).astype(int), formatter=lambda parent_props, child_props, v: np.array(v)))
-        props.setdefault('props_accumulators', {}).setdefault('size', partial(relative_acc, default=lambda: np.zeros(n_dims).astype(int)))
-        props.setdefault('props_accumulators', {}).setdefault('x_rel', partial(relative_acc, default=lambda: np.zeros(n_dims).astype(int)))
+        props.setdefault('props_accumulators', {}).setdefault('x', partial(cumsum_acc, default=lambda: SimpleVector(n_dims), formatter=lambda parent_props, child_props, v: cast_simple_vector(v)))
+        props.setdefault('props_accumulators', {}).setdefault('size', partial(relative_acc, default=lambda: SimpleVector(n_dims)))
+        props.setdefault('props_accumulators', {}).setdefault('x_rel', partial(relative_acc, default=lambda: SimpleVector(n_dims)))
         props.setdefault('props_accumulators', {}).setdefault('axis', partial(relative_acc, default=0))
         super().__init__(block_class, **props)
 
     @property
     def x(self):
-        return self.props['x']
+        return cast_simple_vector(self.props['x'])
 
     @property
     def y(self):
@@ -66,13 +66,13 @@ class IntParallelepipedBlock(Block):
                     values.append(max([c.y[axis] - self.x[axis] for c in self.children]))
             else:
                 values.append(size[axis])
-        return np.array(values)
+        return cast_simple_vector(values)
 
 
 if __name__ == '__main__':
-    a = IntParallelepipedBlock('a', n_dims=2, x=np.array([1, 2]))
+    a = IntParallelepipedBlock('a', n_dims=2, x=[1, 2])
     b = IntParallelepipedBlock('b', n_dims=2)
-    c = IntParallelepipedBlock('c', n_dims=2, x=np.array([3, 4]), size=np.array([1, 5]))
+    c = IntParallelepipedBlock('c', n_dims=2, x=[3, 4], size=[1, 5])
     a.add_child(b)
     b.add_child(c)
 
