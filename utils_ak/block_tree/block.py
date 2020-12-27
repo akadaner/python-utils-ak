@@ -15,6 +15,12 @@ class Block:
         self.props = DynamicProps(props=props, accumulators=props_accumulators, required_keys=props_required_keys)
 
     def __getitem__(self, item):
+        res = self.get(item)
+        if not res:
+            raise Exception('Not found')
+        return res
+
+    def get(self, item):
         if isinstance(item, str):
             res = [b for b in self.children if b.props['class'] == item]
         elif isinstance(item, int):
@@ -24,13 +30,6 @@ class Block:
             res = [self[ii] for ii in range(*item.indices(len(self)))]
         else:
             raise TypeError('Item type not supported')
-
-        if res is None:
-            raise Exception('Item not found')
-
-        if not res:
-            return
-
         return delistify(res)
 
     def __str__(self):

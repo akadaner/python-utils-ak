@@ -46,6 +46,11 @@ def validate_disjoint_by_axis(b1, b2, axis=0):
     assert calc_interval_length(i1 & i2) == 0, cast_js({'disposition': disposition})
 
 
+def push(parent, block, method='stack', **kwargs):
+    func = locals()[f'{method}_push']
+    return func(parent, block, **kwargs)
+
+
 # todo: rewrite
 def dummy_push(parent, block, max_tries=24, beg='last_end', end=288 * 10, axis='x', validator='x', iter_props=None):
     # note: make sure parent abs props are updated
