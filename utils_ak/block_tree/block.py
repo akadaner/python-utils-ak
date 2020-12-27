@@ -45,11 +45,14 @@ class Block:
     def __repr__(self):
         return str(self)
 
-    def iter(self):
-        yield self
+    def iter(self, query=None):
+        query = query or {}
+
+        if all(self.props[k] == v for k, v in query.items()):
+            yield self
 
         for child in self.children:
-            for b in child.iter():
+            for b in child.iter(query):
                 yield b
 
     def set_parent(self, parent):
@@ -89,3 +92,7 @@ if __name__ == '__main__':
     print()
     print(a['b']['c'])
 
+
+    print('Test query')
+    for b in a.iter({'class': 'c'}):
+        print(b)
