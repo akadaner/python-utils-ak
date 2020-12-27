@@ -3,7 +3,7 @@ from utils_ak.block_tree.int_parallelepiped_block import IntParallelepipedBlock
 
 
 class BlockMaker:
-    def __init__(self, root_obj='root', default_push_func=stack_push, block_factory=None, **props):
+    def __init__(self, root_obj='root', default_push_func=stack_push, block_factory=None, make_with_copy_cut=False, default_props=None, **props):
         self.block_factory = block_factory or IntParallelepipedBlock
 
         if isinstance(root_obj, str):
@@ -16,19 +16,27 @@ class BlockMaker:
 
         self.blocks = [self.root]
         self.default_push_func = default_push_func
+        self.make_with_copy_cut = make_with_copy_cut
+        self.default_props = default_props or {}
 
     def init(self, block_obj, **kwargs):
         return self.block_factory(block_obj, **kwargs)
 
-    def make(self, block_obj=None, push_func=None, push_kwargs=None, **kwargs):
+    def make(self, block_obj=None, push_func=None, push_kwargs=None, copy_cut=None, **kwargs):
         push_func = push_func or self.default_push_func
         push_kwargs = push_kwargs or {}
+        copy_cut = copy_cut if copy_cut is not None else self.make_with_copy_cut
+
+        cur_props = dict(self.default_props)
+        cur_props.update(kwargs)
 
         if isinstance(block_obj, str) or block_obj is None:
-            block = self.init(block_obj, **kwargs)
+            block = self.init(block_obj, **cur_props)
         elif isinstance(block_obj, IntParallelepipedBlock):
             block = block_obj
-            block.props.update(kwargs)
+            if copy_cut:
+                block = self.copy_cut(block)
+            block.props.update(cur_props)
         else:
             raise Exception('Unknown block obj type')
 
