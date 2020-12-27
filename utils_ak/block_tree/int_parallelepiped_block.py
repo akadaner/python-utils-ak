@@ -31,6 +31,7 @@ class IntParallelepipedBlock(Block):
         self.n_dims = n_dims
         props.setdefault('props_accumulators', {}).setdefault('x', partial(cumsum_acc, default=lambda: np.zeros(n_dims).astype(int), formatter=lambda parent_props, child_props, v: np.array(v)))
         props.setdefault('props_accumulators', {}).setdefault('size', partial(relative_acc, default=lambda: np.zeros(n_dims).astype(int)))
+        props.setdefault('props_accumulators', {}).setdefault('x_rel', partial(relative_acc, default=lambda: np.zeros(n_dims).astype(int)))
         props.setdefault('props_accumulators', {}).setdefault('axis', partial(relative_acc, default=0))
         super().__init__(block_class, **props)
 

@@ -2,6 +2,10 @@ import numpy as np
 from utils_ak.serialization import cast_js
 from utils_ak import cast_dict_or_list
 from utils_ak.portion import *
+from utils_ak.block_tree import Block
+import logging
+import copy
+
 
 def simple_push(parent, block, validator=None, new_props=None):
     block.set_parent(parent)
@@ -40,61 +44,63 @@ def validate_disjoint_by_axis(b1, b2, axis=0):
     except:
         disposition = 1
 
-    i1 = cast_interval(b1.x[axis], b2.y[axis])
+    i1 = cast_interval(b1.x[axis], b1.y[axis])
     i2 = cast_interval(b2.x[axis], b2.y[axis])
 
     assert calc_interval_length(i1 & i2) == 0, cast_js({'disposition': disposition})
 
 
 def push(parent, block, method='stack', **kwargs):
-    func = locals()[f'{method}_push']
+    # todo: make properly
+    func = globals()[f'{method}_push']
     return func(parent, block, **kwargs)
 
 
 # todo: rewrite
-def dummy_push(parent, block, max_tries=24, beg='last_end', end=288 * 10, axis='x', validator='x', iter_props=None):
+def dummy_push(parent, block, validator, max_tries=24, start_from='last_end', end=288 * 10, iter_props=None):
+    axis = parent.props['axis']
+
     # note: make sure parent abs props are updated
-    beg_key = 't' if axis == 'x' else 'y'
-
-    if beg == 'last_beg':
-        cur_beg = max([parent.beg(axis)] + [child.beg(axis) for child in parent.children])
-    elif beg == 'last_end':
-        cur_beg = max([parent.beg(axis)] + [child.end(axis) for child in parent.children])
-    elif isinstance(beg, int):
-        cur_beg = beg
+    if isinstance(start_from, int):
+        cur_start = start_from
     else:
-        raise Exception('Unknown beg type')
+        if not parent.children:
+            cur_start = 0
+        else:
+            if start_from == 'last_beg':
+                cur_start = max([child.props['x_rel'][axis] for child in parent.children])
+            elif start_from == 'last_end':
+                cur_start = max([(child.props['x_rel'] + child.size)[axis] for child in parent.children])
+            elif isinstance(start_from, int):
+                cur_start = start_from
+            else:
+                raise Exception('Unknown beg type')
 
-    # go to relative coordinates
-    cur_beg -= parent.beg(axis)
-
-    # print('Starting from', cur_beg, parent.props['class'], block.props['class'])
-    # print([parent.beg] + [(child.beg, child.end, child.length, child.props['size']) for child in parent.children])
-    # print([(child.props['class'], child.end, child.props.relative_props, child.beg) for child in parent.children])
-    end = min(end, cur_beg + max_tries)
+    end = min(end, cur_start + max_tries)
 
     iter_props = iter_props or [{}]
 
-    while cur_beg < end:
+    cur_x = np.zeros(block.n_dims).astype(int)
+
+    while cur_x[axis] < end:
         dispositions = []
         for props in iter_props:
             props = copy.deepcopy(props)
-            props[beg_key] = cur_beg
+            cur_x[axis] = cur_start
+            props['x'] = cur_x
             res = simple_push(parent, block, validator=validator, new_props=props)
+
             if isinstance(res, Block):
                 return block
             elif isinstance(res, dict):
-                # optimization by disposition from validate_disjoint error
                 if 'disposition' in res:
                     dispositions.append(res['disposition'])
 
         if len(dispositions) == len(iter_props):
             # all iter_props failed because of bad disposition
-            cur_beg += min(dispositions)
+            cur_start += min(dispositions)
         else:
-            cur_beg += 1
-
-        logging.info(['All dispositions', dispositions])
+            cur_start += 1
     raise Exception('Failed to push element')
 
 
@@ -117,3 +123,15 @@ if __name__ == '__main__':
             validate_disjoint_by_axis(a, b, 0)
         except AssertionError as e:
             print('AssertionError on disposition', e)
+
+    def brute_validator(parent, block):
+        for c in parent.children:
+            validate_disjoint_by_axis(c, block, axis=parent.props['axis'])
+
+    print('Dummy push test')
+    root = IntParallelepipedBlock('root', n_dims=1, x=np.array([2]), axis=0)
+    a = IntParallelepipedBlock('a', n_dims=1, size=[4], axis=0)
+    b = IntParallelepipedBlock('b', n_dims=1, size=[3], axis=0)
+    dummy_push(root, a, brute_validator)
+    dummy_push(root, b, brute_validator, start_from=0)
+    print(root)
