@@ -3,6 +3,7 @@ from utils_ak.serialization import cast_js
 from utils_ak import cast_dict_or_list
 from utils_ak.portion import *
 from utils_ak.block_tree import Block
+from utils_ak.numeric import *
 import logging
 import copy
 
@@ -61,7 +62,7 @@ def dummy_push(parent, block, validator, max_tries=24, start_from='last_end', en
     axis = parent.props['axis']
 
     # note: make sure parent abs props are updated
-    if isinstance(start_from, int):
+    if is_int(start_from):
         cur_start = start_from
     else:
         if not parent.children:

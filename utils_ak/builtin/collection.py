@@ -2,8 +2,12 @@
 import collections
 import numpy
 
-def delistify_single_list(lst):
-    return lst if (len(lst) > 1 or not lst) else lst[0]
+
+def delistify_single_list(lst_obj):
+    if isinstance(lst_obj, list):
+        return lst_obj if (len(lst_obj) > 1 or not lst_obj) else lst_obj[0]
+    else:
+        return lst_obj
 
 
 delistify = delistify_single_list
