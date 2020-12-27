@@ -1,4 +1,4 @@
-from utils_ak.block_tree.pushers import stack_push
+from utils_ak.block_tree.pushers import *
 from utils_ak.block_tree.int_parallelepiped_block import IntParallelepipedBlock
 
 
@@ -34,6 +34,20 @@ class BlockMaker:
 
         push_func(self.blocks[-1], block, **push_kwargs)
         return BlockMakerContext(self, block)
+
+    def copy(self, block):
+        res = self.init(block.props['class'], **block.props.relative_props)
+        for child in block.children:
+            res.add_child(self.copy(child))
+        return res
+
+    def copy_cut(self, block, keys=None):
+        res = self.copy(block)
+        props = block.props.get_all_props()
+        if keys:
+            props = {k: v for k, v in props if k in keys}
+        res.props.update(props)
+        return res
 
 
 class BlockMakerContext:
@@ -73,3 +87,12 @@ if __name__ == '__main__':
 
     print(maker.root)
 
+    print('Test copy')
+    maker, make = init_block_maker('root')
+    with make('a1', x=[1,1], size=[1, 1], push_func=add_push):
+        make('b1', size=[1, 1])
+        with make('b2', size=[1, 1]):
+            make('c1', size=[1, 1])
+    print(maker.root)
+    print(maker.copy(maker.root['a1']['b2']))
+    print(maker.copy_cut(maker.root['a1']['b2']))
