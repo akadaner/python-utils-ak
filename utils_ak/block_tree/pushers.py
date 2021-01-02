@@ -51,10 +51,8 @@ def validate_disjoint_by_axis(b1, b2, axis=0):
     assert calc_interval_length(i1 & i2) == 0, cast_js({'disposition': disposition})
 
 
-def push(parent, block, method='stack', **kwargs):
-    # todo: make properly
-    func = globals()[f'{method}_push']
-    return func(parent, block, **kwargs)
+def push(parent, block, push_func=stack_push, **kwargs):
+    return push_func(parent, block, **kwargs)
 
 
 # todo: rewrite
