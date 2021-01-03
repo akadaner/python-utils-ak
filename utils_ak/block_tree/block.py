@@ -17,7 +17,12 @@ class Block:
     def __getitem__(self, item):
         res = self.get(item)
         if not res:
-            raise Exception('Not found')
+            if isinstance(res, str):
+                raise KeyError(item)
+            elif isinstance(res, int):
+                return IndexError(item)
+            else:
+                raise Exception(f'Not found: {item}')
         return res
 
     def get(self, item):

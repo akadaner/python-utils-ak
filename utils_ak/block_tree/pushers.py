@@ -55,7 +55,6 @@ def push(parent, block, push_func=stack_push, **kwargs):
     return push_func(parent, block, **kwargs)
 
 
-# todo: rewrite
 def dummy_push(parent, block, validator, max_tries=24, start_from='last_end', end=288 * 10, iter_props=None):
     axis = parent.props['axis']
 
