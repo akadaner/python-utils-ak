@@ -1,37 +1,35 @@
 from functools import partial
-from utils_ak.properties import *
-from utils_ak.numeric import is_numeric
 from utils_ak.simple_vector import *
 
 from utils_ak.block_tree import Block
 
 
+def relative_acc(parent_props, child_props, key, default=None, formatter=None):
+    if callable(default):
+        default = default()
+    res = child_props.relative_props.get(key, default)
+    if formatter:
+        res = formatter(res)
+    return res
+
+
 def cumsum_acc(parent_props, child_props, key, default=None, formatter=None):
-    pv, v = cast_prop_values(parent_props, child_props, key)
-
     if callable(default):
         default = default()
 
-    pv = pv if pv is not None else default
-    v = v if v is not None else default
+    if parent_props:
+        return parent_props[key] + relative_acc(parent_props, child_props, key, default=default, formatter=formatter)
 
-    formatter = formatter or (lambda parent_props, child_props, x: x)
-    pv, v = formatter(parent_props, child_props, pv), formatter(parent_props, child_props, v)
-    return pv + v
+    return relative_acc(parent_props, child_props, key, default=default, formatter=formatter)
 
-
-def relative_acc(parent_props, child_props, key, default=None):
-    if callable(default):
-        default = default()
-    return child_props.relative_props.get(key, default)
 
 
 class IntParallelepipedBlock(Block):
     def __init__(self, block_class, n_dims=2, **props):
         self.n_dims = n_dims
-        props.setdefault('props_accumulators', {}).setdefault('x', partial(cumsum_acc, default=lambda: SimpleVector(n_dims), formatter=lambda parent_props, child_props, v: cast_simple_vector(v)))
-        props.setdefault('props_accumulators', {}).setdefault('size', partial(relative_acc, default=lambda: SimpleVector(n_dims)))
-        props.setdefault('props_accumulators', {}).setdefault('x_rel', partial(relative_acc, default=lambda: SimpleVector(n_dims)))
+        props.setdefault('props_accumulators', {}).setdefault('x', partial(cumsum_acc, default=lambda: SimpleVector(n_dims), formatter=cast_simple_vector))
+        props.setdefault('props_accumulators', {}).setdefault('size', partial(relative_acc, default=lambda: SimpleVector(n_dims), formatter=cast_simple_vector))
+        props.setdefault('props_accumulators', {}).setdefault('x_rel', partial(relative_acc, default=lambda: SimpleVector(n_dims), formatter=cast_simple_vector))
         props.setdefault('props_accumulators', {}).setdefault('axis', partial(relative_acc, default=0))
         super().__init__(block_class, **props)
 

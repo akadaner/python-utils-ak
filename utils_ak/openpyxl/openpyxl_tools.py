@@ -6,6 +6,26 @@ from openpyxl.utils import get_column_letter
 from utils_ak.color import cast_color
 
 
+def init_workbook(sheet_names=None, active_sheet_name=None):
+    workbook = opx.Workbook()
+    sheet_names = sheet_names or []
+    for i, sheet_name in enumerate(sheet_names):
+        workbook.create_sheet(sheet_name, i)
+    workbook.remove(workbook.worksheets[-1])
+    if active_sheet_name:
+        workbook.active = sheet_names.index(active_sheet_name)
+    return workbook
+
+
+def cast_workbook(wb_obj):
+    if isinstance(wb_obj, str):
+        return opx.load_workbook(filename=wb_obj, data_only=True)
+    elif isinstance(wb_obj, opx.Workbook):
+        return wb_obj
+    elif isinstance(wb_obj, list):
+        return init_workbook(sheet_names=wb_obj)
+    else:
+        raise Exception('Unknown workbook format')
 
 def set_border(sheet, x, y, w, h, border):
     rows = sheet['{}{}'.format(get_column_letter(x), y):'{}{}'.format(get_column_letter(x + w - 1), y + h - 1)]
@@ -58,17 +78,6 @@ def draw_row(sheet, y, values, color=None, **kwargs):
         draw_cell(sheet, i, y, text=v, color=color, **kwargs)
 
 
-def init_empty_workbook(sheet_names=None, active_sheet_name=None):
-    workbook = opx.Workbook()
-    sheet_names = sheet_names or []
-    for i, sheet_name in enumerate(sheet_names):
-        workbook.create_sheet(sheet_name, i)
-    workbook.remove(workbook.worksheets[-1])
-    if active_sheet_name:
-        workbook.active = sheet_names.index(active_sheet_name)
-    return workbook
-
-
 if __name__ == '__main__':
-    wb = init_empty_workbook(['a', 'b'], active_sheet_name='b')
+    wb = init_workbook(['a', 'b'], active_sheet_name='b')
     wb.save('text.xlsx')
