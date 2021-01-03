@@ -103,19 +103,19 @@ def dummy_push(parent, block, validator, max_tries=24, start_from='last_end', en
 
 
 if __name__ == '__main__':
-    from utils_ak.block_tree import IntParallelepipedBlock
+    from utils_ak.block_tree import ParallelepipedBlock
     print('Stack push test')
-    root = IntParallelepipedBlock('root', n_dims=1, x=[2], axis=0)
-    a = IntParallelepipedBlock('a', n_dims=1, size=[4], axis=0)
-    b = IntParallelepipedBlock('b', n_dims=1, size=[3], axis=0)
+    root = ParallelepipedBlock('root', n_dims=1, x=[2], axis=0)
+    a = ParallelepipedBlock('a', n_dims=1, size=[4], axis=0)
+    b = ParallelepipedBlock('b', n_dims=1, size=[3], axis=0)
     stack_push(root, a)
     stack_push(root, b)
     print(root)
 
     print('Validate disjoint test')
     for t in range(0, 10):
-        a = IntParallelepipedBlock('a', n_dims=1, x=[t], size=[4])
-        b = IntParallelepipedBlock('b', n_dims=1, x=[3], size=[3])
+        a = ParallelepipedBlock('a', n_dims=1, x=[t], size=[4])
+        b = ParallelepipedBlock('b', n_dims=1, x=[3], size=[3])
         print(a, b)
         try:
             validate_disjoint_by_axis(a, b, 0)
@@ -127,9 +127,9 @@ if __name__ == '__main__':
             validate_disjoint_by_axis(c, block, axis=parent.props['axis'])
 
     print('Dummy push test')
-    root = IntParallelepipedBlock('root', n_dims=1, x=[2], axis=0)
-    a = IntParallelepipedBlock('a', n_dims=1, size=[4], axis=0)
-    b = IntParallelepipedBlock('b', n_dims=1, size=[3], axis=0)
+    root = ParallelepipedBlock('root', n_dims=1, x=[2], axis=0)
+    a = ParallelepipedBlock('a', n_dims=1, size=[4], axis=0)
+    b = ParallelepipedBlock('b', n_dims=1, size=[3], axis=0)
     dummy_push(root, a, brute_validator)
     dummy_push(root, b, brute_validator, start_from=0)
     print(root)

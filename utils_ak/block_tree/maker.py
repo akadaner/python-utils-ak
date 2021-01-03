@@ -1,14 +1,14 @@
 from utils_ak.block_tree.pushers import *
-from utils_ak.block_tree.int_parallelepiped_block import IntParallelepipedBlock
+from utils_ak.block_tree.parallelepiped_block import ParallelepipedBlock
 
 
 class BlockMaker:
     def __init__(self, root_obj='root', default_push_func=stack_push, block_factory=None, make_with_copy_cut=False, default_props=None, **props):
-        self.block_factory = block_factory or IntParallelepipedBlock
+        self.block_factory = block_factory or ParallelepipedBlock
 
         if isinstance(root_obj, str):
             self.root = self.block_factory(root_obj, **props)
-        elif isinstance(root_obj, IntParallelepipedBlock):
+        elif isinstance(root_obj, ParallelepipedBlock):
             assert len(props) == 0  # not supported case
             self.root = root_obj
         else:
@@ -19,7 +19,7 @@ class BlockMaker:
         self.make_with_copy_cut = make_with_copy_cut
         self.default_props = default_props or {}
 
-    def init(self, block_obj, **kwargs):
+    def create_block(self, block_obj, **kwargs):
         return self.block_factory(block_obj, **kwargs)
 
     def make(self, block_obj=None, push_func=None, push_kwargs=None, copy_cut=None, **kwargs):
@@ -31,8 +31,8 @@ class BlockMaker:
         cur_props.update(kwargs)
 
         if isinstance(block_obj, str) or block_obj is None:
-            block = self.init(block_obj, **cur_props)
-        elif isinstance(block_obj, IntParallelepipedBlock):
+            block = self.create_block(block_obj, **cur_props)
+        elif isinstance(block_obj, ParallelepipedBlock):
             block = block_obj
             if copy_cut:
                 block = self.copy_cut(block)
@@ -44,7 +44,7 @@ class BlockMaker:
         return BlockMakerContext(self, block)
 
     def copy(self, block, with_children=True):
-        res = self.init(block.props['class'], **block.props.relative_props)
+        res = self.create_block(block.props['class'], **block.props.relative_props)
         if with_children:
             for child in block.children:
                 res.add_child(self.copy(child))
@@ -83,7 +83,7 @@ if __name__ == '__main__':
     maker, make = init_block_maker('root', axis=0)
     make('a', size=[1, 0])
     make('b', size=[5, 0])
-    make(maker.init('c', size=[2, 0]), test=5)
+    make(maker.create_block('c', size=[2, 0]), test=5)
     print(maker.root)
     print(maker.root['c'].props.get_all_props())
 

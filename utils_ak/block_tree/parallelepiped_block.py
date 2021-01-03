@@ -23,13 +23,12 @@ def cumsum_acc(parent_props, child_props, key, default=None, formatter=None):
     return relative_acc(parent_props, child_props, key, default=default, formatter=formatter)
 
 
-
-class IntParallelepipedBlock(Block):
+class ParallelepipedBlock(Block):
     def __init__(self, block_class, n_dims=2, **props):
         self.n_dims = n_dims
         props.setdefault('props_accumulators', {}).setdefault('x', partial(cumsum_acc, default=lambda: SimpleVector(n_dims), formatter=cast_simple_vector))
         props.setdefault('props_accumulators', {}).setdefault('size', partial(relative_acc, default=lambda: SimpleVector(n_dims), formatter=cast_simple_vector))
-        props.setdefault('props_accumulators', {}).setdefault('x_rel', partial(relative_acc, default=lambda: SimpleVector(n_dims), formatter=cast_simple_vector))
+        props.setdefault('props_accumulators', {}).setdefault('x_rel', lambda parent_props, child_props, key: relative_acc(parent_props, child_props, 'x', default=lambda: SimpleVector(n_dims), formatter=cast_simple_vector))
         props.setdefault('props_accumulators', {}).setdefault('axis', partial(relative_acc, default=0))
         super().__init__(block_class, **props)
 
@@ -60,7 +59,7 @@ class IntParallelepipedBlock(Block):
             if b.size[0] != 0:
                 if visible_only and b.props['visible'] is False:
                     continue
-                res += ' ' * b.x[0] + '=' * int(b.size[0]) + f' {b.props["class"]}' + ' x '.join([f'({b.x[i]}, {b.y[i]}]' for i in range(b.n_dims)])
+                res += ' ' * int(b.x[0]) + '=' * int(b.size[0]) + f' {b.props["class"]}' + ' x '.join([f'({b.x[i]}, {b.y[i]}]' for i in range(b.n_dims)])
                 res += '\n'
         return res
 
@@ -81,9 +80,9 @@ class IntParallelepipedBlock(Block):
 
 
 if __name__ == '__main__':
-    a = IntParallelepipedBlock('a', n_dims=2, x=[1, 2])
-    b = IntParallelepipedBlock('b', n_dims=2)
-    c = IntParallelepipedBlock('c', n_dims=2, x=[3, 4], size=[1, 5])
+    a = ParallelepipedBlock('a', n_dims=2, x=[1, 2])
+    b = ParallelepipedBlock('b', n_dims=2)
+    c = ParallelepipedBlock('c', n_dims=2, x=[3, 4], size=[1, 5])
     a.add_child(b)
     b.add_child(c)
 

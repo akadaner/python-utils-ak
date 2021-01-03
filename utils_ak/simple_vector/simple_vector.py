@@ -2,7 +2,7 @@
 def cast_simple_vector(obj):
     if isinstance(obj, SimpleVector):
         return obj
-    elif isinstance(obj, list):
+    elif isinstance(obj, (list, tuple)):
         return SimpleVector(obj)
     elif isinstance(obj, int):
         return SimpleVector([0] * obj)
@@ -13,7 +13,7 @@ def cast_simple_vector(obj):
 def cast_vector_values(obj):
     if isinstance(obj, SimpleVector):
         return obj.values
-    elif isinstance(obj, list):
+    elif isinstance(obj, (list, tuple)):
         return obj
     elif isinstance(obj, int):
         return [0] * obj
