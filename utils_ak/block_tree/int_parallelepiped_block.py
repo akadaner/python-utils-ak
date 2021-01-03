@@ -53,10 +53,22 @@ class IntParallelepipedBlock(Block):
                 res += '\n  ' + line
         return res
 
+    def __repr__(self):
+        return self.tabular_str()
+
+    def tabular_str(self, visible_only=False):
+        res = ''
+        for b in self.iter():
+            if b.size[0] != 0:
+                if visible_only and b.props['visible'] is False:
+                    continue
+                res += ' ' * b.x[0] + '=' * int(b.size[0]) + f' {b.props["class"]}' + ' x '.join([f'({b.x[i]}, {b.y[i]}]' for i in range(b.n_dims)])
+                res += '\n'
+        return res
+
     @property
     def size(self):
         size = self.props['size']
-
         values = []
         for axis in range(self.n_dims):
             if size[axis] == 0:
@@ -67,6 +79,7 @@ class IntParallelepipedBlock(Block):
             else:
                 values.append(size[axis])
         return cast_simple_vector(values)
+
 
 
 if __name__ == '__main__':
@@ -85,3 +98,5 @@ if __name__ == '__main__':
 
     print()
     print(a['b']['c'])
+
+    print(a.__repr__())

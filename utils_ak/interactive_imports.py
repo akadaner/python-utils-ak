@@ -46,3 +46,5 @@ from .simple_event_manager import *
 from .split_file import *
 from .block_tree import *
 from .portion import *
+from .color import *
+from .openpyxl import *
