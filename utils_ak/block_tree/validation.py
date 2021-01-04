@@ -26,7 +26,9 @@ class ClassValidator:
             self.validators[(class2, class1)] = validator
 
     def validate(self, b1, b2):
-        self.validators[(b1.props['class'], b2.props['class'])](b1, b2)
+        key = (b1.props['class'], b2.props['class'])
+        if key in self.validators:
+            self.validators[key](b1, b2)
 
     def __call__(self, parent, block):
         parent_blocks = parent.children[-self.window:]
