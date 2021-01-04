@@ -50,10 +50,20 @@ class Block:
     def __repr__(self):
         return str(self)
 
+    def query_match(self, query):
+        for k, v in query.items():
+            if callable(v):
+                if not v(self.props[k]):
+                    return False
+            else:
+                if self.props[k] != v:
+                    return False
+        return True
+
     def iter(self, query=None):
         query = query or {}
 
-        if all(self.props[k] == v for k, v in query.items()):
+        if self.query_match(query):
             yield self
 
         for child in self.children:

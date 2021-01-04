@@ -2,6 +2,8 @@ from utils_ak.block_tree.pushers import *
 from utils_ak.block_tree.parallelepiped_block import ParallelepipedBlock
 
 
+# todo: remove copy_cut functionality
+
 class BlockMaker:
     def __init__(self, root_obj='root', default_push_func=stack_push, block_factory=None, make_with_copy_cut=False, default_props=None, **props):
         self.block_factory = block_factory or ParallelepipedBlock

@@ -30,6 +30,7 @@ class ParallelepipedBlock(Block):
         props.setdefault('props_accumulators', {}).setdefault('size', partial(relative_acc, default=lambda: SimpleVector(n_dims), formatter=cast_simple_vector))
         props.setdefault('props_accumulators', {}).setdefault('x_rel', lambda parent_props, child_props, key: relative_acc(parent_props, child_props, 'x', default=lambda: SimpleVector(n_dims), formatter=cast_simple_vector))
         props.setdefault('props_accumulators', {}).setdefault('axis', partial(relative_acc, default=0))
+        props.setdefault('props_accumulators', {}).setdefault('is_parent_node', partial(relative_acc, default=False))
         super().__init__(block_class, **props)
 
     @property
@@ -51,14 +52,15 @@ class ParallelepipedBlock(Block):
         return res
 
     def __repr__(self):
-        return self.tabular_str()
+        return self.tabular()
 
-    def tabular_str(self, visible_only=False):
+    def is_leaf(self):
+        return not self.children and not self.props['is_parent_node']
+
+    def tabular(self):
         res = ''
         for b in self.iter():
             if b.size[0] != 0:
-                if visible_only and b.props['visible'] is False:
-                    continue
                 res += ' ' * int(b.x[0]) + '=' * int(b.size[0]) + f' {b.props["class"]}' + ' x '.join([f'({b.x[i]}, {b.y[i]}]' for i in range(b.n_dims)])
                 res += '\n'
         return res

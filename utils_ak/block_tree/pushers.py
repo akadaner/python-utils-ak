@@ -1,7 +1,6 @@
-from utils_ak.serialization import cast_js
 from utils_ak import cast_dict_or_list
-from utils_ak.portion import *
-from utils_ak.block_tree import Block
+from utils_ak.block_tree.block import Block
+from utils_ak.block_tree.validation import *
 from utils_ak.numeric import *
 from utils_ak.simple_vector import *
 import logging
@@ -39,16 +38,6 @@ def stack_push(parent, block):
     return add_push(parent, block)
 
 
-def validate_disjoint_by_axis(b1, b2, axis=0):
-    try:
-        disposition = int(b1.y[axis] - b2.x[axis])
-    except:
-        disposition = 1
-
-    i1 = cast_interval(b1.x[axis], b1.y[axis])
-    i2 = cast_interval(b2.x[axis], b2.y[axis])
-
-    assert calc_interval_length(i1 & i2) == 0, cast_js({'disposition': disposition})
 
 
 def push(parent, block, push_func=stack_push, **kwargs):
@@ -111,16 +100,6 @@ if __name__ == '__main__':
     stack_push(root, a)
     stack_push(root, b)
     print(root)
-
-    print('Validate disjoint test')
-    for t in range(0, 10):
-        a = ParallelepipedBlock('a', n_dims=1, x=[t], size=[4])
-        b = ParallelepipedBlock('b', n_dims=1, x=[3], size=[3])
-        print(a, b)
-        try:
-            validate_disjoint_by_axis(a, b, 0)
-        except AssertionError as e:
-            print('AssertionError on disposition', e)
 
     def brute_validator(parent, block):
         for c in parent.children:
