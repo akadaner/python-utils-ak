@@ -23,9 +23,8 @@ class SimpleEventManager:
 
             if self.last_ts and ts < self.last_ts:
                 logging.warning('Old event was added to the events timeline')
-            self.last_ts = max(ts, self.last_ts)
-
             self.prefix_handler(topic, ts, event)
+            self.last_ts = max(ts, self.last_ts)
 
 
 if __name__ == '__main__':

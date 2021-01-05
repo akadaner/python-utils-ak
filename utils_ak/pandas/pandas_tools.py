@@ -192,6 +192,19 @@ def pd_write(df, fn, **kwargs):
     ext = os.path.splitext(fn)[-1]
     return getattr(df, f'to_{ext[1:]}')(fn, **kwargs)
 
+
+def mark_consecutive_groups(df, key, groups_key):
+    cur_value = None
+    cur_i = 0
+
+    values = []
+    for i, row in df.iterrows():
+        if row[key] != cur_value:
+            cur_i += 1
+            cur_value = row[key]
+        values.append(cur_i)
+    df[groups_key] = values
+
 if __name__ == '__main__':
     df1 = pd.DataFrame.from_dict({'a': [1, 2, 3], 'b': [4, 5, 6], 'c': [1, 1, 1]})
     df1 = df1.set_index('c')

@@ -10,6 +10,7 @@ import copy
 import pyperclip
 import glob
 import logging
+import uuid
 
 
 import inspect
