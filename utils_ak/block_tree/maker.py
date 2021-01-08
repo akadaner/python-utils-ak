@@ -3,7 +3,7 @@ from utils_ak.block_tree.parallelepiped_block import ParallelepipedBlock
 
 
 class BlockMaker:
-    def __init__(self, root_obj='root', default_push_func=stack_push, block_factory=None, make_with_copy_cut=False, default_props=None, **props):
+    def __init__(self, root_obj='root', default_push_func=stack_push, block_factory=None,  **props):
         self.block_factory = block_factory or ParallelepipedBlock
 
         if isinstance(root_obj, str):
@@ -16,48 +16,40 @@ class BlockMaker:
 
         self.blocks = [self.root]
         self.default_push_func = default_push_func
-        self.make_with_copy_cut = make_with_copy_cut
-        self.default_props = default_props or {}
 
     def create_block(self, block_obj, **kwargs):
         return self.block_factory(block_obj, **kwargs)
 
-    def make(self, block_obj=None, push_func=None, push_kwargs=None, copy_cut=None, **kwargs):
+    def copy(self, block, with_children=True, with_props=False, prop_keys=None):
+        res = self.create_block(block.props['class'], **block.props.relative_props)
+
+        if with_children:
+            for child in block.children:
+                res.add_child(self.copy(child))
+
+        if with_props:
+            props = block.props.get_all_props()
+            prop_keys = prop_keys or []
+            if prop_keys:
+                props = {k: v for k, v in props if k in prop_keys}
+            props = {k: v for k, v in props.items() if v is not None}
+            res.props.update(props)
+        return res
+
+    def make(self, block_obj=None, push_func=None, push_kwargs=None, **kwargs):
         push_func = push_func or self.default_push_func
         push_kwargs = push_kwargs or {}
-        copy_cut = copy_cut if copy_cut is not None else self.make_with_copy_cut
-
-        cur_props = dict(self.default_props)
-        cur_props.update(kwargs)
 
         if isinstance(block_obj, str) or block_obj is None:
-            block = self.create_block(block_obj, **cur_props)
+            block = self.create_block(block_obj, **kwargs)
         elif isinstance(block_obj, ParallelepipedBlock):
             block = block_obj
-            if copy_cut:
-                block = self.copy_cut(block)
-            block.props.update(cur_props)
+            block.props.update(kwargs)
         else:
             raise Exception('Unknown block obj type')
 
         push_func(self.blocks[-1], block, **push_kwargs)
         return BlockMakerContext(self, block)
-
-    def copy(self, block, with_children=True):
-        res = self.create_block(block.props['class'], **block.props.relative_props)
-        if with_children:
-            for child in block.children:
-                res.add_child(self.copy(child))
-        return res
-
-    def copy_cut(self, block, keys=None, with_children=True):
-        res = self.copy(block, with_children=with_children)
-        props = block.props.get_all_props()
-        if keys:
-            props = {k: v for k, v in props if k in keys}
-        props = {k: v for k, v in props.items() if v is not None}
-        res.props.update(props)
-        return res
 
 
 class BlockMakerContext:
@@ -77,9 +69,7 @@ def init_block_maker(root_obj, default_push_func=stack_push, **kwargs):
     block_maker = BlockMaker(root_obj, default_push_func, **kwargs)
     return block_maker, block_maker.make
 
-
-if __name__ == '__main__':
-    print('Test 1')
+def test_block_maker1():
     maker, make = init_block_maker('root', axis=0)
     make('a', size=[1, 0])
     make('b', size=[5, 0])
@@ -87,7 +77,8 @@ if __name__ == '__main__':
     print(maker.root)
     print(maker.root['c'].props.get_all_props())
 
-    print('Test 2')
+
+def test_block_maker2():
     maker, make = init_block_maker('root', axis=1)
     with make('a1', size=[0, 3]):
         with make('b1', size=[5, 0]):
@@ -97,7 +88,8 @@ if __name__ == '__main__':
 
     print(maker.root)
 
-    print('Test copy')
+
+def test_copy():
     maker, make = init_block_maker('root')
     with make('a1', x=[1,1], size=[1, 1], push_func=add_push):
         make('b1', size=[1, 1])
@@ -105,4 +97,10 @@ if __name__ == '__main__':
             make('c1', size=[1, 1])
     print(maker.root)
     print(maker.copy(maker.root['a1']['b2']))
-    print(maker.copy_cut(maker.root['a1']['b2']))
+    print(maker.copy(maker.root['a1']['b2'], with_props=True))
+
+
+if __name__ == '__main__':
+    test_block_maker1()
+    test_block_maker2()
+    test_copy()
