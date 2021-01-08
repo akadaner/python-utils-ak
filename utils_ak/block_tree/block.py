@@ -1,5 +1,3 @@
-
-
 from utils_ak.properties import *
 from utils_ak.architecture import delistify
 
@@ -81,15 +79,9 @@ class Block:
         return block
 
 
-if __name__ == '__main__':
-    def cumsum_acc(parent, child, key, default=lambda: 0):
-        pv, v = cast_prop_values(parent, child, key)
-        pv = pv if pv else default()
-        v = v if v else default()
-        return pv + v
-
+def test_block():
     def cast_block(block_class, **kwargs):
-        return Block(block_class, props_accumulators={'t': cumsum_acc}, **kwargs)
+        return Block(block_class, props_accumulators={'t': lambda parent, child, key: cumsum_acc(parent, child, key, default=0, formatter=int)}, **kwargs)
 
     a = cast_block('a', t=5)
     b = cast_block('b')
@@ -107,7 +99,10 @@ if __name__ == '__main__':
     print()
     print(a['b']['c'])
 
-
     print('Test query')
     for b in a.iter({'class': 'c'}):
         print(b)
+
+
+if __name__ == '__main__':
+    test_block()

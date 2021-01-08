@@ -2,13 +2,28 @@ import pandas as pd
 
 
 def cast_prop_values(parent, child, key):
-    if not parent:
-        pv = None
-    else:
-        pv = parent[key]
-
+    pv = None if not parent else parent[key]
     v = child.relative_props.get(key)
     return pv, v
+
+
+def relative_acc(parent, child, key, default=None, formatter=None):
+    if callable(default):
+        default = default()
+    res = child.relative_props.get(key, default)
+    if formatter:
+        res = formatter(res)
+    return res
+
+
+def cumsum_acc(parent, child, key, default=None, formatter=None):
+    if callable(default):
+        default = default()
+
+    if parent:
+        return parent[key] + relative_acc(parent, child, key, default=default, formatter=formatter)
+
+    return relative_acc(parent, child, key, default=default, formatter=formatter)
 
 
 class DynamicProps:
@@ -42,7 +57,6 @@ class DynamicProps:
             res = default
         return res
 
-    # todo: optimize
     def keys(self):
         parent_keys = [] if not self.parent else self.parent.keys()
         res = parent_keys + list(self.accumulators.keys()) + list(self.relative_props.keys()) + self.required_keys
@@ -52,51 +66,27 @@ class DynamicProps:
         return {key: self[key] for key in self.keys()}
 
 
-if __name__ == '__main__':
-    def t_acc(parent, child, key):
-        pv, v = cast_prop_values(parent, child, key)
-        pv = pv if pv else 0
-        v = v if v else 0
-        return pv + v
 
-
-    def size_acc(parent, child, key):
-        size, time_size = child.relative_props.get('size', 0), child.relative_props.get('time_size', 0)
-        size, time_size = int(size), int(time_size)
-        if size:
-            return int(size)
-        else:
-            assert time_size % 5 == 0
-            return time_size // 5
-
-
-    def time_size_acc(parent, child, key):
-        size, time_size = child.relative_props.get('size', 0), child.relative_props.get('time_size', 0)
-        size, time_size = int(size), int(time_size)
-        if size:
-            return size * 5
-        else:
-            assert time_size % 5 == 0
-            return time_size
-
-
-    ACCUMULATORS = {'t': t_acc, 'size': size_acc, 'time_size': time_size_acc}
+def test_dynamic_props():
+    ACCUMULATORS = {'foo': cumsum_acc, 'bar': relative_acc}
 
     def gen_props(props=None):
-        return DynamicProps(props=props, accumulators=ACCUMULATORS, required_keys=['size', 'time_size'])
+        return DynamicProps(props=props, accumulators=ACCUMULATORS, required_keys=['foo', 'bar', 'other'])
 
-    root = gen_props({'t': 1, 'size': 5, 'other': 1})
-    child1 = gen_props({'t': 2})
-    child2 = gen_props({'t': 3})
+    root = gen_props({'foo': 1, 'bar': 5, 'other': 1})
+    child1 = gen_props({'foo': 2})
+    child2 = gen_props({'foo': 3})
     root.add_child(child1)
     child1.add_child(child2)
 
     values = []
     for i, node in enumerate([root, child1, child2]):
-        for key in ['t', 'size', 'time_size', 'other', 'non-existent_key']:
-            values.append([i, key, node[key]])
-
-    print(pd.DataFrame(values))
+        values.append([node[key] for key in ['foo', 'bar', 'other', 'non-existent_key']])
+    print(pd.DataFrame(values, columns=['foo', 'bar', 'other', 'non-existent_key']))
 
     for node in [root, child1, child2]:
         print(node.keys(), node.get_all_props())
+
+
+if __name__ == '__main__':
+    test_dynamic_props()

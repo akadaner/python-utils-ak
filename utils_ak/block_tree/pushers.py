@@ -38,8 +38,6 @@ def stack_push(parent, block):
     return add_push(parent, block)
 
 
-
-
 def push(parent, block, push_func=stack_push, **kwargs):
     return push_func(parent, block, **kwargs)
 

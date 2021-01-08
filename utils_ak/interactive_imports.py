@@ -11,6 +11,7 @@ import pyperclip
 import glob
 import logging
 import uuid
+import openpyxl
 
 
 import inspect

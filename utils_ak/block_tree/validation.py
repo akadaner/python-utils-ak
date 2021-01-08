@@ -32,6 +32,7 @@ class ClassValidator:
 
     def __call__(self, parent, block):
         parent_blocks = parent.children[-self.window:]
+
         if not parent_blocks:
             return
 

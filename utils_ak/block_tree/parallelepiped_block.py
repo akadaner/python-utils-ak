@@ -4,24 +4,6 @@ from utils_ak.simple_vector import *
 from utils_ak.block_tree import Block
 
 
-def relative_acc(parent_props, child_props, key, default=None, formatter=None):
-    if callable(default):
-        default = default()
-    res = child_props.relative_props.get(key, default)
-    if formatter:
-        res = formatter(res)
-    return res
-
-
-def cumsum_acc(parent_props, child_props, key, default=None, formatter=None):
-    if callable(default):
-        default = default()
-
-    if parent_props:
-        return parent_props[key] + relative_acc(parent_props, child_props, key, default=default, formatter=formatter)
-
-    return relative_acc(parent_props, child_props, key, default=default, formatter=formatter)
-
 
 class ParallelepipedBlock(Block):
     def __init__(self, block_class, n_dims=2, **props):

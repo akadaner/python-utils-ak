@@ -13,14 +13,20 @@ def is_numeric(obj):
 
 def is_int_like(obj):
     if isinstance(obj, str) or is_float(obj):
-        obj = float(obj)
-        return int(obj) == obj
+        try:
+            obj = float(obj)
+            return int(obj) == obj
+        except:
+            return False
     elif is_int(obj):
         return True
     else:
         return False
 
 
-if __name__ == '__main__':
+def test_is_int_like():
+    print(is_int_like(1))
+    print(is_int_like('1'))
     print(is_int_like('1.0'))
     print(is_int_like('1.2'))
+    print(is_int_like('1.2;;'))
