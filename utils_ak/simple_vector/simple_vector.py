@@ -53,6 +53,6 @@ class SimpleVector:
         self.values[index] = value
 
 if __name__ == '__main__':
-    v1 = SimpleVector([1,2])
-    v2 = SimpleVector([3,5])
+    v1 = SimpleVector([1, 2])
+    v2 = SimpleVector([3, 5])
     print(v1 + v2, v1 - v2)

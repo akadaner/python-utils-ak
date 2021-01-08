@@ -1,5 +1,6 @@
 import re
 
+
 def def_group(name, pat):
     return r'(?P<{}>{})'.format(name, pat)
 
@@ -42,7 +43,7 @@ def search_one(pattern, s):
     return res[0]
 
 
-def ex_replace_with_pattern():
+def test_replace_with_pattern():
     pat = replace_with_pattern('<pat> a <pat> b <pat> c', '<pat>', 'foo', '.+')
     print(pat)
     print(re.search(pat, 'aaa a aaa b aaa c').groupdict())
@@ -52,4 +53,4 @@ def ex_replace_with_pattern():
 
 
 if __name__ == '__main__':
-    ex_replace_with_pattern()
+    test_replace_with_pattern()
