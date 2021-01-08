@@ -1,7 +1,7 @@
 from utils_ak.portion import *
 from utils_ak.serialization import cast_js
 from utils_ak.block_tree.parallelepiped_block import ParallelepipedBlock
-
+from utils_ak.block_tree.block import Block
 
 def validate_disjoint_by_axis(b1, b2, axis=0):
     try:
@@ -12,7 +12,19 @@ def validate_disjoint_by_axis(b1, b2, axis=0):
     i1 = cast_interval(b1.x[axis], b1.y[axis])
     i2 = cast_interval(b2.x[axis], b2.y[axis])
 
-    assert calc_interval_length(i1 & i2) == 0, cast_js({'disposition': disposition})
+    assert calc_interval_length(i1 & i2) == 0, cast_js({'msg': 'Failed to validated disjoint between {}:{} and {}:{}'.format(b1.props['class'], i1, b2.props['class'], i2), 'disposition': disposition})
+
+
+def test_validate_disjoint_by_axis():
+    print('Validate disjoint test')
+    for t in range(0, 10):
+        a = ParallelepipedBlock('a', n_dims=1, x=[t], size=[4])
+        b = ParallelepipedBlock('b', n_dims=1, x=[3], size=[3])
+        print(a, b)
+        try:
+            validate_disjoint_by_axis(a, b, 0)
+        except AssertionError as e:
+            print('AssertionError on disposition', e)
 
 
 class ClassValidator:
@@ -41,15 +53,31 @@ class ClassValidator:
             self.validate(b1, b2)
 
 
-if __name__ == '__main__':
-    print('Validate disjoint test')
-    for t in range(0, 10):
-        a = ParallelepipedBlock('a', n_dims=1, x=[t], size=[4])
-        b = ParallelepipedBlock('b', n_dims=1, x=[3], size=[3])
-        print(a, b)
-        try:
-            validate_disjoint_by_axis(a, b, 0)
-        except AssertionError as e:
-            print('AssertionError on disposition', e)
+def test_class_validator():
+    class_validator = ClassValidator(window=1)
+    class_validator.add('a', 'a', validator=validate_disjoint_by_axis)
 
-    # todo: class_validator_test
+    root = ParallelepipedBlock('root', axis=0)
+    a1 = ParallelepipedBlock('a', n_dims=2, x=[0, 0], size=[5, 1])
+    a2 = ParallelepipedBlock('a', n_dims=2, x=[2, 0], size=[5, 1])
+    b = ParallelepipedBlock('b', n_dims=2, x=[0, 1], size=[5, 1])
+    root.add_child(a1)
+
+    try:
+        class_validator(root, a2)
+    except AssertionError as e:
+        print(e)
+
+    class_validator(root, b)
+
+    root.add_child(b)
+
+    # window is 1 - validation should pass now
+    class_validator(root, a2)
+
+    root.add_child(a2)
+
+
+if __name__ == '__main__':
+    test_validate_disjoint_by_axis()
+    test_class_validator()
