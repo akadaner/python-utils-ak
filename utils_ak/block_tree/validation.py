@@ -3,6 +3,7 @@ from utils_ak.serialization import cast_js
 from utils_ak.block_tree.parallelepiped_block import ParallelepipedBlock
 from utils_ak.block_tree.block import Block
 
+
 def validate_disjoint_by_axis(b1, b2, axis=0):
     try:
         disposition = int(b1.y[axis] - b2.x[axis])
