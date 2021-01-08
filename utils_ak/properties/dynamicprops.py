@@ -29,7 +29,7 @@ def cumsum_acc(parent, child, key, default=None, formatter=None):
 class DynamicProps:
     def __init__(self, props=None, accumulators=None, required_keys=None):
         self.relative_props = props or {}
-        self.accumulators = accumulators
+        self.accumulators = accumulators or {}
         self.required_keys = required_keys or []
 
         self.parent = None

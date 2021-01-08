@@ -1,19 +1,18 @@
 from functools import partial
 from utils_ak.simple_vector import *
-
+from utils_ak.properties import *
 from utils_ak.block_tree import Block
-
 
 
 class ParallelepipedBlock(Block):
     def __init__(self, block_class, n_dims=2, **props):
         self.n_dims = n_dims
-        props.setdefault('props_accumulators', {}).setdefault('x', partial(cumsum_acc, default=lambda: SimpleVector(n_dims), formatter=cast_simple_vector))
-        props.setdefault('props_accumulators', {}).setdefault('size', partial(relative_acc, default=lambda: SimpleVector(n_dims), formatter=cast_simple_vector))
-        props.setdefault('props_accumulators', {}).setdefault('x_rel', lambda parent_props, child_props, key: relative_acc(parent_props, child_props, 'x', default=lambda: SimpleVector(n_dims), formatter=cast_simple_vector))
-        props.setdefault('props_accumulators', {}).setdefault('axis', partial(relative_acc, default=0))
-        props.setdefault('props_accumulators', {}).setdefault('is_parent_node', partial(relative_acc, default=False))
         super().__init__(block_class, **props)
+        self.props.accumulators['x'] = partial(cumsum_acc, default=lambda: SimpleVector(n_dims), formatter=cast_simple_vector)
+        self.props.accumulators['x_rel'] = lambda parent_props, child_props, key: relative_acc(parent_props, child_props, 'x', default=lambda: SimpleVector(n_dims), formatter=cast_simple_vector)
+        self.props.accumulators['size'] = partial(relative_acc, default=lambda: SimpleVector(n_dims), formatter=cast_simple_vector)
+        self.props.accumulators['axis'] = partial(relative_acc, default=0)
+        self.props.accumulators['is_parent_node'] = partial(relative_acc, default=False)
 
     @property
     def x(self):
@@ -62,8 +61,7 @@ class ParallelepipedBlock(Block):
         return cast_simple_vector(values)
 
 
-
-if __name__ == '__main__':
+def test_parallelepiped_block():
     a = ParallelepipedBlock('a', n_dims=2, x=[1, 2])
     b = ParallelepipedBlock('b', n_dims=2)
     c = ParallelepipedBlock('c', n_dims=2, x=[3, 4], size=[1, 5])
@@ -81,3 +79,7 @@ if __name__ == '__main__':
     print(a['b']['c'])
 
     print(a.__repr__())
+
+
+if __name__ == '__main__':
+    test_parallelepiped_block()
