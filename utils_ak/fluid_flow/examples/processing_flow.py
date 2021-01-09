@@ -4,8 +4,9 @@ def gen_processing_flow():
     container1 = Container('Input', max_pressure_out=50)
     container1.value = 100
     container2 = ProcessingContainer('Ouput')
-    cable = Cable('Cable')
+    EVENT_MANAGER.subscribe('processing_container.set_pressure', container2.on_set_pressure)
 
+    cable = Cable('Cable')
     connect(container1, cable)
     connect(cable, container2)
     return FluidFlow(container1)

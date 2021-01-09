@@ -121,24 +121,30 @@ class Cable(Actor):
     def stats(self):
         return {'current_speed': self.current_speed, 'pressure_in': self.pressure_in, 'pressure_out': self.pressure_out}
 
+
 class ProcessingContainer(Actor, CableMixin):
     def __init__(self, id=None, processing_time=5, max_pressure_out=50):
         super().__init__(id)
         self.processing_time = processing_time
+
         self._container_in = Container()
         self._cable = Cable()
+        self._cable.pressure_in = 0
         self._container_out = Container()
         connect(self._container_in, self._cable)
         connect(self._cable, self._container_out)
+
         self.max_pressure_out = max_pressure_out
+
+        self.last_cable_speed = None
 
     def update_value(self, ts):
         if self.last_ts is None:
             return
-        self._container_in += (ts - self.last_ts) * self.speed('in')
-        self._container_in -= (ts - self.last_ts) * self._cable.current_speed
-        self._container_out += (ts - self.last_ts) * self._cable.current_speed
-        self._container_out -= (ts - self.last_ts) * self.speed('out')
+        self._container_in.value += (ts - self.last_ts) * self.speed('in')
+        self._container_in.value -= (ts - self.last_ts) * self._cable.current_speed
+        self._container_out.value += (ts - self.last_ts) * self._cable.current_speed
+        self._container_out.value -= (ts - self.last_ts) * self.speed('out')
 
     def update_pressure(self, ts):
         # set out pressure
@@ -150,7 +156,9 @@ class ProcessingContainer(Actor, CableMixin):
 
     def update_speed(self, ts):
         self._cable.update_speed(ts)
-        self.add_event('processing_container.set_pressure', ts + self.processing_time, {'pressure': self._container_in.speed('in')})
+        if self.last_cable_speed != self.speed('in'):
+            self.add_event('processing_container.set_pressure', ts + self.processing_time, {'pressure': self.speed('in')})
+            self.last_cable_speed = self.speed('in')
 
     def on_set_pressure(self, topic, ts, event):
         print('Setting inner pressure in ProcessingContainer')
