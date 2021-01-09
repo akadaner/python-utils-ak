@@ -11,16 +11,23 @@ class SimpleEventManager:
     def subscribe(self, topic, callback):
         self.prefix_handler.add(topic, callback)
 
-    def add_event(self, topic, ts, event):
+    def add_event(self, topic, ts, event, duplicates_allowed=False):
+        if not duplicates_allowed:
+            if self.is_event_present(topic, ts, event):
+                return False
         self.events.add((topic, ts, event))
+        return True
 
     def is_event_present(self, topic, ts, event, ts_error=1e-5):
+        if not self.events:
+            return False
+
         ind = self.events.bisect_left([topic, ts, event])
 
         for increment in [1, -1]:
             cur_ind = ind
             while True:
-                if cur_ind < 0 or cur_ind > len(self.events):
+                if cur_ind < 0 or cur_ind >= len(self.events):
                     break
                 cur_event = self.events[cur_ind]
 
@@ -35,8 +42,6 @@ class SimpleEventManager:
                 cur_ind += increment
 
         return False
-
-
 
     def run(self):
         while True:
@@ -70,12 +75,19 @@ def test_simple_event_manager():
     em.add_event('count.up', now_ts, {'num': 3})
     em.add_event('count.down', now_ts + 2, {'num': -11})
 
+    # test is_event_prent
     assert em.is_event_present('count.up', now_ts, {'num': 3})
     assert em.is_event_present('count.up', now_ts + 1e-10, {'num': 3})
     assert em.is_event_present('count.up', now_ts - 1e-10, {'num': 3})
     assert not em.is_event_present('count.up', now_ts + 1, {'num': 3})
     assert not em.is_event_present('different topic', now_ts + 1e-10, {'num': 3})
     assert not em.is_event_present('count.up', now_ts + 1e-10, {'different event': 10})
+
+    # test duplicate addition
+    events_count_before = len(em.events)
+    em.add_event('count.up', now_ts, {'num': 3})
+    assert len(em.events) == events_count_before
+
     em.run()
 
 
