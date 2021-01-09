@@ -24,6 +24,14 @@ class Pipe(Actor):
         assert len(self.children) == 1
         return self.children[0]
 
+    @property
+    def pressure(self, orient='in'):
+        assert orient in ['in', 'out']
+        if orient == 'in':
+            return self.pressure_in
+        elif orient == 'out':
+            return self.pressure_out
+
     def update_speed(self, ts):
         self.current_speed = calc_minimum_pressure([self.pressure_in, self.pressure_out])
 

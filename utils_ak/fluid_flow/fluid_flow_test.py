@@ -66,9 +66,9 @@ def test_flow_5():
 
 if __name__ == '__main__':
     configure_logging(stream_level=logging.INFO)
-    # test_flow_1()
-    # test_flow_2()
-    # test_flow_3()
-    # test_flow_4()
+    test_flow_1()
+    test_flow_2()
+    test_flow_3()
+    test_flow_4()
     test_flow_5()
 
