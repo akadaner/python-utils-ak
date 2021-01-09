@@ -17,13 +17,13 @@ class Container(Actor, PipeMixin):
         self.value -= (ts - self.last_ts) * self.speed('out')
 
     def update_pressure(self, ts):
-        if self.cable('out'):
+        if self.pipe('out'):
             input_speed = self.speed('in')
 
             if abs(self.value) < ERROR:
-                self.cable('out').pressure_in = min(self.max_pressure_out, input_speed)
+                self.pipe('out').pressure_in = min(self.max_pressure_out, input_speed)
             else:
-                self.cable('out').pressure_in = self.max_pressure_out
+                self.pipe('out').pressure_in = self.max_pressure_out
 
     def update_triggers(self, ts):
         # trigger when current value is finished with current speed

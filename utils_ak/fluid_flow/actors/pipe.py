@@ -31,14 +31,14 @@ class Pipe(Actor):
         self.current_speed = np.nanmin(pressures)
 
     def __str__(self):
-        return f'Cable {self.id}'
+        return f'Pipe {self.id}'
 
     def stats(self):
         return {'current_speed': self.current_speed, 'pressure_in': self.pressure_in, 'pressure_out': self.pressure_out}
 
 
 class PipeMixin:
-    def cable(self, orient):
+    def pipe(self, orient):
         assert orient in ['in', 'out']
         if orient == 'in':
             nodes = self.parents
@@ -54,12 +54,12 @@ class PipeMixin:
     def speed(self, speed_type):
         assert speed_type in ['in', 'out', 'drain']
         if speed_type == 'in':
-            if not self.cable('in'):
+            if not self.pipe('in'):
                 return 0
-            return self.cable('in').current_speed
+            return self.pipe('in').current_speed
         elif speed_type == 'out':
-            if not self.cable('out'):
+            if not self.pipe('out'):
                 return 0
-            return self.cable('out').current_speed
+            return self.pipe('out').current_speed
         elif speed_type == 'drain':
             return self.speed('in') - self.speed('out')
