@@ -1,5 +1,6 @@
 from utils_ak.serialization import cast_js
 
+from utils_ak.fluid_flow.event_manager import EVENT_MANAGER
 
 class FluidFlow:
     def __init__(self, root):
@@ -39,3 +40,10 @@ class FluidFlow:
             getattr(node, 'update_last_ts', lambda ts: None)(ts)
         print(self)
         print()
+
+
+def run_flow(flow):
+    EVENT_MANAGER.subscribe('', flow.update)
+    EVENT_MANAGER.add_event('update', 0, {})
+    EVENT_MANAGER.run()
+

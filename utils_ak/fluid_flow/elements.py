@@ -3,14 +3,13 @@ import numpy as np
 import uuid
 
 from utils_ak.dag import *
-from utils_ak.simple_event_manager import *
 from utils_ak.numeric import custom_round
 from utils_ak.time import *
 from utils_ak.serialization import cast_js
 
 ERROR = 1e-5
-EVENT_MANAGER = SimpleEventManager()
 
+from utils_ak.fluid_flow.event_manager import EVENT_MANAGER
 
 class Actor(DAGNode):
     event_manager = EVENT_MANAGER
