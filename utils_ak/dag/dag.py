@@ -18,19 +18,11 @@ class DAGNode:
                 res.append(node)
         return res
 
-    def top(self, orient='down', create_if_needed=True):
+    def top(self, orient='down'):
         leaves = self.leaves(orient)
-
+        assert len(leaves) == 1, 'Top not found'
         if len(leaves) == 1:
-            return leaves[0]  # top already exists
-
-        if create_if_needed:
-            top = DAGNode()
-            for leaf in leaves:
-                connect(leaf, top)
-            return top
-
-        raise Exception('Top not found')
+            return leaves[0]
 
     def root(self, orient='down'):
         cur_node = self
@@ -153,7 +145,13 @@ def test_dag_iteration():
     connect(root_up, node1)
     connect(root_up, node2)
     print(list(root_up.leaves()))
-    print(root_up.top())
+    try:
+        print(root_up.top())
+    except AssertionError as e:
+        print('AssertionError', e)
+    top = NamedNode('Top')
+    for leaf in root_up.leaves():
+        connect(leaf, top)
     print(root_up.top())
     print(list(root_up.leaves()))
 
