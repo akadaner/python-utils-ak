@@ -1,13 +1,15 @@
 from utils_ak.fluid_flow.actor import Actor
 from utils_ak.fluid_flow.actors.pipe import PipeMixin
 from utils_ak.fluid_flow.calculations import ERROR
+from utils_ak.fluid_flow.pressure import calc_minimum_pressure
 
 
 class Container(Actor, PipeMixin):
-    def __init__(self, id=None, item='default', max_pressure_out=None):
+    def __init__(self, id=None, item='default', max_pressure_in=None, max_pressure_out=None):
         super().__init__(id)
         self.item = item
         self.value = 0
+        self.max_pressure_in = max_pressure_in
         self.max_pressure_out = max_pressure_out
 
     def update_value(self, ts):
@@ -17,13 +19,18 @@ class Container(Actor, PipeMixin):
         self.value -= (ts - self.last_ts) * self.speed('out')
 
     def update_pressure(self, ts):
-        if self.pipe('out'):
-            input_speed = self.speed('in')
+        if self.pipe('in'):
+            self.pipe('in').pressure_out = self.max_pressure_in
 
-            if abs(self.value) < ERROR:
-                self.pipe('out').pressure_in = min(self.max_pressure_out, input_speed)
-            else:
-                self.pipe('out').pressure_in = self.max_pressure_out
+        if self.pipe('out'):
+            self.pipe('out').pressure_in = self.max_pressure_out
+
+    def update_speed(self, ts):
+        input_speed = self.speed('in')
+
+        # set factual pressure for output
+        if self.pipe('out') and abs(self.value) < ERROR:
+            self.pipe('out').pressure_in = calc_minimum_pressure([self.pipe('out').pressure_in, input_speed])
 
     def update_triggers(self, ts):
         # trigger when current value is finished with current speed

@@ -4,11 +4,14 @@ from utils_ak.fluid_flow.actor import Actor
 from utils_ak.fluid_flow.actors.pipe import PipeMixin, Pipe
 from utils_ak.fluid_flow.actors.container import Container
 from utils_ak.fluid_flow.calculations import ERROR
-
+from utils_ak.fluid_flow.pressure import calc_minimum_pressure
 
 
 class ProcessingContainer(Actor, PipeMixin):
-    def __init__(self, id=None, item_in='default', item_out='default', processing_time=5, transformation_factor=1., max_pressure_out=50):
+    def __init__(self, id=None, item_in='default', item_out='default',
+                 processing_time=5,
+                 transformation_factor=1.,
+                 max_pressure_in=None, max_pressure_out=None):
         super().__init__(id)
         self.processing_time = processing_time
 
@@ -19,9 +22,10 @@ class ProcessingContainer(Actor, PipeMixin):
         connect(self._container_in, self._pipe)
         connect(self._pipe, self._container_out)
 
+        self.max_pressure_in = max_pressure_in
         self.max_pressure_out = max_pressure_out
 
-        self.last_cable_speed = None
+        self.last_pipe_speed = None
         self.transformation_factor = transformation_factor
 
     def update_value(self, ts):
@@ -33,18 +37,20 @@ class ProcessingContainer(Actor, PipeMixin):
         self._container_out.value -= (ts - self.last_ts) * self.speed('out')
 
     def update_pressure(self, ts):
-        # set out pressure
+        if self.pipe('in'):
+            self.pipe('in').pressure_out = self.max_pressure_in
+
         if self.pipe('out'):
-            if abs(self._container_out.value) < ERROR:
-                self.pipe('out').pressure_in = min(self.max_pressure_out, self._pipe.current_speed)
-            else:
-                self.pipe('out').pressure_in = self.max_pressure_out
+            self.pipe('out').pressure_in = self.max_pressure_out
 
     def update_speed(self, ts):
         self._pipe.update_speed(ts)
-        if self.last_cable_speed != self.speed('in'):
+        if self.last_pipe_speed != self.speed('in'):
             self.add_event('processing_container.set_pressure', ts + self.processing_time, {'pressure': self.speed('in')})
-            self.last_cable_speed = self.speed('in')
+            self.last_pipe_speed = self.speed('in')
+
+        if self.pipe('out') and abs(self._container_out.value) < ERROR:
+            self.pipe('out').pressure_in = calc_minimum_pressure([self.pipe('out').pressure_in, self._pipe.current_speed])
 
     def on_set_pressure(self, topic, ts, event):
         self._pipe.pressure_in = event['pressure']

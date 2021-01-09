@@ -1,4 +1,5 @@
 from utils_ak.fluid_flow.actor import Actor
+from utils_ak.fluid_flow.pressure import calc_minimum_pressure
 import numpy as np
 
 
@@ -24,11 +25,7 @@ class Pipe(Actor):
         return self.children[0]
 
     def update_speed(self, ts):
-        pressures = [self.pressure_in, self.pressure_out]
-        pressures = [p if p is not None else np.nan for p in pressures]
-        if all(np.isnan(p) for p in pressures):
-            raise Exception('No pressures specified')
-        self.current_speed = np.nanmin(pressures)
+        self.current_speed = calc_minimum_pressure([self.pressure_in, self.pressure_out])
 
     def __str__(self):
         return f'Pipe {self.id}'

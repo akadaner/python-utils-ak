@@ -32,6 +32,7 @@ class FluidFlow:
             for node in self.root.iterate('down'):
                 getattr(node, method, lambda ts: None)(ts)
             self.log(self)
+        self.log()
 
 def run_flow(flow):
     event_manager = SimpleEventManager()
