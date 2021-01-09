@@ -9,20 +9,25 @@ from utils_ak.serialization import cast_js
 
 ERROR = 1e-5
 
-from utils_ak.fluid_flow.event_manager import EVENT_MANAGER
 
 class Actor(DAGNode):
-    event_manager = EVENT_MANAGER
     def __init__(self, id=None):
         super().__init__()
         self.last_ts = None
         self.id = id or str(uuid.uuid4())
+        self.event_manager = None
+
+    def set_event_manager(self, event_manager):
+        self.event_manager = event_manager
 
     def add_event(self, topic, ts, event):
         self.event_manager.add_event(topic, ts, event)
 
     def update_last_ts(self, ts):
         self.last_ts = ts
+
+    def subscribe(self):
+        pass
 
 
 class CableMixin:
@@ -161,7 +166,6 @@ class ProcessingContainer(Actor, CableMixin):
             self.last_cable_speed = self.speed('in')
 
     def on_set_pressure(self, topic, ts, event):
-        print('Setting inner pressure in ProcessingContainer')
         self._cable.pressure_in = event['pressure']
 
     def update_triggers(self, ts):
@@ -178,3 +182,5 @@ class ProcessingContainer(Actor, CableMixin):
     def stats(self):
         return {'container_in': self._container_in.stats(), 'cable': self._cable.stats(), 'container_out': self._container_out.stats()}
 
+    def subscribe(self):
+        self.event_manager.subscribe('processing_container.set_pressure', self.on_set_pressure)
