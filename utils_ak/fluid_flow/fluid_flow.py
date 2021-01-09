@@ -1,24 +1,29 @@
 import numpy as np
 
+import uuid
+
 from utils_ak.dag import *
 from utils_ak.simple_event_manager import *
+from utils_ak.numeric import custom_round
+from utils_ak.time import *
 
 ERROR = 1e-5
 EVENT_MANAGER = SimpleEventManager()
 
 
 class Actor(DAGNode):
-    def __init__(self):
+    def __init__(self, id=None):
         super().__init__()
         self.last_ts = None
+        self.id = id or str(uuid.uuid4())
 
     def update_last_ts(self, ts):
         self.last_ts = ts
 
 
 class Container(Actor):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, id=None):
+        super().__init__(id)
         self.value = 0
 
     def cable(self, orient):
@@ -65,10 +70,13 @@ class Container(Actor):
             eta = self.value / self.speed('drain')
             EVENT_MANAGER.add_event(ts + eta, 'update.trigger', {})
 
+    def __str__(self):
+        return f'Container {self.id}'
+
 
 class Cable(Actor):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, id=None):
+        super().__init__(id)
         self.current_speed = 0
         self.pressure_in = None
         self.pressure_out = None
@@ -94,3 +102,60 @@ class Cable(Actor):
             raise Exception('No pressures specified')
         self.current_speed = np.nanmin(pressures)
 
+    def __str__(self):
+        return f'Cable {self.id}'
+
+
+class PrimitiveFlow:
+    def __init__(self):
+        container1 = Container()
+        container1.value = 100
+        container2 = Container()
+        cable = Cable()
+
+        connect(container1, cable)
+        connect(cable, container2)
+
+        self.root = container1
+
+    def print_current_flow(self):
+        for node in self.root.iterate('down'):
+            if isinstance(node, Container):
+                print(cast_datetime(node.last_ts), node, node.value)
+            elif isinstance(node, Cable):
+                print(cast_datetime(node.last_ts), node, node.pressure_in, node.pressure_out, node.current_speed)
+
+    def update(self, ts, topic, event):
+        print('Processing time', ts)
+
+        print('Updating value')
+        for node in self.root.iterate('down'):
+            getattr(node, 'update_value', lambda ts: None)(ts)
+        self.print_current_flow()
+
+        print('Updating pressure')
+        for node in self.root.iterate('down'):
+            getattr(node, 'update_pressure', lambda ts: None)(ts)
+        self.print_current_flow()
+
+        print('Updating speed')
+        for node in self.root.iterate('down'):
+            getattr(node, 'update_speed', lambda ts: None)(ts)
+        self.print_current_flow()
+
+        print('Updating triggers')
+        for node in self.root.iterate('down'):
+            getattr(node, 'update_triggers', lambda ts: None)(ts)
+        self.print_current_flow()
+
+        print('Updating last ts')
+        for node in self.root.iterate('down'):
+            getattr(node, 'update_last_ts', lambda ts: None)(ts)
+        self.print_current_flow()
+
+
+flow = PrimitiveFlow()
+EVENT_MANAGER.subscribe('update', flow.update)
+today_ts = int(customs_round(cast_ts(datetime.now()), 24 * 3600))
+# EVENT_MANAGER.add_event(today_ts, 'update', {})
+# EVENT_MANAGER.run()
