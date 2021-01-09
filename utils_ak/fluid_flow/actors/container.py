@@ -4,7 +4,7 @@ from utils_ak.fluid_flow.calculations import ERROR
 
 
 class Container(Actor, PipeMixin):
-    def __init__(self, item, id=None, max_pressure_out=None):
+    def __init__(self, id=None, item='default', max_pressure_out=None):
         super().__init__(id)
         self.item = item
         self.value = 0

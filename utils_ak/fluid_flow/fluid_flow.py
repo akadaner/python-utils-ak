@@ -27,32 +27,11 @@ class FluidFlow:
     def update(self, topic, ts, event):
         self.log('Processing time', ts)
 
-        self.log('Updating value')
-        for node in self.root.iterate('down'):
-            getattr(node, 'update_value', lambda ts: None)(ts)
-        self.log(self)
-
-        self.log('Updating pressure')
-        for node in self.root.iterate('down'):
-            getattr(node, 'update_pressure', lambda ts: None)(ts)
-        self.log(self)
-
-        self.log('Updating speed')
-        for node in self.root.iterate('down'):
-            getattr(node, 'update_speed', lambda ts: None)(ts)
-        self.log(self)
-
-        self.log('Updating triggers')
-        for node in self.root.iterate('down'):
-            getattr(node, 'update_triggers', lambda ts: None)(ts)
-        self.log(self)
-
-        self.log('Updating last ts')
-        for node in self.root.iterate('down'):
-            getattr(node, 'update_last_ts', lambda ts: None)(ts)
-        self.log(self)
-        self.log()
-
+        for method in ['update_value', 'update_pressure', 'update_speed', 'update_triggers', 'update_last_ts']:
+            self.log(f'Procedure {method}')
+            for node in self.root.iterate('down'):
+                getattr(node, method, lambda ts: None)(ts)
+            self.log(self)
 
 def run_flow(flow):
     event_manager = SimpleEventManager()

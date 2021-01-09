@@ -6,8 +6,9 @@ from utils_ak.fluid_flow.actors.container import Container
 from utils_ak.fluid_flow.calculations import ERROR
 
 
+
 class ProcessingContainer(Actor, PipeMixin):
-    def __init__(self, item_in, item_out, id=None, processing_time=5, transformation_factor=1., max_pressure_out=50):
+    def __init__(self, id=None, item_in='default', item_out='default', processing_time=5, transformation_factor=1., max_pressure_out=50):
         super().__init__(id)
         self.processing_time = processing_time
 
