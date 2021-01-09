@@ -8,7 +8,7 @@ def test_flow_1():
     container1 = Container('Input', max_pressure_out=50)
     container1.value = 100
     container2 = Container('Ouput')
-    cable = Cable('Cable')
+    cable = Pipe('Cable')
 
     connect(container1, cable)
     connect(cable, container2)
@@ -21,7 +21,7 @@ def test_flow_2():
     container1.value = 100
     container2 = ProcessingContainer('Ouput')
 
-    cable = Cable('Cable')
+    cable = Pipe('Cable')
     connect(container1, cable)
     connect(cable, container2)
     flow = FluidFlow(container1, verbose=True)

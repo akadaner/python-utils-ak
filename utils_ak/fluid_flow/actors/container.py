@@ -1,10 +1,12 @@
 from utils_ak.fluid_flow.actor import Actor
-from utils_ak.fluid_flow.actors.cable import CableMixin
+from utils_ak.fluid_flow.actors.pipe import PipeMixin
 from utils_ak.fluid_flow.calculations import ERROR
 
-class Container(Actor, CableMixin):
-    def __init__(self, id=None, max_pressure_out=None):
+
+class Container(Actor, PipeMixin):
+    def __init__(self, item, id=None, max_pressure_out=None):
         super().__init__(id)
+        self.item = item
         self.value = 0
         self.max_pressure_out = max_pressure_out
 
@@ -30,7 +32,7 @@ class Container(Actor, CableMixin):
             self.add_event('update.trigger', ts + eta, {})
 
     def __str__(self):
-        return f'Container {self.id}'
+        return f'Container {self.id} with {self.item}'
 
     def stats(self):
         return {'value': self.value}

@@ -2,7 +2,7 @@ from utils_ak.fluid_flow.actor import Actor
 import numpy as np
 
 
-class Cable(Actor):
+class Pipe(Actor):
     def __init__(self, id=None):
         super().__init__(id)
         self.current_speed = 0
@@ -37,7 +37,7 @@ class Cable(Actor):
         return {'current_speed': self.current_speed, 'pressure_in': self.pressure_in, 'pressure_out': self.pressure_out}
 
 
-class CableMixin:
+class PipeMixin:
     def cable(self, orient):
         assert orient in ['in', 'out']
         if orient == 'in':

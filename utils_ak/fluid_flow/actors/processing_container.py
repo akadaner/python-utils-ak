@@ -1,33 +1,34 @@
 from utils_ak.dag import *
 
 from utils_ak.fluid_flow.actor import Actor
-from utils_ak.fluid_flow.actors.cable import CableMixin, Cable
+from utils_ak.fluid_flow.actors.pipe import PipeMixin, Pipe
 from utils_ak.fluid_flow.actors.container import Container
 from utils_ak.fluid_flow.calculations import ERROR
 
 
-class ProcessingContainer(Actor, CableMixin):
-    def __init__(self, id=None, processing_time=5, max_pressure_out=50):
+class ProcessingContainer(Actor, PipeMixin):
+    def __init__(self, item_in, item_out, id=None, processing_time=5, transformation_factor=1., max_pressure_out=50):
         super().__init__(id)
         self.processing_time = processing_time
 
-        self._container_in = Container()
-        self._cable = Cable()
+        self._container_in = Container(item_in)
+        self._cable = Pipe()
         self._cable.pressure_in = 0
-        self._container_out = Container()
+        self._container_out = Container(item_out)
         connect(self._container_in, self._cable)
         connect(self._cable, self._container_out)
 
         self.max_pressure_out = max_pressure_out
 
         self.last_cable_speed = None
+        self.transformation_factor = transformation_factor
 
     def update_value(self, ts):
         if self.last_ts is None:
             return
         self._container_in.value += (ts - self.last_ts) * self.speed('in')
         self._container_in.value -= (ts - self.last_ts) * self._cable.current_speed
-        self._container_out.value += (ts - self.last_ts) * self._cable.current_speed
+        self._container_out.value += (ts - self.last_ts) * self._cable.current_speed * self.transformation_factor
         self._container_out.value -= (ts - self.last_ts) * self.speed('out')
 
     def update_pressure(self, ts):
