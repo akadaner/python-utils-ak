@@ -76,7 +76,7 @@ class Processor(Actor, PipeMixin):
             eta = self._container_out.value / abs(speed_drain)
             self.add_event('update.trigger.empty_container', ts + eta, {})
 
-        if self.processing_limit:
+        if self.processing_limit and self.speed('in') > ERROR:
             # trigger when processing limit is filled
             value_left = self.processing_limit - self.total_processed
             eta = value_left / self.speed('in')
