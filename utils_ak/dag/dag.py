@@ -2,16 +2,14 @@ class DAGNode:
     def __init__(self):
         self.parents = []
         self.children = []
-
-        self.iteration_state = {}
         self.reset_iteration_state()
 
-    def reset_iteration_state(self, with_children=False):
+    def reset_iteration_state(self, orient='down', with_children=False):
         self.iteration_state = {'is_processed': False}  # iteration state variable
 
         if with_children:
-            for child in self.oriented_children('down'):
-                child.reset_iteration_state(with_children=True)
+            for child in self.oriented_children(orient):
+                child.reset_iteration_state(orient, with_children=True)
 
     def root(self, orient='down'):
         cur_node = self
@@ -30,7 +28,7 @@ class DAGNode:
 
     def iterate(self, orient='down'):
         assert not self.oriented_parents(orient), 'Can iterate only from root node'
-        self.reset_iteration_state(with_children=True)
+        self.reset_iteration_state(orient, with_children=True)
 
         cur_node = self
 
@@ -62,7 +60,7 @@ def disconnect(parent, child):
     child.parents.remove(parent)
 
 
-def test_dag_node():
+def test_dag_iteration():
     class NamedNode(DAGNode):
         def __init__(self, name):
             super().__init__()
@@ -84,5 +82,28 @@ def test_dag_node():
     connect(node1, root_down)
     connect(node2, root_down)
 
+    print('Testing iteration')
+    for orient in ['down', 'up']:
+        print('Processing orientation', orient)
+        for node in [root_up, node1, node2, root_down]:
+            print('Processing node', node)
+            if orient == 'down' and node == root_up:
+                for iter_node in node.iterate(orient):
+                    print(iter_node)
+            elif orient == 'up' and node == root_down:
+                for iter_node in node.iterate(orient):
+                    print(iter_node)
+            else:
+                try:
+                    list(node.iterate(orient))
+                except AssertionError as e:
+                    print('AssertionError', e)
+
+    print('Testing root')
+    for orient in ['down', 'up']:
+        print('Processing orientation', orient)
+        for node in [root_up, node1, node2, root_down]:
+            print(node.root(orient))
+
 if __name__ == '__main__':
-    test_dag_node()
+    test_dag_iteration()
