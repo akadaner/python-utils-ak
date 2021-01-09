@@ -1,8 +1,8 @@
 from utils_ak.dag import *
 
 from utils_ak.fluid_flow.actor import Actor
-from utils_ak.fluid_flow.elements.cable import CableMixin, Cable
-from utils_ak.fluid_flow.elements.container import Container
+from utils_ak.fluid_flow.actors.cable import CableMixin, Cable
+from utils_ak.fluid_flow.actors.container import Container
 from utils_ak.fluid_flow.calculations import ERROR
 
 
