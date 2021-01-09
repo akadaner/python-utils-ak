@@ -28,7 +28,20 @@ def test_flow_2():
     run_flow(flow)
 
 
+def test_flow_3():
+    container1 = Container('Input')
+    container1.value = 100
+    container2 = ProcessingContainer('Ouput', processing_time=5, max_pressure_in=10, transformation_factor=2.)
+
+    pipe = Pipe('Pipe')
+    connect(container1, pipe)
+    connect(pipe, container2)
+    flow = FluidFlow(container1, verbose=True)
+    run_flow(flow)
+
+
 if __name__ == '__main__':
     configure_logging(stream_level=logging.INFO)
-    test_flow_1()
-    test_flow_2()
+    # test_flow_1()
+    # test_flow_2()
+    test_flow_3()
