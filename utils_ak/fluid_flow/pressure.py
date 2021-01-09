@@ -6,3 +6,4 @@ def calc_minimum_pressure(pressures):
     if all(np.isnan(p) for p in pressures):
         raise Exception('No pressures specified')
     return float(np.nanmin(pressures))
+

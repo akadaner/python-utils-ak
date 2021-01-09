@@ -1,3 +1,4 @@
+from utils_ak.dag import connect
 from utils_ak.fluid_flow.actor import Actor
 from utils_ak.fluid_flow.pressure import calc_minimum_pressure
 import numpy as np
@@ -68,3 +69,9 @@ class PipeMixin:
             return self.pipe('out').current_speed
         elif speed_type == 'drain':
             return self.speed('in') - self.speed('out')
+
+
+def pipe_together(node1, node2, pipe_name='Pipe'):
+    pipe = Pipe(pipe_name)
+    connect(node1, pipe)
+    connect(pipe, node2)

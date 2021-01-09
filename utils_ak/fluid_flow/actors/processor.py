@@ -86,7 +86,7 @@ class Processor(Actor, PipeMixin):
         return f'Processing Container: {self.id}'
 
     def stats(self):
-        return {'container_in': self._container_in.stats(), 'cable': self._pipe.stats(), 'container_out': self._container_out.stats()}
+        return {'container_in': self._container_in.stats(), 'pipe': self._pipe.stats(), 'container_out': self._container_out.stats()}
 
     def subscribe(self):
         self.event_manager.subscribe('processing_container.set_pressure', self.on_set_pressure)

@@ -11,6 +11,27 @@ class DAGNode:
             for child in self.oriented_children(orient):
                 child.reset_iteration_state(orient, with_children=True)
 
+    def leaves(self, orient='down'):
+        res = []
+        for node in self.iterate_as_tree(orient):
+            if not node.oriented_children(orient):
+                res.append(node)
+        return res
+
+    def top(self, orient='down', create_if_needed=True):
+        leaves = self.leaves(orient)
+
+        if len(leaves) == 1:
+            return leaves[0]  # top already exists
+
+        if create_if_needed:
+            top = DAGNode()
+            for leaf in leaves:
+                connect(leaf, top)
+            return top
+
+        raise Exception('Top not found')
+
     def root(self, orient='down'):
         cur_node = self
 
@@ -48,6 +69,25 @@ class DAGNode:
                 continue
             else:
                 break
+
+    @staticmethod
+    def _iter_node_as_tree_recursive(cur_node, orient='down'):
+        if cur_node.iteration_state['is_processed']:
+            return
+        else:
+            yield cur_node
+            cur_node.iteration_state['is_processed'] = True
+
+        for child in cur_node.oriented_children(orient):
+            for node in DAGNode._iter_node_as_tree_recursive(child, orient):
+                yield node
+
+    def iterate_as_tree(self, orient='down'):
+        assert not self.oriented_parents(orient), 'Can iterate only from root node'
+        self.reset_iteration_state(orient, with_children=True)
+
+        for node in self._iter_node_as_tree_recursive(self):
+            yield node
 
 
 def connect(parent, child):
@@ -104,6 +144,25 @@ def test_dag_iteration():
         print('Processing orientation', orient)
         for node in [root_up, node1, node2, root_down]:
             print(node.root(orient))
+
+    print('Testing Leaves, top, iterate as tree')
+    root_up = NamedNode('root_up')
+    node1 = NamedNode('1')
+    node2 = NamedNode('2')
+
+    connect(root_up, node1)
+    connect(root_up, node2)
+    print(list(root_up.leaves()))
+    print(root_up.top())
+    print(root_up.top())
+    print(list(root_up.leaves()))
+
+    for node in root_up.iterate():
+        print(node)
+
+    for node in root_up.iterate_as_tree():
+        print(node)
+
 
 if __name__ == '__main__':
     test_dag_iteration()
