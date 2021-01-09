@@ -9,7 +9,7 @@ from utils_ak.fluid_flow.pressure import calc_minimum_pressure
 
 class ProcessingContainer(Actor, PipeMixin):
     def __init__(self, id=None, item_in='default', item_out='default',
-                 processing_time=5,
+                 processing_time=0,
                  transformation_factor=1.,
                  max_pressure_in=None, max_pressure_out=None):
         super().__init__(id)
@@ -44,10 +44,16 @@ class ProcessingContainer(Actor, PipeMixin):
             self.pipe('out').pressure_in = self.max_pressure_out
 
     def update_speed(self, ts):
+        if self.processing_time == 0:
+            # set new inner pressure at once
+            self._pipe.pressure_in = self.speed('in')
+        else:
+            # set inner pressure delayed with processing time
+            if self.last_pipe_speed != self.speed('in'):
+                self.add_event('processing_container.set_pressure', ts + self.processing_time, {'pressure': self.speed('in')})
+                self.last_pipe_speed = self.speed('in')
+
         self._pipe.update_speed(ts)
-        if self.last_pipe_speed != self.speed('in'):
-            self.add_event('processing_container.set_pressure', ts + self.processing_time, {'pressure': self.speed('in')})
-            self.last_pipe_speed = self.speed('in')
 
         if self.pipe('out') and abs(self._container_out.value) < ERROR:
             self.pipe('out').pressure_in = calc_minimum_pressure([self.pipe('out').pressure_in, self._pipe.current_speed])
