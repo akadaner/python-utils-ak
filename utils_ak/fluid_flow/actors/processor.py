@@ -41,12 +41,13 @@ class Processor(Actor, PipeMixin):
         self._container_out.value += (ts - self.last_ts) * self._pipe.current_speed * self.transformation_factor
         self._container_out.value -= (ts - self.last_ts) * self.speed('out')
 
+        # close pressure asap
+        if self.pipe('in') and self.total_processed == self.processing_limit:
+            self.pipe('in').pressure_out = 0
+
     def update_pressure(self, ts):
-        if self.pipe('in'):
-            if self.total_processed == self.processing_limit:
-                self.pipe('in').pressure_out = 0
-            else:
-                self.pipe('in').pressure_out = self.max_pressure_in
+        if self.pipe('in') and self.total_processed != self.processing_limit:
+            self.pipe('in').pressure_out = self.max_pressure_in
 
         if self.pipe('out'):
             self.pipe('out').pressure_in = self.max_pressure_out

@@ -17,8 +17,8 @@ class Hub(Actor):
             left = total_output_pressure
 
             for pipe in self.parents:
-                pipe.pressure_out = min(left, pipe.pressure_in)
-                left -= min(left, pipe.pressure_in)
+                pipe.pressure_out = calc_minimum_pressure([left, pipe.pressure_in])
+                left -= calc_minimum_pressure([left, pipe.pressure_in])
 
     def update_speed(self, ts):
         assert all(isinstance(pipe, Pipe) for pipe in self.parents + self.children)

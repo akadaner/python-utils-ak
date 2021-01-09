@@ -51,14 +51,31 @@ def test_flow_5_processing_limit():
     run_flow(flow)
 
 
-def test_flow_6_hub():
+def test_flow_6_hub_1():
     container = Container('Input', max_pressure_out=20)
     container.value = 100
 
     hub = Hub('Hub')
 
-    processor1 = Processor('Output1')
-    processor2 = Processor('Output2')
+    processor1 = Processor('Output1', max_pressure_in=15)
+    processor2 = Processor('Output2', max_pressure_in=10)
+
+    pipe_together(container, hub, 'container-hub')
+    pipe_together(hub, processor1, 'hub-processor1')
+    pipe_together(hub, processor2, 'hub-processor2')
+
+    flow = FluidFlow(container, verbose=True)
+    run_flow(flow)
+
+
+def test_flow_6_hub_2():
+    container = Container('Input', max_pressure_out=20)
+    container.value = 100
+
+    hub = Hub('Hub')
+
+    processor1 = Processor('Output1', max_pressure_in=15, processing_limit=30)
+    processor2 = Processor('Output2', max_pressure_in=10)
 
     pipe_together(container, hub, 'container-hub')
     pipe_together(hub, processor1, 'hub-processor1')
@@ -70,10 +87,11 @@ def test_flow_6_hub():
 
 if __name__ == '__main__':
     configure_logging(stream_level=logging.INFO)
-    # test_flow_1()
-    # test_flow_2()
-    # test_flow_3()
-    # test_flow_4_zero_pressure()
-    # test_flow_5_processing_limit()
-    test_flow_6_hub()
+    test_flow_1()
+    test_flow_2()
+    test_flow_3()
+    test_flow_4_zero_pressure()
+    test_flow_5_processing_limit()
+    test_flow_6_hub_1()
+    test_flow_6_hub_2()
 
