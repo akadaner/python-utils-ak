@@ -52,6 +52,8 @@ class Container(Actor):
             return self.speed('in') - self.speed('out')
 
     def update_value(self, ts):
+        if not self.last_ts:
+            return
         self.value += (ts - self.last_ts) * self.speed('in')
         self.value -= (ts - self.last_ts) * self.speed('out')
 
@@ -95,67 +97,78 @@ class Cable(Actor):
         assert len(self.children) == 1
         return self.children[0]
 
-    def update_speed(self):
+    def update_speed(self, ts):
         pressures = [self.pressure_in, self.pressure_out]
         pressures = [p if p is not None else np.nan for p in pressures]
-        if all(p == np.nan for p in pressures):
+        if all(np.isnan(p) for p in pressures):
             raise Exception('No pressures specified')
         self.current_speed = np.nanmin(pressures)
 
     def __str__(self):
         return f'Cable {self.id}'
 
+def test_primitive_flow():
+    class PrimitiveFlow:
+        def __init__(self):
+            container1 = Container('Input')
+            container1.value = 100
+            container2 = Container('Ouput')
+            cable = Cable('Cable')
 
-class PrimitiveFlow:
-    def __init__(self):
-        container1 = Container()
-        container1.value = 100
-        container2 = Container()
-        cable = Cable()
+            connect(container1, cable)
+            connect(cable, container2)
 
-        connect(container1, cable)
-        connect(cable, container2)
+            self.root = container1
 
-        self.root = container1
+        def __str__(self):
+            values = ['Primitive Flow']
+            for node in self.root.iterate('down'):
+                if isinstance(node, Container):
+                    values.append(' ' * 4 + ', '.join([str(x) for x in [node.last_ts, node, node.value]]))
+                elif isinstance(node, Cable):
+                    values.append(' ' * 4 + ', '.join([str(x) for x in [node.last_ts, node, node.pressure_in, node.pressure_out, node.current_speed]]))
+            return '\n'.join(values)
 
-    def print_current_flow(self):
-        for node in self.root.iterate('down'):
-            if isinstance(node, Container):
-                print(cast_datetime(node.last_ts), node, node.value)
-            elif isinstance(node, Cable):
-                print(cast_datetime(node.last_ts), node, node.pressure_in, node.pressure_out, node.current_speed)
+        def update(self, ts, topic, event):
+            print('Processing time', ts)
 
-    def update(self, ts, topic, event):
-        print('Processing time', ts)
+            print('Updating value')
+            for node in self.root.iterate('down'):
+                getattr(node, 'update_value', lambda ts: None)(ts)
+            print(self)
 
-        print('Updating value')
-        for node in self.root.iterate('down'):
-            getattr(node, 'update_value', lambda ts: None)(ts)
-        self.print_current_flow()
+            print('Updating pressure')
+            for node in self.root.iterate('down'):
+                getattr(node, 'update_pressure', lambda ts: None)(ts)
+            print(self)
 
-        print('Updating pressure')
-        for node in self.root.iterate('down'):
-            getattr(node, 'update_pressure', lambda ts: None)(ts)
-        self.print_current_flow()
+            print('Updating speed')
+            for node in self.root.iterate('down'):
+                getattr(node, 'update_speed', lambda ts: None)(ts)
+            print(self)
 
-        print('Updating speed')
-        for node in self.root.iterate('down'):
-            getattr(node, 'update_speed', lambda ts: None)(ts)
-        self.print_current_flow()
+            print('Updating triggers')
+            for node in self.root.iterate('down'):
+                getattr(node, 'update_triggers', lambda ts: None)(ts)
+            print(self)
 
-        print('Updating triggers')
-        for node in self.root.iterate('down'):
-            getattr(node, 'update_triggers', lambda ts: None)(ts)
-        self.print_current_flow()
+            print('Updating last ts')
+            for node in self.root.iterate('down'):
+                getattr(node, 'update_last_ts', lambda ts: None)(ts)
+            print(self)
 
-        print('Updating last ts')
-        for node in self.root.iterate('down'):
-            getattr(node, 'update_last_ts', lambda ts: None)(ts)
-        self.print_current_flow()
+    import warnings
+    warnings.filterwarnings("ignore")
+
+    flow = PrimitiveFlow()
+    print(flow)
+    flow.update(0, 'update', {})
+    flow.update(1, 'update', {})
+    # EVENT_MANAGER.subscribe('update', flow.update)
+    # today_ts = int(custom_round(cast_ts(datetime.now()), 24 * 3600))
+    # EVENT_MANAGER.add_event(0, 'update', {})
+    # EVENT_MANAGER.run()
 
 
-flow = PrimitiveFlow()
-EVENT_MANAGER.subscribe('update', flow.update)
-today_ts = int(customs_round(cast_ts(datetime.now()), 24 * 3600))
-# EVENT_MANAGER.add_event(today_ts, 'update', {})
-# EVENT_MANAGER.run()
+if __name__ == '__main__':
+    test_primitive_flow()
