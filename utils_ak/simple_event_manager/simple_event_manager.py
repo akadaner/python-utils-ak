@@ -16,7 +16,7 @@ class SimpleEventManager:
             if self.is_event_present(topic, ts, event):
                 return False
         self.events.add((topic, ts, event))
-        return True
+        return topic, ts, event
 
     def is_event_present(self, topic, ts, event, ts_error=1e-5):
         if not self.events:
