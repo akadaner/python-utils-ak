@@ -32,6 +32,3 @@ class Hub(Actor):
 
     def __str__(self):
         return f'Hub: {self.id}'
-
-    def stats(self):
-        return {}

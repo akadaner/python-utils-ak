@@ -60,9 +60,9 @@ def test_flow_6_hub():
     processor1 = Processor('Output1')
     processor2 = Processor('Output2')
 
-    pipe_together(container, hub)
-    pipe_together(hub, processor1)
-    pipe_together(hub, processor2)
+    pipe_together(container, hub, 'container-hub')
+    pipe_together(hub, processor1, 'hub-processor1')
+    pipe_together(hub, processor2, 'hub-processor2')
 
     flow = FluidFlow(container, verbose=True)
     run_flow(flow)

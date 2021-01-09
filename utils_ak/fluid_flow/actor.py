@@ -20,3 +20,6 @@ class Actor(DAGNode):
 
     def subscribe(self):
         pass
+
+    def stats(self):
+        return {}

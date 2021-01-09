@@ -1,12 +1,23 @@
 import logging
 
+from utils_ak.dag import *
 from utils_ak.serialization import cast_js
 from utils_ak.simple_event_manager import SimpleEventManager
+
+from utils_ak.fluid_flow.actor import Actor
+from utils_ak.fluid_flow.actors import pipe_together, Stub
 
 
 class FluidFlow:
     def __init__(self, root, verbose=False):
         self.root = root
+
+        # create top if needed
+        if len(self.root.leaves()) > 1:
+            top = Stub('Top')
+            for i, leaf in enumerate(self.root.leaves()):
+                pipe_together(leaf, top, f'Top parent {i}')
+
         self.verbose = verbose
         self.logger = logging.getLogger()
 
