@@ -52,7 +52,10 @@ class SimpleVector:
     def __setitem__(self, index, value):
         self.values[index] = value
 
-if __name__ == '__main__':
+def test_simple_vector():
     v1 = SimpleVector([1, 2])
     v2 = SimpleVector([3, 5])
     print(v1 + v2, v1 - v2)
+
+if __name__ == '__main__':
+    test_simple_vector()

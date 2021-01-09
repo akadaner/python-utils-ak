@@ -22,9 +22,10 @@ class Actor(DAGNode):
 
 
 class Container(Actor):
-    def __init__(self, id=None):
+    def __init__(self, id=None, max_pressure=None):
         super().__init__(id)
         self.value = 0
+        self.max_pressure_out = max_pressure
 
     def cable(self, orient):
         assert orient in ['in', 'out']
@@ -52,7 +53,7 @@ class Container(Actor):
             return self.speed('in') - self.speed('out')
 
     def update_value(self, ts):
-        if not self.last_ts:
+        if self.last_ts is None:
             return
         self.value += (ts - self.last_ts) * self.speed('in')
         self.value -= (ts - self.last_ts) * self.speed('out')
@@ -61,16 +62,16 @@ class Container(Actor):
         if self.cable('out'):
             input_speed = self.speed('in')
 
-            if self.value == 0:
-                self.cable('out').pressure_in = input_speed
+            if abs(self.value) < ERROR:
+                self.cable('out').pressure_in = min(self.max_pressure_out, input_speed)
             else:
-                self.cable('out').pressure_in = None  # infinite speed allowed
+                self.cable('out').pressure_in = self.max_pressure_out
 
     def update_triggers(self, ts):
         # trigger when current value is finished with current speed
-        if self.speed('drain') < 0:
-            eta = self.value / self.speed('drain')
-            EVENT_MANAGER.add_event(ts + eta, 'update.trigger', {})
+        if self.value > ERROR and self.speed('drain') < -ERROR:
+            eta = self.value / abs(self.speed('drain'))
+            EVENT_MANAGER.add_event('update.trigger', ts + eta, {})
 
     def __str__(self):
         return f'Container {self.id}'
@@ -107,10 +108,11 @@ class Cable(Actor):
     def __str__(self):
         return f'Cable {self.id}'
 
+
 def test_primitive_flow():
     class PrimitiveFlow:
         def __init__(self):
-            container1 = Container('Input')
+            container1 = Container('Input', max_pressure=50)
             container1.value = 100
             container2 = Container('Ouput')
             cable = Cable('Cable')
@@ -129,7 +131,7 @@ def test_primitive_flow():
                     values.append(' ' * 4 + ', '.join([str(x) for x in [node.last_ts, node, node.pressure_in, node.pressure_out, node.current_speed]]))
             return '\n'.join(values)
 
-        def update(self, ts, topic, event):
+        def update(self, topic, ts, event):
             print('Processing time', ts)
 
             print('Updating value')
@@ -156,18 +158,16 @@ def test_primitive_flow():
             for node in self.root.iterate('down'):
                 getattr(node, 'update_last_ts', lambda ts: None)(ts)
             print(self)
+            print()
 
     import warnings
     warnings.filterwarnings("ignore")
 
     flow = PrimitiveFlow()
-    print(flow)
-    flow.update(0, 'update', {})
-    flow.update(1, 'update', {})
-    # EVENT_MANAGER.subscribe('update', flow.update)
+    EVENT_MANAGER.subscribe('update', flow.update)
     # today_ts = int(custom_round(cast_ts(datetime.now()), 24 * 3600))
-    # EVENT_MANAGER.add_event(0, 'update', {})
-    # EVENT_MANAGER.run()
+    EVENT_MANAGER.add_event('update', 0, {})
+    EVENT_MANAGER.run()
 
 
 if __name__ == '__main__':

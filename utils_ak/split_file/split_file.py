@@ -40,8 +40,7 @@ class SplitFile:
         suffix = '_{}'.format(max(cur_indexes) + 1)
         return os.path.splitext(self.fn)[0] + suffix + os.path.splitext(self.fn)[-1]
 
-
-if __name__ == '__main__':
+def test_split_file():
     sf = SplitFile('test.csv')
     print(sf.list(), sf.get_indexes(), sf.get_current(), sf.get_new())
     with open(sf.get_new(), 'w') as f:
@@ -54,3 +53,6 @@ if __name__ == '__main__':
     for fn in sf.list():
         print('Removing', fn)
         os.remove(fn)
+
+if __name__ == '__main__':
+    test_split_file()
