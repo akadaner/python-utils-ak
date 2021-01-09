@@ -1,7 +1,7 @@
-from utils_ak.serialization import cast_js
-
-from utils_ak.fluid_flow.event_manager import SimpleEventManager
 import logging
+
+from utils_ak.serialization import cast_js
+from utils_ak.simple_event_manager import SimpleEventManager
 
 
 class FluidFlow:
@@ -11,7 +11,7 @@ class FluidFlow:
         self.logger = logging.getLogger()
 
     def __str__(self):
-        values = ['Primitive Flow']
+        values = ['Flow:']
         for node in self.root.iterate('down'):
             values.append(' ' * 4 + str(node) + ': ' + cast_js(node.stats()))
         return '\n'.join(values)
@@ -63,4 +63,3 @@ def run_flow(flow):
     event_manager.subscribe('', flow.update)
     event_manager.add_event('update', 0, {})
     event_manager.run()
-
