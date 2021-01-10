@@ -1,7 +1,11 @@
 import sys
 from decimal import Decimal
 from datetime import datetime
+import numpy as np
 import os
+
+from utils_ak.numeric import is_int, is_float
+
 
 # ultimate json tool for convenient json handling and stuff
 
@@ -28,6 +32,10 @@ class JsonEncoder(json.JSONEncoder):
             return str(obj)
         elif isinstance(obj, datetime):
             return str(obj)
+        elif is_int(obj):
+            return int(obj)
+        elif is_float(obj):
+            return float(obj)
         else:
             return super().default(obj)
 

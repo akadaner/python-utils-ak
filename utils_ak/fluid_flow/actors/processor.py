@@ -5,88 +5,88 @@ from utils_ak.fluid_flow.actors.pipe import *
 from utils_ak.fluid_flow.actors.container import Container
 from utils_ak.fluid_flow.calculations import *
 
+from functools import wraps
+
+
+def connector(f):
+    @wraps(f)
+    def inner(self, *args, **kwargs):
+        if self.pipe('in'):
+            pipe_in = self.pipe('in')
+            disconnect(pipe_in, self)
+            connect(pipe_in, self.containers['in'])
+        if self.pipe('out'):
+            pipe_out = self.pipe('out')
+            disconnect(self, pipe_out)
+            connect(self.containers['out'], pipe_out)
+
+        res = f(self, *args, **kwargs)
+
+        if self.containers['in'].pipe('in'):
+            pipe_in = self.containers['in'].pipe('in')
+            disconnect(pipe_in, self.containers['in'])
+            connect(pipe_in, self)
+        if self.containers['out'].pipe('out'):
+            pipe_out = self.containers['out'].pipe('out')
+            disconnect(self.containers['out'], pipe_out)
+            connect(self, pipe_out)
+        return res
+    return inner
+
 
 class Processor(Actor, PipeMixin):
-    def __init__(self, id=None, item_in='default', item_out='default',
-                 processing_time=0,
-                 processing_limit=None,
-                 transformation_factor=1.,
-                 max_pressure_in=None, max_pressure_out=None):
+    def __init__(self, id, containers, processing_time=0, transformation_factor=1):
         super().__init__(id)
+        self.containers = containers
+        self._pipe = pipe_together(containers['in'], containers['out'])
         self.processing_time = processing_time
-        self.processing_limit = processing_limit
-        self.transformation_factor = transformation_factor
-
-        self._container_in = Container(item_in)
-        self._pipe = Pipe()
-        self._pipe.pressure_in = 0
-        self._container_out = Container(item_out)
-
-        pipe_together(self._container_in, self._container_out, self._pipe)
-
-        self.max_pressure_in = max_pressure_in
-        self.max_pressure_out = max_pressure_out
 
         self.last_pipe_speed = None
-
-        self.total_processed = 0
-
-    def update_value(self, ts):
-        if self.last_ts is None:
-            return
-        self._container_in.value += (ts - self.last_ts) * self.speed('in')
-        self.total_processed += (ts - self.last_ts) * self.speed('in')
-        self._container_in.value -= (ts - self.last_ts) * self._pipe.current_speed
-        self._container_out.value += (ts - self.last_ts) * self._pipe.current_speed * self.transformation_factor
-        self._container_out.value -= (ts - self.last_ts) * self.speed('out')
-
-        # close pressure asap
-        if self.pipe('in') and self.total_processed == self.processing_limit:
-            self.pipe('in').pressure_out = 0
-
-    def update_pressure(self, ts):
-        if self.pipe('in') and self.total_processed != self.processing_limit:
-            self.pipe('in').pressure_out = self.max_pressure_in
-
-        if self.pipe('out'):
-            self.pipe('out').pressure_in = self.max_pressure_out
-
-    def update_speed(self, ts):
-        if self.processing_time == 0:
-            # set new inner pressure at once
-            self._pipe.pressure_in = self.speed('in')
-        else:
-            # set inner pressure delayed with processing time
-            if self.last_pipe_speed != self.speed('in'):
-                self.add_event('processing_container.set_pressure', ts + self.processing_time, {'pressure': self.speed('in')})
-                self.last_pipe_speed = self.speed('in')
-
-        self._pipe.update_speed(ts)
-
-        if self.pipe('out') and abs(self._container_out.value) < ERROR:
-            self.pipe('out').pressure_in = nanmin([self.pipe('out').pressure_in, self._pipe.current_speed])
+        self.transformation_factor = transformation_factor
 
     def on_set_pressure(self, topic, ts, event):
         self._pipe.pressure_in = event['pressure']
 
-    def update_triggers(self, ts):
-        speed_drain = self._pipe.current_speed - self.speed('out')
-        if self._container_out.value > ERROR and speed_drain < -ERROR:
-            # trigger when current value is finished with current speed
-            eta = self._container_out.value / abs(speed_drain)
-            self.add_event('update.trigger.empty_container', ts + eta, {})
+    def subscribe(self):
+        self.event_manager.subscribe('processing_container.set_pressure', self.on_set_pressure)
 
-        if self.processing_limit and self.speed('in') > ERROR:
-            # trigger when processing limit is filled
-            value_left = self.processing_limit - self.total_processed
-            eta = value_left / self.speed('in')
-            self.add_event('update.trigger.filled_limit', ts + eta, {})
+    @connector
+    def update_value(self, ts):
+        for node in [self.containers['in'], self.containers['out']]:
+            node.update_value(ts)
+
+    @connector
+    def update_pressure(self, ts):
+        for node in [self.containers['in'], self.containers['out']]:
+            node.update_pressure(ts)
+
+    @connector
+    def update_speed(self, ts):
+        self.containers['in'].update_speed(ts)
+        if self.processing_time == 0:
+            # set new inner pressure at once
+            self._pipe.pressure_in = self.speed('in') * self.transformation_factor
+        else:
+            # set inner pressure delayed with processing time
+            if self.last_pipe_speed != self.speed('in'):
+                self.add_event('processing_container.set_pressure', ts + self.processing_time, {'pressure': self.speed('in') * self.transformation_factor})
+                self.last_pipe_speed = self.speed('in') * self.transformation_factor
+        self._pipe.update_speed(ts)
+
+        self.containers['out'].update_speed(ts)
+
+    @connector
+    def update_triggers(self, ts):
+        for node in [self.containers['in'], self.containers['out']]:
+            node.update_triggers(ts)
+
+    @connector
+    def update_last_ts(self, ts):
+        for node in [self.containers['in'], self._pipe, self.containers['out']]:
+            node.update_last_ts(ts)
 
     def __str__(self):
         return f'Processing Container: {self.id}'
 
     def stats(self):
-        return {'container_in': self._container_in.stats(), 'pipe': self._pipe.stats(), 'container_out': self._container_out.stats()}
-
-    def subscribe(self):
-        self.event_manager.subscribe('processing_container.set_pressure', self.on_set_pressure)
+        return {node.id: node.stats() for node in [self.containers['in'], self._pipe, self.containers['out']]}

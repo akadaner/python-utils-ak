@@ -39,13 +39,14 @@ class FluidFlow:
         self.log('Processing time', ts)
 
         for method in ['update_value', 'update_pressure', 'update_speed', 'update_triggers', 'update_last_ts']:
-            # self.log(f'Procedure {method}')
+            self.log(f'Procedure {method}')
             for node in self.root.iterate('down'):
                 getattr(node, method, lambda ts: None)(ts)
-            # self.log(self)
-        self.log(self)
+            self.log(self)
+        # self.log(self)
 
         self.log()
+
 
 
 def run_flow(flow):

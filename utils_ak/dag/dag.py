@@ -82,12 +82,16 @@ class DAGNode:
             yield node
 
 
-def connect(parent, child):
+def connect(parent, child, safe=True):
+    if safe and (not parent or not child):
+        return
     parent.children.append(child)
     child.parents.append(parent)
 
 
-def disconnect(parent, child):
+def disconnect(parent, child, safe=True):
+    if safe and (not parent or not child):
+        return
     parent.children.remove(child)
     child.parents.remove(parent)
 

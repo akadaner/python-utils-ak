@@ -1,4 +1,4 @@
-from utils_ak.dag import connect
+from utils_ak.dag import *
 from utils_ak.fluid_flow.actor import Actor
 from utils_ak.fluid_flow.calculations import *
 
@@ -69,7 +69,34 @@ class PipeMixin:
         return self.speed('in') - self.speed('out')
 
 
-def pipe_together(node1, node2, pipe='Pipe'):
-    pipe = cast_pipe(pipe)
+def pipe_together(node1, node2, pipe=None):
+    if not pipe:
+        pipe = cast_pipe(f'{node1} -> {node2}')
+    else:
+        pipe = cast_pipe(pipe)
     connect(node1, pipe)
     connect(pipe, node2)
+    return pipe
+
+
+def switch(node1, node2, orient='in'):
+    piped_nodes = [node for node in [node1, node2] if node.pipe(orient)]
+
+    if not piped_nodes:
+        return
+
+    if not node1.pipe(orient):
+        node1, node2 = node2, node1
+
+    pipe1, pipe2 = node1.pipe(orient), node2.pipe(orient)
+
+    if orient == 'in':
+        disconnect(pipe1, node1)
+        disconnect(pipe2, node2)
+        connect(pipe1, node2)
+        connect(pipe2, node1)
+    elif orient == 'out':
+        disconnect(node1, pipe1)
+        disconnect(node2, pipe2)
+        connect(node2, pipe1)
+        connect(node1, pipe2)

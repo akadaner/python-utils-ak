@@ -4,7 +4,7 @@ from utils_ak.fluid_flow.calculations import *
 
 
 class Hub(Actor):
-    def __init__(self, id=None):
+    def __init__(self, id):
         super().__init__(id)
 
     def update_pressure(self, ts):
@@ -26,8 +26,8 @@ class Hub(Actor):
         left = total_input_speed
 
         for pipe in self.children:
-            pipe.pressure_in = calc_minimum_pressure([left, pipe.pressure_out])
-            left -= calc_minimum_pressure([left, pipe.pressure_out])
+            pipe.pressure_in = nanmin([left, pipe.pressure_out])
+            left -= nanmin([left, pipe.pressure_out])
 
     def __str__(self):
         return f'Hub: {self.id}'

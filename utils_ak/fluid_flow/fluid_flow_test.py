@@ -4,6 +4,63 @@ import warnings
 warnings.filterwarnings("ignore")
 
 
+def test_pipe_switch_1():
+    ci1 = Container('I1')
+    ci2 = Container('I2')
+    co1 = Container('O1')
+    co2 = Container('O2')
+
+    pipe_together(ci1, co1, '1')
+    pipe_together(ci2, co2, '2')
+
+    for node in ci1.iterate():
+        print(node)
+    for node in ci2.iterate():
+        print(node)
+    print()
+
+    switch(co1, co2, 'in')
+
+    for node in ci1.iterate():
+        print(node)
+    for node in ci2.iterate():
+        print(node)
+    print()
+
+    switch(co1, co2, 'in')
+    for node in ci1.iterate():
+        print(node)
+    for node in ci2.iterate():
+        print(node)
+    print()
+
+    switch(ci1, ci2, 'out')
+
+    for node in ci1.iterate():
+        print(node)
+    for node in ci2.iterate():
+        print(node)
+    print()
+
+
+def test_pipe_switch_2():
+    ci1 = Container('I1')
+    co1 = Container('O1')
+    co2 = Container('O2')
+
+    pipe_together(ci1, co1)
+
+    for node in ci1.iterate():
+        print(node)
+    print()
+    switch(co1, co2, 'in')
+
+    for node in ci1.iterate():
+        print(node)
+    print()
+
+
+
 def test_flow_container_1():
     container1 = Container('Input', max_pressures=[0, 50])
     container1.value = 100
@@ -38,9 +95,14 @@ def test_flow_container_3():
 
 
 def test_flow_processor_1():
-    container = Container('Input', max_pressure_out=50)
+    container = Container('Input', max_pressures=[0, 10])
     container.value = 100
-    processor = Processor('Output')
+
+    containers = {}
+    containers['in'] = Container('In')
+    containers['out'] = Container('Out')
+    processor = Processor('Output', containers=containers)
+
     pipe_together(container, processor)
     flow = FluidFlow(container, verbose=True)
     run_flow(flow)
@@ -110,6 +172,10 @@ def test_flow_hub_2():
 
 if __name__ == '__main__':
     configure_logging(stream_level=logging.INFO)
-    test_flow_container_1()
-    test_flow_container_2()
-    test_flow_container_3()
+    test_pipe_switch_1()
+    test_pipe_switch_2()
+    # test_pipe_switch_3()
+    # test_flow_container_1()
+    # test_flow_container_2()
+    # test_flow_container_3()
+    # test_flow_processor_1()
