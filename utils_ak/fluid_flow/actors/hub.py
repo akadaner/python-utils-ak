@@ -1,7 +1,6 @@
 from utils_ak.fluid_flow.actor import Actor
 from utils_ak.fluid_flow.actors.pipe import PipeMixin, Pipe
-from utils_ak.fluid_flow.calculations import ERROR
-from utils_ak.fluid_flow.pressure import calc_minimum_pressure
+from utils_ak.fluid_flow.calculations import *
 
 
 class Hub(Actor):
@@ -17,8 +16,8 @@ class Hub(Actor):
             left = total_output_pressure
 
             for pipe in self.parents:
-                pipe.pressure_out = calc_minimum_pressure([left, pipe.pressure_in])
-                left -= calc_minimum_pressure([left, pipe.pressure_in])
+                pipe.pressure_out = nanmin([left, pipe.pressure_in])
+                left -= nanmin([left, pipe.pressure_in])
 
     def update_speed(self, ts):
         assert all(isinstance(pipe, Pipe) for pipe in self.parents + self.children)

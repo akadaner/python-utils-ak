@@ -3,8 +3,7 @@ from utils_ak.dag import *
 from utils_ak.fluid_flow.actor import Actor
 from utils_ak.fluid_flow.actors.pipe import *
 from utils_ak.fluid_flow.actors.container import Container
-from utils_ak.fluid_flow.calculations import ERROR
-from utils_ak.fluid_flow.pressure import calc_minimum_pressure
+from utils_ak.fluid_flow.calculations import *
 
 
 class Processor(Actor, PipeMixin):
@@ -65,7 +64,7 @@ class Processor(Actor, PipeMixin):
         self._pipe.update_speed(ts)
 
         if self.pipe('out') and abs(self._container_out.value) < ERROR:
-            self.pipe('out').pressure_in = calc_minimum_pressure([self.pipe('out').pressure_in, self._pipe.current_speed])
+            self.pipe('out').pressure_in = nanmin([self.pipe('out').pressure_in, self._pipe.current_speed])
 
     def on_set_pressure(self, topic, ts, event):
         self._pipe.pressure_in = event['pressure']

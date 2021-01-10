@@ -1,7 +1,6 @@
 from utils_ak.dag import connect
 from utils_ak.fluid_flow.actor import Actor
-from utils_ak.fluid_flow.pressure import calc_minimum_pressure
-
+from utils_ak.fluid_flow.calculations import *
 
 def cast_pipe(pipe_obj):
     if isinstance(pipe_obj, str):
@@ -16,7 +15,7 @@ class Pipe(Actor):
     def __init__(self, id=None):
         super().__init__(id)
         self.current_speed = 0
-        self.pressures = {'in': None, 'out': None}
+        self.pressures = {'out': None, 'in': None}
 
     @property
     def parent(self):
@@ -33,7 +32,7 @@ class Pipe(Actor):
         return self.children[0]
 
     def update_speed(self, ts):
-        self.current_speed = calc_minimum_pressure(self.pressures.values())
+        self.current_speed = nanmin(self.pressures.values())
 
     def __str__(self):
         return f'Pipe {self.id}'
@@ -44,7 +43,6 @@ class Pipe(Actor):
 
 class PipeMixin:
     def pipe(self, orient):
-        assert orient in ['in', 'out']
         if orient == 'in':
             nodes = self.parents
         elif orient == 'out':
@@ -56,19 +54,18 @@ class PipeMixin:
             assert len(nodes) == 1
             return nodes[0]
 
-    def speed(self, speed_type):
-        assert speed_type in ['in', 'out', 'drain']
-        if speed_type == 'in':
+    def speed(self, orient):
+        if orient == 'in':
             if not self.pipe('in'):
                 return 0
             return self.pipe('in').current_speed
-        elif speed_type == 'out':
+        elif orient == 'out':
             if not self.pipe('out'):
                 return 0
             return self.pipe('out').current_speed
-        elif speed_type == 'drain':
-            return self.speed('in') - self.speed('out')
 
+    def drain(self):
+        return self.speed('in') - self.speed('out')
 
 def pipe_together(node1, node2, pipe='Pipe'):
     pipe = cast_pipe(pipe)
