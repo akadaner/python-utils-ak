@@ -33,7 +33,10 @@ class Pipe(Actor):
         return self.children[0]
 
     def update_speed(self, ts):
-        self.current_speed = nanmin(self.pressures.values())
+        self.current_speed = nanmin(self.pressures.values(), require_any=False)
+
+        if np.isnan(self.current_speed):
+            self.current_speed = 0
 
     def __str__(self):
         return f'Pipe {self.id}'

@@ -42,6 +42,11 @@ class Processor(Actor, PipeMixin):
     def subscribe(self):
         self.event_manager.subscribe('processing_container.set_pressure', self.on_set_pressure)
 
+    def set_event_manager(self, event_manager):
+        self.event_manager = event_manager
+        for node in [self.containers['in'], self._pipe, self.containers['out']]:
+            node.set_event_manager(event_manager)
+
     @switch
     def update_value(self, ts):
         for node in [self.containers['in'], self.containers['out']]:
@@ -49,12 +54,13 @@ class Processor(Actor, PipeMixin):
 
     @switch
     def update_pressure(self, ts):
-        for node in [self.containers['in'], self.containers['out']]:
-            node.update_pressure(ts)
+        self.containers['in'].update_pressure(ts, orients=['in'])
+        self.containers['out'].update_pressure(ts, orients=['out'])
 
     @switch
     def update_speed(self, ts):
-        self.containers['in'].update_speed(ts)
+        self.containers['in'].update_speed(ts, set_out_pressure=False)
+
         if self.processing_time == 0:
             # set new inner pressure at once
             self._pipe.pressures['out'] = self.containers['in'].speed('in') * self.transformation_factor

@@ -28,18 +28,18 @@ class Container(Actor, PipeMixin):
         self.value -= (ts - self.last_ts) * self.speed('out')
         self.df.at['out', 'collected'] += (ts - self.last_ts) * self.speed('out')
 
-    def update_pressure(self, ts):
-        for orient in ['in', 'out']:
+    def update_pressure(self, ts, orients=('in', 'out')):
+        for orient in orients:
             if self.pipe(orient):
                 pressure = self.df.at[orient, 'max_pressure'] if not self.is_limit_reached(orient) else 0
                 self.pipe(orient).pressures[orient] = pressure
 
-    def update_speed(self, ts):
+    def update_speed(self, ts, set_out_pressure=True):
         input_speed = self.speed('in')
 
-        # set factual pressure for output
-        if self.pipe('out') and abs(self.value) < ERROR:
-            self.pipe('out').pressures['out'] = nanmin([self.pipe('out').pressures['out'], input_speed])
+        if set_out_pressure:
+            if self.pipe('out') and abs(self.value) < ERROR:
+                self.pipe('out').pressures['out'] = nanmin([self.pipe('out').pressures['out'], input_speed])
 
     def update_triggers(self, ts):
         values = []
