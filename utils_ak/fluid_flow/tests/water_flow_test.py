@@ -1,21 +1,23 @@
 from utils_ak.fluid_flow import *
 from utils_ak.block_tree import *
 
+
 def test_water_line_flow():
     drenator = Container('Drenator', value=1000, max_pressures=[None, None])
 
     melting1 = Processor('Melting1', max_pressures=[1000, 1000], processing_time=0, limits=[750, 750])
     melting2 = Processor('Melting2', max_pressures=[1000, 1000], processing_time=0, limits=[250, 250])
-    melting_queue = Queue('MeltingQueue', [melting1, melting2])
+    melting_queue = Queue('MeltingQueue', [melting1, melting2], break_funcs={'in': lambda old, new: 1})
 
-    cooling1 = Processor('Cooling1', max_pressures=[None, None], processing_time=1, limits=[750, 750])
-    cooling2 = Processor('Cooling2', max_pressures=[None, None], processing_time=1, limits=[250, 250])
+    cooling1 = Processor('Cooling1', max_pressures=[None, None], processing_time=0.5, limits=[750, 750])
+    cooling2 = Processor('Cooling2', max_pressures=[None, None], processing_time=0.5, limits=[250, 250])
     cooling_queue = Queue('CoolingQueue', [cooling1, cooling2])
 
     packing_hub = Hub('Hub')
 
-    packing1 = Processor('Packing1', max_pressures=[200, None], processing_time=0, limits=[1000, None])
-    packing_queue1 = Queue('PackingQueue1', [packing1])
+    packing1 = Processor('Packing1', max_pressures=[200, None], processing_time=0, limits=[200, None])
+    packing2 = Processor('Packing2', max_pressures=[400, None], processing_time=0, limits=[800, None])
+    packing_queue1 = Queue('PackingQueue1', [packing1, packing2])
 
     pipe_together(drenator, melting_queue, 'drenator-melting')
     pipe_together(melting_queue, cooling_queue, 'melting-cooling')

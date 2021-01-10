@@ -8,23 +8,27 @@ class SimpleBoundedIterator:
     def current(self):
         return self.lst[self.current_index]
 
-    def next(self, return_current_if_out=True):
+    def next(self, return_current_if_out=True, update_index=True):
         if self.current_index == len(self.lst) - 1:
             if return_current_if_out:
                 return self.current()
             else:
                 return
-        self.current_index += 1
-        return self.current()
+        res = self.lst[self.current_index + 1]
+        if update_index:
+            self.current_index += 1
+        return res
 
-    def prev(self, return_current_if_out=True):
+    def prev(self, return_current_if_out=True, update_index=True):
         if self.current_index == 0:
             if return_current_if_out:
                 return self.current()
             else:
                 return
-        self.current_index -= 1
-        return self.current()
+        res = self.lst[self.current_index - 1]
+        if update_index:
+            self.current_index -= 1
+        return res
 
     def iter(self, direction='up'):
         yield self.current()
