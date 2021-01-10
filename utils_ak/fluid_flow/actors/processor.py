@@ -46,7 +46,7 @@ class Processor(Actor, PipeMixin):
         self._pipe.pressures['out'] = event['pressure']
 
     def subscribe(self):
-        self.event_manager.subscribe('processor.set_pressure', self.on_set_pressure)
+        self.event_manager.subscribe(f'processor.set_pressure.{self.id}', self.on_set_pressure)
 
     @switch
     def update_value(self, ts):
@@ -68,7 +68,7 @@ class Processor(Actor, PipeMixin):
         else:
             # set inner pressure delayed with processing time
             if self.last_pipe_speed != self.containers['in'].speed('in'):
-                self.add_event('processor.set_pressure', ts + self.processing_time, {'pressure': self.containers['in'].speed('in')})
+                self.add_event(f'processor.set_pressure.{self.id}', ts + self.processing_time, {'pressure': self.containers['in'].speed('in')})
                 self.last_pipe_speed = self.containers['in'].speed('in')
 
         self._pipe.update_speed(ts)

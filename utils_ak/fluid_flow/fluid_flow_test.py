@@ -198,9 +198,9 @@ def test_flow_queue_3():
     parent.value = 100
 
     child1 = Processor('Child1', max_pressures=[20, None], processing_time=5, limits=[40, None])
-    # child2 = Processor('Child2', max_pressures=[10, None], processing_time=5, limits=[50, None])
+    child2 = Processor('Child2', max_pressures=[10, None], processing_time=5, limits=[50, None])
 
-    queue = Queue('Queue', [child1])
+    queue = Queue('Queue', [child1, child2])
 
     pipe_together(parent, queue, 'parent-queue')
 
