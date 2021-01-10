@@ -45,14 +45,14 @@ class Container(Actor, PipeMixin):
         for orient in orients:
             if self.pipe(orient):
                 pressure = self.df.at[orient, 'max_pressure'] if not self.is_limit_reached(orient) else 0
-                self.pipe(orient).pressures[orient] = pressure
+                self.pipe(orient).set_pressure(orient, pressure, self.item)
 
     def update_speed(self, ts, set_out_pressure=True):
         input_speed = self.speed('in')
 
         if set_out_pressure:
             if self.pipe('out') and abs(self.value) < ERROR:
-                self.pipe('out').pressures['out'] = nanmin([self.pipe('out').pressures['out'], input_speed])
+                self.pipe('out').set_pressure('out', nanmin([self.pipe('out').pressures['out'], input_speed]), self.item)
 
     def update_triggers(self, ts):
         values = []

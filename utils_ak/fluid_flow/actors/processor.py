@@ -44,7 +44,7 @@ class Processor(Actor, PipeMixin):
         return [self.containers['in'], self._pipe, self.containers['out']]
 
     def on_set_pressure(self, topic, ts, event):
-        self._pipe.pressures['out'] = event['pressure']
+        self._pipe.set_pressure('out', event['pressure'], event['item'])
 
     def subscribe(self):
         self.event_manager.subscribe(f'processor.set_pressure.{self.id}', self.on_set_pressure)
@@ -65,11 +65,11 @@ class Processor(Actor, PipeMixin):
 
         if self.processing_time == 0:
             # set new inner pressure at once
-            self._pipe.pressures['out'] = self.containers['in'].speed('in')
+            self._pipe.set_pressure('out', self.containers['in'].speed('in'), self.containers['out'].item)
         else:
             # set inner pressure delayed with processing time
             if self.last_pipe_speed != self.containers['in'].speed('in'):
-                self.add_event(f'processor.set_pressure.{self.id}', ts + self.processing_time, {'pressure': self.containers['in'].speed('in')})
+                self.add_event(f'processor.set_pressure.{self.id}', ts + self.processing_time, {'pressure': self.containers['in'].speed('in'), 'item': self.containers['out'].item})
                 self.last_pipe_speed = self.containers['in'].speed('in')
 
         self._pipe.update_speed(ts)

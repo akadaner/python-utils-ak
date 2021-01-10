@@ -16,6 +16,7 @@ class Pipe(Actor):
     def __init__(self, id=None):
         super().__init__(id)
         self.current_speed = 0
+        self.current_item = None
         self.pressures = {'out': None, 'in': None}
 
     @property
@@ -44,6 +45,9 @@ class Pipe(Actor):
     def stats(self):
         return {'current_speed': self.current_speed, 'pressures': self.pressures}
 
+    def set_pressure(self, orient, pressure, item):
+        self.pressures[orient] = pressure
+        self.current_item = item
 
 class PipeMixin:
     def pipe(self, orient):
