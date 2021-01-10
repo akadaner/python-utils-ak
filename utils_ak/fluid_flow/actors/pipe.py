@@ -88,9 +88,6 @@ def pipe_switch(node1, node2, orient='in'):
     if not piped_nodes:
         return
 
-    if not node1.pipe(orient):
-        node1, node2 = node2, node1
-
     pipe1, pipe2 = node1.pipe(orient), node2.pipe(orient)
 
     if orient == 'in':
