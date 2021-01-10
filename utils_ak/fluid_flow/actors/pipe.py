@@ -76,7 +76,7 @@ class PipeMixin:
         return self.speed('in') - self.speed('out')
 
 
-def pipe_together(node1, node2, pipe=None):
+def pipe_connect(node1, node2, pipe=None):
     if not pipe:
         pipe = cast_pipe(f'{node1} -> {node2}')
     else:
@@ -84,6 +84,19 @@ def pipe_together(node1, node2, pipe=None):
     connect(node1, pipe)
     connect(pipe, node2)
     return pipe
+
+
+def pipe_disconnect(node1, node2):
+    # find commmon pipe
+    input_pipes = [node for node in node1.children if isinstance(node, Pipe)]
+    output_pipes = [node for node in node2.parents if isinstance(node, Pipe)]
+
+    intersection = set(input_pipes) & set(output_pipes)
+
+    assert len(intersection) > 0
+    for pipe in intersection:
+        disconnect(node1, pipe)
+        disconnect(pipe, node2)
 
 
 def pipe_switch(node1, node2, orient='in'):

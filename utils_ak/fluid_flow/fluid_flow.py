@@ -5,7 +5,7 @@ from utils_ak.serialization import cast_js
 from utils_ak.simple_event_manager import SimpleEventManager
 
 from utils_ak.fluid_flow.actor import Actor
-from utils_ak.fluid_flow.actors import pipe_together, Stub
+from utils_ak.fluid_flow.actors import pipe_connect, Stub
 
 
 class FluidFlow:
@@ -16,7 +16,7 @@ class FluidFlow:
         if len(self.root.leaves()) > 1:
             top = Stub('Top')
             for i, leaf in enumerate(self.root.leaves()):
-                pipe_together(leaf, top, f'Top parent {i}')
+                pipe_connect(leaf, top, f'Top parent {i}')
 
         self.verbose = verbose
         self.logger = logging.getLogger()

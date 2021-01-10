@@ -37,3 +37,8 @@ class Actor(DAGNode):
 
     def active_periods(self):
         return []
+
+    def reset(self):
+        self.last_ts = None
+        for actor in self.inner_actors():
+            actor.reset()

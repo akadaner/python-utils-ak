@@ -54,6 +54,10 @@ class Container(Actor, PipeMixin):
             if self.pipe('out') and abs(self.value) < ERROR:
                 self.pipe('out').set_pressure('out', nanmin([self.pipe('out').pressures['out'], input_speed]), self.item)
 
+    def reset(self):
+        super().reset()
+        self.transactions = []
+
     def update_triggers(self, ts):
         values = []
         if self.drain() < 0:

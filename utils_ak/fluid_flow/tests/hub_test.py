@@ -10,9 +10,9 @@ def test_flow_hub_1():
     child1 = Container('Child1', max_pressures=[15, None])
     child2 = Container('Child2', max_pressures=[10, None])
 
-    pipe_together(parent, hub, 'parent-hub')
-    pipe_together(hub, child1, 'hub-child1')
-    pipe_together(hub, child2, 'hub-child2')
+    pipe_connect(parent, hub, 'parent-hub')
+    pipe_connect(hub, child1, 'hub-child1')
+    pipe_connect(hub, child2, 'hub-child2')
 
     flow = FluidFlow(parent, verbose=True)
     run_flow(flow)
@@ -26,9 +26,9 @@ def test_flow_hub_2():
     child1 = Processor('Child1', max_pressures=[15, None], limits=[30, None])
     child2 = Processor('Child2', max_pressures=[10, None])
 
-    pipe_together(parent, hub, 'parent-hub')
-    pipe_together(hub, child1, 'hub-child1')
-    pipe_together(hub, child2, 'hub-child2')
+    pipe_connect(parent, hub, 'parent-hub')
+    pipe_connect(hub, child1, 'hub-child1')
+    pipe_connect(hub, child2, 'hub-child2')
 
     flow = FluidFlow(parent, verbose=True)
     run_flow(flow)
@@ -42,9 +42,9 @@ def test_flow_hub_3():
     child1 = Container('Child1', item='b', max_pressures=[15, None])
     child2 = Container('Child2', item='a', max_pressures=[10, None])
 
-    pipe_together(parent, hub, 'parent-hub')
-    pipe_together(hub, child1, 'hub-child1')
-    pipe_together(hub, child2, 'hub-child2')
+    pipe_connect(parent, hub, 'parent-hub')
+    pipe_connect(hub, child1, 'hub-child1')
+    pipe_connect(hub, child2, 'hub-child2')
 
     flow = FluidFlow(parent, verbose=True)
     run_flow(flow)

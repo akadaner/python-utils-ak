@@ -9,7 +9,7 @@ def test_flow_queue_1_in():
 
     queue = Queue('Queue', [child1, child2])
 
-    pipe_together(parent, queue, 'parent-queue')
+    pipe_connect(parent, queue, 'parent-queue')
 
     flow = FluidFlow(parent, verbose=True)
     run_flow(flow)
@@ -21,7 +21,7 @@ def test_flow_queue_2_out():
     queue = Queue('Parent', [parent1, parent2])
 
     child = Container('Child', max_pressures=[None, None])
-    pipe_together(queue, child, 'parent-queue')
+    pipe_connect(queue, child, 'parent-queue')
 
     flow = FluidFlow(queue, verbose=True)
     run_flow(flow)
@@ -35,7 +35,7 @@ def test_flow_queue_3():
 
     queue = Queue('Queue', [child1, child2])
 
-    pipe_together(parent, queue, 'parent-queue')
+    pipe_connect(parent, queue, 'parent-queue')
 
     flow = FluidFlow(parent, verbose=True)
     run_flow(flow)
@@ -50,9 +50,9 @@ def test_flow_queue_4_different_items():
     child1 = Container('Child1', item='a', max_pressures=[None, None])
     child2 = Container('Child2', item='b', max_pressures=[None, None])
 
-    pipe_together(queue, hub, 'parent-hub')
-    pipe_together(hub, child1, 'hub-child1')
-    pipe_together(hub, child2, 'hub-child2')
+    pipe_connect(queue, hub, 'parent-hub')
+    pipe_connect(hub, child1, 'hub-child1')
+    pipe_connect(hub, child2, 'hub-child2')
     flow = FluidFlow(queue, verbose=True)
     run_flow(flow)
 

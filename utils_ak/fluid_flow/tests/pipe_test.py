@@ -8,8 +8,8 @@ def test_pipe_switch_1():
     co1 = Container('O1')
     co2 = Container('O2')
 
-    pipe_together(ci1, co1, '1')
-    pipe_together(ci2, co2, '2')
+    pipe_connect(ci1, co1, '1')
+    pipe_connect(ci2, co2, '2')
 
     for node in ci1.iterate():
         print(node)
@@ -48,7 +48,7 @@ def test_pipe_switch_2():
     co1 = Container('O1')
     co2 = Container('O2')
 
-    pipe_together(ci1, co1)
+    pipe_connect(ci1, co1)
 
     for node in ci1.iterate():
         print(node)

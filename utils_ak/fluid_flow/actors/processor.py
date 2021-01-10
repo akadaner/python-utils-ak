@@ -31,7 +31,7 @@ class Processor(Actor, PipeMixin):
         items = items or ['default', 'default']
         self.containers = {'in': Container('In', item=items[0], max_pressures=(max_pressures[0], None), limits=(limits[0], None)),
                            'out': Container('Out', item=items[1], max_pressures=(None, max_pressures[1]), limits=(None, limits[1]))}
-        self._pipe = pipe_together(self.containers['in'], self.containers['out'], '_pipe')
+        self._pipe = pipe_connect(self.containers['in'], self.containers['out'], '_pipe')
         self.processing_time = processing_time
 
         self.last_pipe_speed = None
