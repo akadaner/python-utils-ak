@@ -40,7 +40,25 @@ def test_flow_queue_3():
     flow = FluidFlow(parent, verbose=True)
     run_flow(flow)
 
+
+def test_flow_queue_4_different_items():
+    parent1 = Container('Parent1', item='a', value=100, max_pressures=[None, 10], limits=[None, 100])
+    parent2 = Container('Parent2', item='b', value=100, max_pressures=[None, 20], limits=[None, 100])
+    queue = Queue('Parent', [parent1, parent2])
+
+    hub = Hub('hub')
+    child1 = Container('Child1', item='a', max_pressures=[None, None])
+    child2 = Container('Child2', item='b', max_pressures=[None, None])
+
+    pipe_together(queue, hub, 'parent-hub')
+    pipe_together(hub, child1, 'hub-child1')
+    pipe_together(hub, child2, 'hub-child2')
+    flow = FluidFlow(queue, verbose=True)
+    run_flow(flow)
+
+
 if __name__ == '__main__':
-    test_flow_queue_1_in()
-    test_flow_queue_2_out()
-    test_flow_queue_3()
+    # test_flow_queue_1_in()
+    # test_flow_queue_2_out()
+    # test_flow_queue_3()
+    test_flow_queue_4()
