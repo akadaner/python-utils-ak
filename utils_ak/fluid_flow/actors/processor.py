@@ -36,16 +36,17 @@ class Processor(Actor, PipeMixin):
         self.last_pipe_speed = None
         self.transformation_factor = transformation_factor
 
+    def is_limit_reached(self, orient):
+        return self.containers[orient].is_limit_reached(orient)
+
+    def inner_actors(self):
+        return [self.containers['in'], self._pipe, self.containers['out']]
+
     def on_set_pressure(self, topic, ts, event):
         self._pipe.pressures['out'] = event['pressure']
 
     def subscribe(self):
         self.event_manager.subscribe('processing_container.set_pressure', self.on_set_pressure)
-
-    def set_event_manager(self, event_manager):
-        self.event_manager = event_manager
-        for node in [self.containers['in'], self._pipe, self.containers['out']]:
-            node.set_event_manager(event_manager)
 
     @switch
     def update_value(self, ts):
@@ -79,13 +80,8 @@ class Processor(Actor, PipeMixin):
         for node in [self.containers['in'], self.containers['out']]:
             node.update_triggers(ts)
 
-    @switch
-    def update_last_ts(self, ts):
-        for node in [self.containers['in'], self._pipe, self.containers['out']]:
-            node.update_last_ts(ts)
-
     def __str__(self):
-        return f'Processing Container: {self.id}'
+        return f'Processor: {self.id}'
 
     def stats(self):
         return {node.id: node.stats() for node in [self.containers['in'], self._pipe, self.containers['out']]}

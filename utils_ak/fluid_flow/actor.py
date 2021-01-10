@@ -11,12 +11,19 @@ class Actor(DAGNode):
 
     def set_event_manager(self, event_manager):
         self.event_manager = event_manager
+        for actor in self.inner_actors():
+            actor.set_event_manager(event_manager)
+
+    def inner_actors(self):
+        return []
 
     def add_event(self, topic, ts, event):
         self.event_manager.add_event(topic, ts, event)
 
     def update_last_ts(self, ts):
         self.last_ts = ts
+        for actor in self.inner_actors():
+            actor.update_last_ts(ts)
 
     def subscribe(self):
         pass

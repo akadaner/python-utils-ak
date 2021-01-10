@@ -166,11 +166,10 @@ def test_flow_hub_2():
     run_flow(flow)
 
 
-
 if __name__ == '__main__':
     configure_logging(stream_level=logging.INFO)
-    test_pipe_switch_1()
-    test_pipe_switch_2()
+    # test_pipe_switch_1()
+    # test_pipe_switch_2()
     # test_flow_container_1()
     # test_flow_container_2()
     # test_flow_container_3()

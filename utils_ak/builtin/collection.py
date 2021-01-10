@@ -86,8 +86,7 @@ def unfold_dic(dic, keys, get=False, default=None):
     else:
         return [dic[key] for key in keys]
 
-
-if __name__ == '__main__':
+def test_collection():
     d1 = {'k1': {'k3': 4}}
     d2 = {'k1': {'k3': [2, 3]}}
     print(update_dic(d1, d2), d1, d2)
@@ -96,3 +95,6 @@ if __name__ == '__main__':
     # print(filter_dic({'k': 1, 'e': 2}, leave=2))
     print(remove_duplicates([1,2,3, 4,5,1,1,]))
     print(remove_neighbor_duplicates([1,2,3, 4,5,1,1,]))
+
+if __name__ == '__main__':
+    test_collection()
