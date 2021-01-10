@@ -20,11 +20,11 @@ class Container(Actor, PipeMixin):
             return True
         return False
 
-    def update_value(self, ts):
+    def update_value(self, ts, factor=1):
         if self.last_ts is None:
             return
-        self.value += (ts - self.last_ts) * self.speed('in')
-        self.df.at['in', 'collected'] += (ts - self.last_ts) * self.speed('in')
+        self.value += (ts - self.last_ts) * self.speed('in') * factor
+        self.df.at['in', 'collected'] += (ts - self.last_ts) * self.speed('in') * factor
         self.value -= (ts - self.last_ts) * self.speed('out')
         self.df.at['out', 'collected'] += (ts - self.last_ts) * self.speed('out')
 

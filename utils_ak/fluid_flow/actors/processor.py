@@ -49,8 +49,8 @@ class Processor(Actor, PipeMixin):
 
     @switch
     def update_value(self, ts):
-        for node in [self.containers['in'], self.containers['out']]:
-            node.update_value(ts)
+        self.containers['in'].update_value(ts)
+        self.containers['out'].update_value(ts, factor=self.transformation_factor)
 
     @switch
     def update_pressure(self, ts):
@@ -63,11 +63,11 @@ class Processor(Actor, PipeMixin):
 
         if self.processing_time == 0:
             # set new inner pressure at once
-            self._pipe.pressures['out'] = self.containers['in'].speed('in') * self.transformation_factor
+            self._pipe.pressures['out'] = self.containers['in'].speed('in')
         else:
             # set inner pressure delayed with processing time
             if self.last_pipe_speed != self.containers['in'].speed('in'):
-                self.add_event('processing_container.set_pressure', ts + self.processing_time, {'pressure': self.containers['in'].speed('in') * self.transformation_factor})
+                self.add_event('processing_container.set_pressure', ts + self.processing_time, {'pressure': self.containers['in'].speed('in')})
                 self.last_pipe_speed = self.containers['in'].speed('in')
 
         self._pipe.update_speed(ts)
