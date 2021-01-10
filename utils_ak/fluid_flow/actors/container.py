@@ -15,6 +15,11 @@ class Container(Actor, PipeMixin):
         self.df['limit'] = limits
         self.df['collected'] = 0
 
+    def is_limit_reached(self, orient):
+        if self.df.at[orient, 'limit'] and self.df.at[orient, 'collected'] == self.df.at[orient, 'limit']:
+            return True
+        return False
+
     def update_value(self, ts):
         if self.last_ts is None:
             return
@@ -23,19 +28,11 @@ class Container(Actor, PipeMixin):
         self.value -= (ts - self.last_ts) * self.speed('out')
         self.df.at['out', 'collected'] += (ts - self.last_ts) * self.speed('out')
 
-        for orient in ['in', 'out']:
-            if self.is_limit_reached(orient):
-                self.pipe(orient).pressures[orient] = 0.
-
-    def is_limit_reached(self, orient):
-        if self.df.at[orient, 'limit'] and self.df.at[orient, 'collected'] == self.df.at[orient, 'limit']:
-            return True
-        return False
-
     def update_pressure(self, ts):
         for orient in ['in', 'out']:
-            if self.pipe(orient) and not self.is_limit_reached(orient):
-                self.pipe(orient).pressures[orient] = self.df.at[orient, 'max_pressure']
+            if self.pipe(orient):
+                pressure = self.df.at[orient, 'max_pressure'] if not self.is_limit_reached(orient) else 0
+                self.pipe(orient).pressures[orient] = pressure
 
     def update_speed(self, ts):
         input_speed = self.speed('in')
@@ -47,13 +44,13 @@ class Container(Actor, PipeMixin):
     def update_triggers(self, ts):
         values = []
         if self.drain() < 0:
-            values.append([self.value, self.drain()])
+            values.append(['empty_container', self.value, self.drain()])
 
         for orient in ['in', 'out']:
             if self.df.at[orient, 'limit']:
-                values.append([self.df.at[orient, 'limit'] - self.df.at[orient, 'collected'], self.speed(orient)])
+                values.append([f'{orient} limit', self.df.at[orient, 'limit'] - self.df.at[orient, 'collected'], self.speed(orient)])
 
-        df = pd.DataFrame(values, columns=['left', 'speed'])
+        df = pd.DataFrame(values, columns=['name', 'left', 'speed'])
         df = df[df['left'] > ERROR]
         df = df[df['speed'].abs() > ERROR]
         df['eta'] = df['left'] / df['speed'].abs()

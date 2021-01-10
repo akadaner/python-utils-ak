@@ -26,6 +26,17 @@ def test_flow_container_2():
     run_flow(flow)
 
 
+def test_flow_container_3():
+    container1 = Container('Input', max_pressures=[0, 50], limits=[None, 30])
+    container1.value = 100
+    container2 = Container('Output', max_pressures=[5, 0], limits=[20, 0])
+
+    pipe_together(container1, container2)
+
+    flow = FluidFlow(container1, verbose=True)
+    run_flow(flow)
+
+
 def test_flow_processor_1():
     container = Container('Input', max_pressure_out=50)
     container.value = 100
@@ -99,5 +110,6 @@ def test_flow_hub_2():
 
 if __name__ == '__main__':
     configure_logging(stream_level=logging.INFO)
-    # test_flow_container_1()
+    test_flow_container_1()
     test_flow_container_2()
+    test_flow_container_3()

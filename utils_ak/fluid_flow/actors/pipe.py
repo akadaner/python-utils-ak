@@ -2,6 +2,7 @@ from utils_ak.dag import connect
 from utils_ak.fluid_flow.actor import Actor
 from utils_ak.fluid_flow.calculations import *
 
+
 def cast_pipe(pipe_obj):
     if isinstance(pipe_obj, str):
         return Pipe(pipe_obj)
@@ -66,6 +67,7 @@ class PipeMixin:
 
     def drain(self):
         return self.speed('in') - self.speed('out')
+
 
 def pipe_together(node1, node2, pipe='Pipe'):
     pipe = cast_pipe(pipe)
