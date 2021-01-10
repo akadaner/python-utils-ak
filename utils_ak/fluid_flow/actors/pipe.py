@@ -83,6 +83,8 @@ def pipe_together(node1, node2, pipe=None):
 
 
 def pipe_switch(node1, node2, orient='in'):
+    if node1 == node2:
+        return
     piped_nodes = [node for node in [node1, node2] if node.pipe(orient)]
 
     if not piped_nodes:

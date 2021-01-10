@@ -5,10 +5,10 @@ import pandas as pd
 
 
 class Container(Actor, PipeMixin):
-    def __init__(self, id, item='default', max_pressures=None, limits=None):
+    def __init__(self, id, value=0, item='default', max_pressures=None, limits=None):
         super().__init__(id)
         self.item = item
-        self.value = 0
+        self.value = value
 
         self.df = pd.DataFrame(index=['in', 'out'], columns=['max_pressure', 'limit', 'collected'])
         self.df['max_pressure'] = max_pressures

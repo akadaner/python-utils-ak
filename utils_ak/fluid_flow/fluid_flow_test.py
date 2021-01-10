@@ -166,6 +166,33 @@ def test_flow_hub_2():
     run_flow(flow)
 
 
+def test_flow_queue_1_in():
+    parent = Container('Parent', max_pressures=[None, 20])
+    parent.value = 100
+
+    child1 = Container('Child1', max_pressures=[20, None], limits=[40, None])
+    child2 = Container('Child2', max_pressures=[10, None], limits=[50, None])
+
+    queue = Queue('Queue', [child1, child2])
+
+    pipe_together(parent, queue, 'parent-queue')
+
+    flow = FluidFlow(parent, verbose=True)
+    run_flow(flow)
+
+
+def test_flow_queue_2_out():
+    parent1 = Container('Parent1', value=100, max_pressures=[None, 10], limits=[None, 100])
+    parent2 = Container('Parent2', value=100, max_pressures=[None, 20], limits=[None, 100])
+    queue = Queue('Parent', [parent1, parent2])
+
+    child = Container('Child', max_pressures=[None, None])
+    pipe_together(queue, child, 'parent-queue')
+
+    flow = FluidFlow(queue, verbose=True)
+    run_flow(flow)
+
+
 if __name__ == '__main__':
     configure_logging(stream_level=logging.INFO)
     # test_pipe_switch_1()
@@ -179,3 +206,5 @@ if __name__ == '__main__':
     # test_flow_processor_limit()
     # test_flow_hub_1()
     # test_flow_hub_2()
+    # test_flow_queue_1_in()
+    test_flow_queue_2_out()
