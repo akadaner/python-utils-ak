@@ -48,7 +48,6 @@ class Queue(Actor, PipeMixin):
                 new = self.iterators[orient].next()
                 pipe_switch(old, new, orient)
 
-
     @switch
     def update_pressure(self, ts):
         for node in self.inner_actors():

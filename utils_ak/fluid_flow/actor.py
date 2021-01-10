@@ -26,7 +26,8 @@ class Actor(DAGNode):
             actor.update_last_ts(ts)
 
     def subscribe(self):
-        pass
+        for node in self.inner_actors():
+            node.subscribe()
 
     def stats(self):
         return {}
