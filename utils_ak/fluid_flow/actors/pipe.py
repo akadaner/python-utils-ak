@@ -79,7 +79,7 @@ def pipe_together(node1, node2, pipe=None):
     return pipe
 
 
-def switch(node1, node2, orient='in'):
+def pipe_switch(node1, node2, orient='in'):
     piped_nodes = [node for node in [node1, node2] if node.pipe(orient)]
 
     if not piped_nodes:

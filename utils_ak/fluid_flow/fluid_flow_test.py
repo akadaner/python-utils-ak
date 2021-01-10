@@ -19,7 +19,7 @@ def test_pipe_switch_1():
         print(node)
     print()
 
-    switch(co1, co2, 'in')
+    pipe_switch(co1, co2, 'in')
 
     for node in ci1.iterate():
         print(node)
@@ -27,14 +27,14 @@ def test_pipe_switch_1():
         print(node)
     print()
 
-    switch(co1, co2, 'in')
+    pipe_switch(co1, co2, 'in')
     for node in ci1.iterate():
         print(node)
     for node in ci2.iterate():
         print(node)
     print()
 
-    switch(ci1, ci2, 'out')
+    pipe_switch(ci1, ci2, 'out')
 
     for node in ci1.iterate():
         print(node)
@@ -53,7 +53,7 @@ def test_pipe_switch_2():
     for node in ci1.iterate():
         print(node)
     print()
-    switch(co1, co2, 'in')
+    pipe_switch(co1, co2, 'in')
 
     for node in ci1.iterate():
         print(node)
@@ -98,10 +98,7 @@ def test_flow_processor_1():
     container = Container('Input', max_pressures=[0, 10])
     container.value = 100
 
-    containers = {}
-    containers['in'] = Container('In')
-    containers['out'] = Container('Out')
-    processor = Processor('Output', containers=containers)
+    processor = Processor('Output')
 
     pipe_together(container, processor)
     flow = FluidFlow(container, verbose=True)
@@ -111,7 +108,7 @@ def test_flow_processor_1():
 def test_flow_processor_2():
     container = Container('Input')
     container.value = 100
-    processor = Processor('Output', processing_time=5, max_pressure_in=10, transformation_factor=2.)
+    processor = Processor('Output', processing_time=5, max_pressures=[10, None], transformation_factor=2.)
     pipe_together(container, processor)
     flow = FluidFlow(container, verbose=True)
     run_flow(flow)
@@ -172,10 +169,10 @@ def test_flow_hub_2():
 
 if __name__ == '__main__':
     configure_logging(stream_level=logging.INFO)
-    test_pipe_switch_1()
-    test_pipe_switch_2()
-    # test_pipe_switch_3()
+    # test_pipe_switch_1()
+    # test_pipe_switch_2()
     # test_flow_container_1()
     # test_flow_container_2()
     # test_flow_container_3()
     # test_flow_processor_1()
+    test_flow_processor_2()
