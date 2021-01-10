@@ -37,6 +37,7 @@ class Queue(Actor, PipeMixin):
 
     @switch
     def update_value(self, ts):
+
         self.current('in').update_value(ts)
         if self.current('in') != self.current('out'):
             self.current('out').update_value(ts)
@@ -47,6 +48,9 @@ class Queue(Actor, PipeMixin):
                 old = self.current(orient)
                 new = self.iterators[orient].next()
                 pipe_switch(old, new, orient)
+            # todo: del
+            # print('Current', self.id, orient, self.current(orient), self.current(orient).is_limit_reached(orient), self.current(orient).containers['out'].df)
+
 
     @switch
     def update_pressure(self, ts):

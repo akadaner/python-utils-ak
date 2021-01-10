@@ -13,12 +13,12 @@ class Container(Actor, PipeMixin):
         self.df = pd.DataFrame(index=['in', 'out'], columns=['max_pressure', 'limit', 'collected'])
         self.df['max_pressure'] = max_pressures
         self.df['limit'] = limits
-        self.df['collected'] = 0
+        self.df['collected'] = 0.
 
         self.transactions = []
 
     def is_limit_reached(self, orient):
-        if self.df.at[orient, 'limit'] and self.df.at[orient, 'collected'] == self.df.at[orient, 'limit']:
+        if self.df.at[orient, 'limit'] and abs(self.df.at[orient, 'collected'] - self.df.at[orient, 'limit']) < ERROR:
             return True
         return False
 
@@ -38,7 +38,7 @@ class Container(Actor, PipeMixin):
 
     def active_periods(self):
         if not self.transactions:
-            return
+            return []
         return [[self.item, self.transactions[0][0], self.transactions[-1][1]]]
 
     def update_pressure(self, ts, orients=('in', 'out')):

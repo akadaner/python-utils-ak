@@ -42,7 +42,7 @@ class ParallelepipedBlock(Block):
         res = ''
         for b in self.iter():
             if b.size[0] != 0:
-                res += ' ' * int(b.x[0]) + '=' * int(b.size[0]) + f' {b.props["class"]}' + ' x '.join([f'({b.x[i]}, {b.y[i]}]' for i in range(b.n_dims)])
+                res += ' ' * int(b.x[0]) + '=' * int(b.size[0]) + f' {b.props["class"]} ' + ' x '.join([f'({b.x[i]}, {b.y[i]}]' for i in range(b.n_dims)])
                 res += '\n'
         return res
 
