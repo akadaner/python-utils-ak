@@ -12,13 +12,13 @@ from functools import wraps
 def switch(f):
     @wraps(f)
     def inner(self, *args, **kwargs):
-        pipe_switch(self, self.containers['in'], 'in')
-        pipe_switch(self, self.containers['out'], 'out')
+        pipe_switch(self, self.current('in'), 'in')
+        pipe_switch(self, self.current('out'), 'out')
 
         res = f(self, *args, **kwargs)
 
-        pipe_switch(self, self.containers['in'], 'in')
-        pipe_switch(self, self.containers['out'], 'out')
+        pipe_switch(self, self.current('in'), 'in')
+        pipe_switch(self, self.current('out'), 'out')
         return res
     return inner
 
@@ -29,23 +29,33 @@ class Queue(Actor, PipeMixin):
         self.containers = containers
         self.iterators = {'in': SimpleBoundedIterator(containers, 0), 'out': SimpleBoundedIterator(containers, 0)}
 
+    def current(self, orient):
+        return self.iterators[orient].current()
+
     def inner_actors(self):
         return self.containers
 
-    def update_value_orient(self, ts, orient='in'):
-        pass
-
+    @switch
     def update_value(self, ts):
-        pass
+        for orient in ['in', 'out']:
+            self.current(orient).update_value(ts)
+            if self.current(orient).is_limit_reached(orient):
+                # try to go to the next queue element
+                self.iterators[orient].next()
 
+    @switch
     def update_pressure(self, ts):
-        pass
+        for node in self.inner_actors():
+            node.update_pressure(ts)
 
+    @switch
     def update_speed(self, ts):
-        pass
-
+        for node in self.inner_actors():
+            node.update_speed(ts)
+    @switch
     def update_triggers(self, ts):
-        pass
+        for node in self.inner_actors():
+            node.update_triggers(ts)
 
     def __str__(self):
         return f'Queue: {self.id}'
