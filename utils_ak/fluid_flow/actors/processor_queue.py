@@ -1,40 +1,21 @@
-from utils_ak.dag import *
-
 from utils_ak.fluid_flow.actor import Actor
-from utils_ak.fluid_flow.actors.pipe import *
-from utils_ak.fluid_flow.actors.container import Container
-from utils_ak.fluid_flow.calculations import ERROR
-from utils_ak.fluid_flow.pressure import calc_minimum_pressure
 
 
-class Processor(Actor, PipeMixin):
-    def __init__(self, id=None, item_in='default', item_out='default',
-                 processing_time=0,
-                 processing_limit=None,
-                 transformation_factor=1.,
-                 max_pressure_in=None, max_pressure_out=None):
+class ProcessorQueue(Actor):
+    def __init__(self, id=None, processors=None):
         super().__init__(id)
-        self.processing_time = processing_time
-        self.processing_limit = processing_limit
-        self.transformation_factor = transformation_factor
-
-        self._container_in = Container(item_in)
-        self._pipe = Pipe()
-        self._pipe.pressure_in = 0
-        self._container_out = Container(item_out)
-
-        pipe_together(self._container_in, self._container_out, self._pipe)
-
-        self.max_pressure_in = max_pressure_in
-        self.max_pressure_out = max_pressure_out
-
-        self.last_pipe_speed = None
-
-        self.total_processed = 0
+        self.processors = processors or []
+        assert len(processors) >= 1
+        self.cur_processor = self.processors[0]
 
     def update_value(self, ts):
         if self.last_ts is None:
             return
+
+
+
+
+
         self._container_in.value += (ts - self.last_ts) * self.speed('in')
         self.total_processed += (ts - self.last_ts) * self.speed('in')
         self._container_in.value -= (ts - self.last_ts) * self._pipe.current_speed

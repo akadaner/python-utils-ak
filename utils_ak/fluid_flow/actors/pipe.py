@@ -1,15 +1,22 @@
 from utils_ak.dag import connect
 from utils_ak.fluid_flow.actor import Actor
 from utils_ak.fluid_flow.pressure import calc_minimum_pressure
-import numpy as np
+
+
+def cast_pipe(pipe_obj):
+    if isinstance(pipe_obj, str):
+        return Pipe(pipe_obj)
+    elif isinstance(pipe_obj, Pipe):
+        return pipe_obj
+    else:
+        raise Exception('Unknown pipe object')
 
 
 class Pipe(Actor):
     def __init__(self, id=None):
         super().__init__(id)
         self.current_speed = 0
-        self.pressure_in = None
-        self.pressure_out = None
+        self.pressures = {'in': None, 'out': None}
 
     @property
     def parent(self):
@@ -25,22 +32,14 @@ class Pipe(Actor):
         assert len(self.children) == 1
         return self.children[0]
 
-    @property
-    def pressure(self, orient='in'):
-        assert orient in ['in', 'out']
-        if orient == 'in':
-            return self.pressure_in
-        elif orient == 'out':
-            return self.pressure_out
-
     def update_speed(self, ts):
-        self.current_speed = calc_minimum_pressure([self.pressure_in, self.pressure_out])
+        self.current_speed = calc_minimum_pressure(self.pressures.values())
 
     def __str__(self):
         return f'Pipe {self.id}'
 
     def stats(self):
-        return {'current_speed': self.current_speed, 'pressure_in': self.pressure_in, 'pressure_out': self.pressure_out}
+        return {'current_speed': self.current_speed, 'pressures': self.pressures}
 
 
 class PipeMixin:
@@ -71,7 +70,7 @@ class PipeMixin:
             return self.speed('in') - self.speed('out')
 
 
-def pipe_together(node1, node2, pipe_name='Pipe'):
-    pipe = Pipe(pipe_name)
+def pipe_together(node1, node2, pipe='Pipe'):
+    pipe = cast_pipe(pipe)
     connect(node1, pipe)
     connect(pipe, node2)

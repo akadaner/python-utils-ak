@@ -5,7 +5,7 @@ warnings.filterwarnings("ignore")
 
 
 def test_flow_1():
-    container1 = Container('Input', max_pressure_out=50)
+    container1 = Container('Input', max_pressures=[0, 50])
     container1.value = 100
     container2 = Container('Output')
 
@@ -85,13 +85,13 @@ def test_flow_6_hub_2():
     run_flow(flow)
 
 
+
 if __name__ == '__main__':
     configure_logging(stream_level=logging.INFO)
     test_flow_1()
-    test_flow_2()
-    test_flow_3()
-    test_flow_4_zero_pressure()
-    test_flow_5_processing_limit()
-    test_flow_6_hub_1()
-    test_flow_6_hub_2()
-
+    # test_flow_2()
+    # test_flow_3()
+    # test_flow_4_zero_pressure()
+    # test_flow_5_processing_limit()
+    # test_flow_6_hub_1()
+    # test_flow_6_hub_2()
