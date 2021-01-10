@@ -23,13 +23,14 @@ def switch(f):
 
 
 class Processor(Actor, PipeMixin):
-    def __init__(self, id, processing_time=0, transformation_factor=1, max_pressures=None, limits=None):
+    def __init__(self, id, items=None, processing_time=0, transformation_factor=1, max_pressures=None, limits=None):
         super().__init__(id)
 
         max_pressures = max_pressures or [None, None]
         limits = limits or [None, None]
-        self.containers = {'in': Container('In', max_pressures=(max_pressures[0], None), limits=(limits[0], None)),
-                           'out': Container('Out', max_pressures=(None, max_pressures[1]), limits=(None, limits[1]))}
+        items = items or ['default', 'default']
+        self.containers = {'in': Container('In', item=items[0], max_pressures=(max_pressures[0], None), limits=(limits[0], None)),
+                           'out': Container('Out', item=items[1], max_pressures=(None, max_pressures[1]), limits=(None, limits[1]))}
         self._pipe = pipe_together(self.containers['in'], self.containers['out'], '_pipe')
         self.processing_time = processing_time
 
