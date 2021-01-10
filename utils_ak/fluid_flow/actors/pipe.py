@@ -44,6 +44,9 @@ class Pipe(Actor):
     def stats(self):
         return {'current_speed': self.current_speed, 'pressures': self.pressures}
 
+    def display_stats(self):
+        return {}
+
 
 class PipeMixin:
     def pipe(self, orient):

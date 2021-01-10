@@ -15,6 +15,8 @@ class Container(Actor, PipeMixin):
         self.df['limit'] = limits
         self.df['collected'] = 0
 
+        self.transactions = []
+
     def is_limit_reached(self, orient):
         if self.df.at[orient, 'limit'] and self.df.at[orient, 'collected'] == self.df.at[orient, 'limit']:
             return True
@@ -23,10 +25,21 @@ class Container(Actor, PipeMixin):
     def update_value(self, ts, factor=1):
         if self.last_ts is None:
             return
-        self.value += (ts - self.last_ts) * self.speed('in') * factor
-        self.df.at['in', 'collected'] += (ts - self.last_ts) * self.speed('in') * factor
-        self.value -= (ts - self.last_ts) * self.speed('out')
-        self.df.at['out', 'collected'] += (ts - self.last_ts) * self.speed('out')
+
+        self.add_value(ts, 'in', (ts - self.last_ts) * self.speed('in') * factor)
+        self.add_value(ts, 'out', -(ts - self.last_ts) * self.speed('out'))
+
+    def add_value(self, ts, orient, value):
+        if not value:
+            return
+        self.value += value
+        self.df.at[orient, 'collected'] += abs(value)
+        self.transactions.append([self.last_ts, ts, value])
+
+    def active_period(self):
+        if not self.transactions:
+            return
+        return self.transactions[0][0], self.transactions[-1][1]
 
     def update_pressure(self, ts, orients=('in', 'out')):
         for orient in orients:
@@ -64,3 +77,6 @@ class Container(Actor, PipeMixin):
 
     def stats(self):
         return {'value': self.value}
+
+    def display_stats(self):
+        return self.value

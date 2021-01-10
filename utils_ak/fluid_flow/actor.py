@@ -31,3 +31,6 @@ class Actor(DAGNode):
 
     def stats(self):
         return {}
+
+    def display_stats(self):
+        return {}

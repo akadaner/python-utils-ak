@@ -86,3 +86,6 @@ class Processor(Actor, PipeMixin):
 
     def stats(self):
         return {node.id: node.stats() for node in [self.containers['in'], self._pipe, self.containers['out']]}
+
+    def display_stats(self):
+        return [self.containers['in'].display_stats(), self.containers['out'].display_stats()]

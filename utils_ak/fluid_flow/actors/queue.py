@@ -67,3 +67,6 @@ class Queue(Actor, PipeMixin):
 
     def stats(self):
         return [[node.id, node.stats()] for node in self.containers]
+
+    def display_stats(self):
+        return [(node.id, node.display_stats()) for node in self.containers]
