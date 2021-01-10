@@ -62,7 +62,7 @@ def test_pipe_switch_2():
 
 
 def test_flow_container_1():
-    container1 = Container('Input', max_pressures=[0, 50])
+    container1 = Container('Input', max_pressures=[None, 50])
     container1.value = 100
     container2 = Container('Output')
 
@@ -73,7 +73,7 @@ def test_flow_container_1():
 
 
 def test_flow_container_2():
-    container1 = Container('Input', max_pressures=[0, 50], limits=[None, 30])
+    container1 = Container('Input', max_pressures=[None, 50], limits=[None, 30])
     container1.value = 100
     container2 = Container('Output')
 
@@ -84,9 +84,9 @@ def test_flow_container_2():
 
 
 def test_flow_container_3():
-    container1 = Container('Input', max_pressures=[0, 50], limits=[None, 30])
+    container1 = Container('Input', max_pressures=[None, 50], limits=[None, 30])
     container1.value = 100
-    container2 = Container('Output', max_pressures=[5, 0], limits=[20, 0])
+    container2 = Container('Output', max_pressures=[5, None], limits=[20, None])
 
     pipe_together(container1, container2)
 
@@ -95,7 +95,7 @@ def test_flow_container_3():
 
 
 def test_flow_processor_1():
-    container = Container('Input', max_pressures=[0, 10])
+    container = Container('Input', max_pressures=[None, 10])
     container.value = 100
 
     processor = Processor('Output')
@@ -126,55 +126,57 @@ def test_flow_processor_zero_pressure():
 def test_flow_processor_limit():
     container = Container('Input', max_pressures=[None, 10])
     container.value = 100
-    processor = Processor('Output', limits=[50, 0])
+    processor = Processor('Output', limits=[50, None])
     pipe_together(container, processor)
     flow = FluidFlow(container, verbose=True)
     run_flow(flow)
 
 
 def test_flow_hub_1():
-    container = Container('Input', max_pressure_out=20)
-    container.value = 100
+    parent = Container('Parent', max_pressures=[None, 20])
+    parent.value = 100
 
     hub = Hub('Hub')
 
-    processor1 = Processor('Output1', max_pressure_in=15)
-    processor2 = Processor('Output2', max_pressure_in=10)
+    child1 = Container('Child1', max_pressures=[15, None])
+    child2 = Container('Child2', max_pressures=[10, None])
 
-    pipe_together(container, hub, 'container-hub')
-    pipe_together(hub, processor1, 'hub-processor1')
-    pipe_together(hub, processor2, 'hub-processor2')
+    pipe_together(parent, hub, 'parent-hub')
+    pipe_together(hub, child1, 'hub-child1')
+    pipe_together(hub, child2, 'hub-child2')
 
-    flow = FluidFlow(container, verbose=True)
+    flow = FluidFlow(parent, verbose=True)
     run_flow(flow)
 
 
 def test_flow_hub_2():
-    container = Container('Input', max_pressure_out=20)
-    container.value = 100
+    parent = Container('Parent', max_pressures=[None, 20])
+    parent.value = 100
 
     hub = Hub('Hub')
 
-    processor1 = Processor('Output1', max_pressure_in=15, processing_limit=30)
-    processor2 = Processor('Output2', max_pressure_in=10)
+    child1 = Processor('Child1', max_pressures=[15, None], limits=[30, None])
+    child2 = Processor('Child2', max_pressures=[10, None])
 
-    pipe_together(container, hub, 'container-hub')
-    pipe_together(hub, processor1, 'hub-processor1')
-    pipe_together(hub, processor2, 'hub-processor2')
+    pipe_together(parent, hub, 'parent-hub')
+    pipe_together(hub, child1, 'hub-child1')
+    pipe_together(hub, child2, 'hub-child2')
 
-    flow = FluidFlow(container, verbose=True)
+    flow = FluidFlow(parent, verbose=True)
     run_flow(flow)
 
 
 
 if __name__ == '__main__':
     configure_logging(stream_level=logging.INFO)
-    # test_pipe_switch_1()
-    # test_pipe_switch_2()
-    # test_flow_container_1()
-    # test_flow_container_2()
-    # test_flow_container_3()
-    # test_flow_processor_1()
-    # test_flow_processor_2()
-    # test_flow_processor_zero_pressure()
+    test_pipe_switch_1()
+    test_pipe_switch_2()
+    test_flow_container_1()
+    test_flow_container_2()
+    test_flow_container_3()
+    test_flow_processor_1()
+    test_flow_processor_2()
+    test_flow_processor_zero_pressure()
     test_flow_processor_limit()
+    test_flow_hub_1()
+    test_flow_hub_2()
