@@ -4,13 +4,12 @@ from utils_ak.block_tree import *
 def test_water_line_flow():
     drenator = Container('Drenator', value=1000, max_pressures=[None, None])
 
-    melting1 = Processor('Melting1', max_pressures=[1000, None], processing_time=0, limits=[750, 750])
-    melting2 = Processor('Melting2', max_pressures=[1000, None], processing_time=0, limits=[250, 250])
+    melting1 = Processor('Melting1', max_pressures=[1000, 1000], processing_time=0, limits=[750, 750])
+    melting2 = Processor('Melting2', max_pressures=[1000, 1000], processing_time=0, limits=[250, 250])
     melting_queue = Queue('MeltingQueue', [melting1, melting2])
 
-    # cooling1 = Processor('Cooling1', max_pressures=[1000, None], processing_time=1, limits=[1000, 1000])
-    cooling1 = Processor('Cooling1', max_pressures=[750, None], processing_time=1, limits=[750, 750])
-    cooling2 = Processor('Cooling2', max_pressures=[250, None], processing_time=1, limits=[250, 250])
+    cooling1 = Processor('Cooling1', max_pressures=[None, None], processing_time=1, limits=[750, 750])
+    cooling2 = Processor('Cooling2', max_pressures=[None, None], processing_time=1, limits=[250, 250])
     cooling_queue = Queue('CoolingQueue', [cooling1, cooling2])
 
     packing_hub = Hub('Hub')
