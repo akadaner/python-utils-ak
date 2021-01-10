@@ -70,3 +70,6 @@ class Queue(Actor, PipeMixin):
 
     def display_stats(self):
         return [(node.id, node.display_stats()) for node in self.containers]
+
+    def active_periods(self):
+        return sum([node.active_periods() for node in self.containers], [])

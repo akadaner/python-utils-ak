@@ -36,10 +36,10 @@ class Container(Actor, PipeMixin):
         self.df.at[orient, 'collected'] += abs(value)
         self.transactions.append([self.last_ts, ts, value])
 
-    def active_period(self):
+    def active_periods(self):
         if not self.transactions:
             return
-        return self.transactions[0][0], self.transactions[-1][1]
+        return [[self.item, self.transactions[0][0], self.transactions[-1][1]]]
 
     def update_pressure(self, ts, orients=('in', 'out')):
         for orient in orients:

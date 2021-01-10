@@ -1,5 +1,5 @@
 from utils_ak.fluid_flow import *
-
+from utils_ak.block_tree import *
 
 def test_water_line_flow():
     drenator = Container('Drenator', value=1000, max_pressures=[None, None])
@@ -24,6 +24,14 @@ def test_water_line_flow():
     flow = FluidFlow(drenator, verbose=True)
     run_flow(flow)
 
+    maker, make = init_block_maker('root', axis=1)
+
+    for node in drenator.iterate('down'):
+        if node.active_periods():
+            for period in node.active_periods():
+                label = '-'.join([str(node.id), period[0]])
+                make(label, x=[period[1], 0], size=(period[2] - period[1], 1))
+    print(maker.root.tabular())
 
 if __name__ == '__main__':
     test_water_line_flow()

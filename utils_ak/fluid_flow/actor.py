@@ -34,3 +34,6 @@ class Actor(DAGNode):
 
     def display_stats(self):
         return {}
+
+    def active_periods(self):
+        return []

@@ -89,3 +89,6 @@ class Processor(Actor, PipeMixin):
 
     def display_stats(self):
         return [self.containers['in'].display_stats(), self.containers['out'].display_stats()]
+
+    def active_periods(self):
+        return self.containers['in'].active_periods()

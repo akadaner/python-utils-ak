@@ -25,7 +25,8 @@ class FluidFlow:
         values = ['Flow:']
         for node in self.root.iterate('down'):
             # values.append(' ' * 4 + str(node) + ': ' + cast_js(node.stats()))
-            values.append(' ' * 4 + str(node) + ': ' + cast_js(node.display_stats()))
+            if node.display_stats():
+                values.append(' ' * 4 + str(node) + ': ' + cast_js(node.display_stats()))
         return '\n'.join(values)
 
     def __repr__(self):
