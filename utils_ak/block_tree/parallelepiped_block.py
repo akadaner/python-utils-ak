@@ -6,6 +6,12 @@ from utils_ak.block_tree import Block
 from utils_ak.clock import *
 
 
+def x_cumsum_acc(parent, child, key, default=None, formatter=None):
+    if parent:
+        return parent[key].add(relative_acc(parent, child, key, default=default, formatter=formatter))
+    return SimpleVector(list(relative_acc(parent, child, key, default=default, formatter=formatter).values))
+
+
 class ParallelepipedBlock(Block):
     def __init__(self, block_class, n_dims=2, **props):
         self.n_dims = n_dims
@@ -16,7 +22,7 @@ class ParallelepipedBlock(Block):
             props['size'] = SimpleVector(n_dims)
 
         super().__init__(block_class, props_formatters={'x': lambda k, v: SimpleVector(v), 'size': lambda k, v: SimpleVector(v)}, **props)
-        self.props.accumulators['x'] = cumsum_acc
+        self.props.accumulators['x'] = x_cumsum_acc
         self.props.accumulators['x_rel'] = lambda parent_props, child_props, key: relative_acc(parent_props, child_props, 'x')
         self.props.accumulators['size'] = relative_acc
         self.props.accumulators['axis'] = partial(relative_acc, default=0)

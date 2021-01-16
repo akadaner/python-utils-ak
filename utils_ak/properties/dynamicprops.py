@@ -20,11 +20,10 @@ def relative_acc(parent, child, key, default=None, formatter=None):
     return res
 
 
-def cumsum_acc(parent, child, key, default=None, formatter=None, sum_func=lambda v1, v2: v1 + v2):
+def cumsum_acc(parent, child, key, default=None, formatter=None):
     if parent:
-        return sum_func(parent[key], relative_acc(parent, child, key, default=default, formatter=formatter))
+        return parent[key] + relative_acc(parent, child, key, default=default, formatter=formatter)
     return relative_acc(parent, child, key, default=default, formatter=formatter)
-
 
 class DynamicProps:
     def __init__(self, props=None, formatters=None, accumulators=None, required_keys=None):

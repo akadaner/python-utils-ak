@@ -53,8 +53,9 @@ class SimpleVector:
         self.values[index] = value
 
     def add(self, other):
-        for i, v in enumerate(other):
+        for i, v in enumerate(other.values):
             self.values[i] += v
+        return self
 
 def test_simple_vector():
     v1 = SimpleVector([1, 2])
