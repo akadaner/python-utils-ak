@@ -43,9 +43,13 @@ class SimpleIterator:
     def prev(self, return_first_if_out=False, update_index=True):
         return self.backward(1, return_first_if_out, update_index)
 
-    def iter(self, direction='up', step=1):
+    def iter(self, direction='up', step=1, limit=None):
         yield self.current()
+        counter = 1
         while True:
+            if counter == limit:
+                break
+
             if direction == 'up':
                 next = self.forward(step, out_value=STUB)
             elif direction == 'down':
@@ -53,7 +57,11 @@ class SimpleIterator:
 
             if next == STUB:
                 break
+
             yield next
+            counter += 1
+
+
 
     def iter_sequences(self, n=2):
         for i in range(len(self) - n + 1):
@@ -85,6 +93,10 @@ def test_simple_bounded_iterator():
     it.reset()
 
     for v in it.iter(step=2):
+        print(v)
+    it.reset()
+
+    for v in it.iter(limit=2):
         print(v)
 
 
