@@ -1,3 +1,4 @@
+from utils_ak.clock import *
 from utils_ak.fluid_flow.actor import Actor
 from utils_ak.fluid_flow.actors.pipe import PipeMixin
 from utils_ak.fluid_flow.calculations import *
@@ -67,14 +68,10 @@ class Container(Actor, PipeMixin):
             if self.df.at[orient, 'limit']:
                 values.append([f'{orient} limit', self.df.at[orient, 'limit'] - self.df.at[orient, 'collected'], self.speed(orient)])
 
-        df = pd.DataFrame(values, columns=['name', 'left', 'speed'])
-        df = df[df['left'] > ERROR]
-        df = df[df['speed'].abs() > ERROR]
-        df['eta'] = df['left'] / df['speed'].abs()
-        df = df.sort_values(by='eta')
-
-        if len(df) > 0:
-            self.add_event('update.trigger', ts + df.iloc[0]['eta'], {})
+        values = [value for value in values if value[1] > ERROR and abs(value[2]) > ERROR]
+        etas = [value[1] / abs(value[2]) for value in values]
+        if etas:
+            self.add_event('update.trigger', ts + min(etas), {})
 
     def __str__(self):
         return f'Container {self.id}:{self.item}'
