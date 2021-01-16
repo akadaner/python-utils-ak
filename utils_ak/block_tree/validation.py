@@ -13,7 +13,7 @@ def validate_disjoint_by_axis(b1, b2, axis=0):
     i1 = cast_interval(b1.x[axis], b1.y[axis])
     i2 = cast_interval(b2.x[axis], b2.y[axis])
 
-    assert calc_interval_length(i1 & i2) == 0, cast_js({'msg': 'Failed to validated disjoint between {}:{} and {}:{}'.format(b1.props['class'], i1, b2.props['class'], i2), 'disposition': disposition})
+    assert calc_interval_length(i1 & i2) == 0, cast_js({'msg': 'Failed to validate disjoint between {}:{} and {}:{}'.format(b1.props['class'], i1, b2.props['class'], i2), 'disposition': disposition})
 
 
 def test_validate_disjoint_by_axis():

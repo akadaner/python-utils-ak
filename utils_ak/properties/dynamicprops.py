@@ -40,8 +40,8 @@ class DynamicProps:
         pv, v = cast_prop_values(parent, child, key)
         return v if v is not None else pv
 
-    def update(self, props):
-        self.relative_props.update(props)
+    def update(self, **props):
+        self.relative_props.update(**props)
 
     def add_child(self, child):
         self.children.append(child)

@@ -16,7 +16,7 @@ def stack_push(parent, block):
 
     x = block.props.get('x', cast_simple_vector(block.n_dims))
     x[axis] = cur_end
-    block.props.update({'x': x})
+    block.props.update(x=x)
     return add_push(parent, block)
 
 
@@ -35,7 +35,7 @@ def simple_push(parent, block, validator=None, new_props=None):
 
     # update props for current try
     new_props = new_props or {}
-    block.props.update(new_props)
+    block.props.update(**new_props)
 
     if validator:
         try:
@@ -58,10 +58,13 @@ def add_push(parent, block, new_props=None):
 
 
 def dummy_push(parent, block, validator, max_tries=24, start_from='last_end', iter_props=None):
+    # print('Pushing', parent.props['class'], block.props['class'])
     axis = parent.props['axis']
 
     if is_int(start_from):
         cur_start = start_from
+    elif start_from == 'beg':
+        cur_start = block.props['x_rel'][axis]
     else:
         if not parent.children:
             cur_start = 0
@@ -86,6 +89,7 @@ def dummy_push(parent, block, validator, max_tries=24, start_from='last_end', it
             props = copy.deepcopy(props)
             cur_x[axis] = cur_start
             props['x'] = cur_x
+            # print('Trying to push from ', cur_start)
             res = simple_push(parent, block, validator=validator, new_props=props)
 
             if isinstance(res, Block):
@@ -95,8 +99,9 @@ def dummy_push(parent, block, validator, max_tries=24, start_from='last_end', it
                 assert isinstance(res, dict)
 
                 if 'disposition' in res:
+                    # print('Disposition', res)
                     dispositions.append(res['disposition'])
-
+        # print('Dispositions', dispositions)
         if len(dispositions) == len(iter_props):
             # all iter_props failed because of bad disposition
             cur_start += min(dispositions)

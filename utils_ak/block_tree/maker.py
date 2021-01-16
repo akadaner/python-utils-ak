@@ -33,7 +33,7 @@ class BlockMaker:
             if prop_keys:
                 props = {k: v for k, v in props if k in prop_keys}
             props = {k: v for k, v in props.items() if v is not None}
-            res.props.update(props)
+            res.props.update(**props)
         return res
 
     def make(self, block_obj=None, push_func=None, push_kwargs=None, **kwargs):
@@ -44,7 +44,7 @@ class BlockMaker:
             block = self.create_block(block_obj, **kwargs)
         elif isinstance(block_obj, ParallelepipedBlock):
             block = block_obj
-            block.props.update(kwargs)
+            block.props.update(**kwargs)
         else:
             raise Exception('Unknown block obj type')
 
