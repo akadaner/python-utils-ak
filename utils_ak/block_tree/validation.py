@@ -29,9 +29,10 @@ def test_validate_disjoint_by_axis():
 
 
 class ClassValidator:
-    def __init__(self, window=2):
+    def __init__(self, window=2, window_by_classes=None):
         self.validators = {}
         self.window = window
+        self.window_by_classes = window_by_classes or {}
 
     def add(self, class1, class2, validator, uni_direction=False):
         self.validators[(class1, class2)] = validator
@@ -50,8 +51,21 @@ class ClassValidator:
             return
 
         b2 = block
-        for b1 in parent_blocks:
-            self.validate(b1, b2)
+
+        if not self.window_by_classes.get(block.props['cls']):
+            for b1 in parent_blocks:
+                self.validate(b1, b2)
+        else:
+            parent_classes = set([b.props['cls'] for b in parent_blocks])
+            for parent_cls in parent_classes:
+                if parent_cls not in self.window_by_classes[block.props['cls']]:
+                    # don't check at all
+                    continue
+                cls_parent_blocks = [b for b in parent_blocks if b.props['cls'] == parent_cls]
+                cls_parent_blocks = cls_parent_blocks[-self.window_by_classes[block.props['cls']][parent_cls]:]
+
+                for b1 in cls_parent_blocks:
+                    self.validate(b1, b2)
 
 
 def test_class_validator():
