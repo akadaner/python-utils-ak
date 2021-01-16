@@ -9,20 +9,21 @@ from utils_ak.clock import *
 class ParallelepipedBlock(Block):
     def __init__(self, block_class, n_dims=2, **props):
         self.n_dims = n_dims
-        self._zero_simple_vector = SimpleVector(n_dims)
+
+        if 'x' not in props:
+            props['x'] = SimpleVector(n_dims)
+        if 'size' not in props:
+            props['size'] = SimpleVector(n_dims)
+
         super().__init__(block_class, props_formatters={'x': lambda k, v: SimpleVector(v), 'size': lambda k, v: SimpleVector(v)}, **props)
-        self.props.accumulators['x'] = partial(cumsum_acc, default=lambda: SimpleVector(n_dims))
-        self.props.accumulators['x_rel'] = lambda parent_props, child_props, key: relative_acc(parent_props, child_props, 'x', default=lambda: SimpleVector(n_dims))
-        self.props.accumulators['size'] = partial(relative_acc)
+        self.props.accumulators['x'] = cumsum_acc
+        self.props.accumulators['x_rel'] = lambda parent_props, child_props, key: relative_acc(parent_props, child_props, 'x')
+        self.props.accumulators['size'] = relative_acc
         self.props.accumulators['axis'] = partial(relative_acc, default=0)
         self.props.accumulators['is_parent_node'] = partial(relative_acc, default=False)
 
     @property
     def x(self):
-        # todo: make properly
-        if 'x' not in self.props.relative_props:
-            self.props.update(x=[0, 0])
-
         return self.props['x']
 
     @property
@@ -55,9 +56,6 @@ class ParallelepipedBlock(Block):
 
     @property
     def size(self):
-        # todo: make properly
-        if 'size' not in self.props.relative_props:
-            self.props.update(size=[0, 0])
         size = self.props['size']
         values = []
         for axis in range(self.n_dims):

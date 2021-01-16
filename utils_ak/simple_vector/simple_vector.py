@@ -52,6 +52,9 @@ class SimpleVector:
     def __setitem__(self, index, value):
         self.values[index] = value
 
+    def add(self, other):
+        for i, v in enumerate(other):
+            self.values[i] += v
 
 def test_simple_vector():
     v1 = SimpleVector([1, 2])
