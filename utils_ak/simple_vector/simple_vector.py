@@ -1,3 +1,5 @@
+from utils_ak.clock import *
+
 
 def cast_simple_vector(obj):
     if isinstance(obj, SimpleVector):
@@ -20,8 +22,6 @@ def cast_vector_values(obj):
     elif isinstance(obj, list):
         return obj
     elif isinstance(obj, tuple):
-        # todo: del
-        # return list(obj)
         return obj
     elif isinstance(obj, int):
         return [0] * obj
@@ -51,6 +51,7 @@ class SimpleVector:
 
     def __setitem__(self, index, value):
         self.values[index] = value
+
 
 def test_simple_vector():
     v1 = SimpleVector([1, 2])

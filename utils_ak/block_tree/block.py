@@ -3,14 +3,14 @@ from utils_ak.architecture import delistify
 
 
 class Block:
-    def __init__(self, block_class=None, default_block_class='block', props_accumulators=None, props_required_keys=None, **props):
+    def __init__(self, block_class=None, default_block_class='block', props_formatters=None, props_accumulators=None, props_required_keys=None, **props):
         block_class = block_class or default_block_class
         props['cls'] = block_class
 
         self.parent = None
         self.children = []
 
-        self.props = DynamicProps(props=props, accumulators=props_accumulators, required_keys=props_required_keys)
+        self.props = DynamicProps(props=props, formatters=props_formatters, accumulators=props_accumulators, required_keys=props_required_keys)
 
     def __getitem__(self, item):
         res = self.get(item)

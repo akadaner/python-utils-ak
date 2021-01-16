@@ -1,6 +1,7 @@
 import logging
 import copy
 
+from utils_ak.clock import *
 from utils_ak import cast_dict_or_list
 from utils_ak.numeric import *
 from utils_ak.simple_vector import *
@@ -29,18 +30,18 @@ def test_stack_push():
     stack_push(root, b)
     print(root)
 
-
+@clockify()
 def simple_push(parent, block, validator=None, new_props=None):
     block.set_parent(parent)
 
     # update props for current try
     new_props = new_props or {}
     block.props.update(**new_props)
-
     if validator:
         try:
             validator(parent, block)
         except AssertionError as e:
+
             try:
                 # reset parent
                 block.parent = None
@@ -49,8 +50,8 @@ def simple_push(parent, block, validator=None, new_props=None):
                 return cast_dict_or_list(e.__str__())  # {'disposition': 2}
             except:
                 return {}
-
-    return parent.add_child(block)
+    res = parent.add_child(block)
+    return res
 
 
 def add_push(parent, block, new_props=None):
@@ -59,6 +60,7 @@ def add_push(parent, block, new_props=None):
 
 def dummy_push(parent, block, validator, max_tries=24, start_from='last_end', iter_props=None):
     # print('Pushing', parent.props['class'], block.props['class'])
+    clock('1')
     axis = parent.props['axis']
 
     if is_int(start_from):
@@ -81,6 +83,7 @@ def dummy_push(parent, block, validator, max_tries=24, start_from='last_end', it
     cur_x = cast_simple_vector(block.n_dims)
 
     cur_try = 0
+    clock('1')
 
     while cur_try < max_tries:
         dispositions = []

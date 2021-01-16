@@ -3,7 +3,6 @@ from utils_ak.serialization import cast_js
 from utils_ak.block_tree.parallelepiped_block import ParallelepipedBlock
 from utils_ak.block_tree.block import Block
 
-
 def validate_disjoint_by_axis(b1, b2, axis=0):
     try:
         disposition = int(b1.y[axis] - b2.x[axis])
@@ -13,7 +12,8 @@ def validate_disjoint_by_axis(b1, b2, axis=0):
     i1 = cast_interval(b1.x[axis], b1.y[axis])
     i2 = cast_interval(b2.x[axis], b2.y[axis])
 
-    assert calc_interval_length(i1 & i2) == 0, cast_js({'msg': 'Failed to validate disjoint between {}:{} and {}:{}'.format(b1.props['cls'], i1, b2.props['cls'], i2), 'disposition': disposition})
+    # assert calc_interval_length(i1 & i2) == 0, cast_js({'msg': 'Failed to validate disjoint between {}:{} and {}:{}'.format(b1.props['cls'], i1, b2.props['cls'], i2), 'disposition': disposition})
+    assert calc_interval_length(i1 & i2) == 0, cast_js({'disposition': disposition})
 
 
 def test_validate_disjoint_by_axis():

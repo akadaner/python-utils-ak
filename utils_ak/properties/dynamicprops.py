@@ -8,32 +8,41 @@ def cast_prop_values(parent, child, key):
 
 
 def relative_acc(parent, child, key, default=None, formatter=None):
-    if callable(default):
-        default = default()
-    res = child.relative_props.get(key, default)
+    if key in child.relative_props:
+        res = child.relative_props[key]
+    else:
+        if callable(default):
+            default = default()
+        res = default
+
     if formatter:
         res = formatter(res)
     return res
 
 
-def cumsum_acc(parent, child, key, default=None, formatter=None):
-    if callable(default):
-        default = default()
-
+def cumsum_acc(parent, child, key, default=None, formatter=None, sum_func=lambda v1, v2: v1 + v2):
     if parent:
-        return parent[key] + relative_acc(parent, child, key, default=default, formatter=formatter)
-
+        return sum_func(parent[key], relative_acc(parent, child, key, default=default, formatter=formatter))
     return relative_acc(parent, child, key, default=default, formatter=formatter)
 
 
 class DynamicProps:
-    def __init__(self, props=None, accumulators=None, required_keys=None):
-        self.relative_props = props or {}
+    def __init__(self, props=None, formatters=None, accumulators=None, required_keys=None):
         self.accumulators = accumulators or {}
         self.required_keys = required_keys or []
+        self.formatters = formatters or {}
+
+        self.relative_props = self._format_props(props or {})
 
         self.parent = None
         self.children = []
+
+    def _format_props(self, props):
+        props = dict(props)
+        for k, fmt in self.formatters.items():
+            if k in props:
+                props[k] = fmt(k, props[k])
+        return props
 
     @staticmethod
     def default_accumulator(parent, child, key):
@@ -41,6 +50,7 @@ class DynamicProps:
         return v if v is not None else pv
 
     def update(self, **props):
+        props = self._format_props(props)
         self.relative_props.update(**props)
 
     def add_child(self, child):
