@@ -5,7 +5,7 @@ from utils_ak.architecture import delistify
 class Block:
     def __init__(self, block_class=None, default_block_class='block', props_accumulators=None, props_required_keys=None, **props):
         block_class = block_class or default_block_class
-        props['class'] = block_class
+        props['cls'] = block_class
 
         self.parent = None
         self.children = []
@@ -25,7 +25,7 @@ class Block:
 
     def get(self, item):
         if isinstance(item, str):
-            res = [b for b in self.children if b.props['class'] == item]
+            res = [b for b in self.children if b.props['cls'] == item]
         elif isinstance(item, int):
             res = self.children[item]
         elif isinstance(item, slice):
@@ -36,7 +36,7 @@ class Block:
         return delistify(res)
 
     def __str__(self):
-        res = f'{self.props["class"]}\n'
+        res = f'{self.props["cls"]}\n'
 
         for child in self.children:
             for line in str(child).split('\n'):
@@ -58,14 +58,12 @@ class Block:
                     return False
         return True
 
-    def iter(self, query=None):
-        query = query or {}
-
+    def iter(self, **query):
         if self.query_match(query):
             yield self
 
         for child in self.children:
-            for b in child.iter(query):
+            for b in child.iter(**query):
                 yield b
 
     def set_parent(self, parent):
@@ -100,7 +98,7 @@ def test_block():
     print(a['b']['c'])
 
     print('Test query')
-    for b in a.iter({'class': 'c'}):
+    for b in a.iter(cls=c):
         print(b)
 
 
