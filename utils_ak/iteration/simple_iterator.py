@@ -1,4 +1,4 @@
-
+STUB = '__stub'
 
 class SimpleIterator:
     def __init__(self, lst, start_from=0):
@@ -11,12 +11,12 @@ class SimpleIterator:
     def __len__(self):
         return len(self.lst)
 
-    def forward(self, step=1, return_last_if_out=False, update_index=True):
+    def forward(self, step=1, return_last_if_out=False, update_index=True, out_value=None):
         if self.current_index >= len(self.lst) - step:
             if return_last_if_out:
                 res = self.lst[-1]
             else:
-                res = None
+                res = out_value
         else:
             res = self.lst[self.current_index + step]
 
@@ -27,12 +27,12 @@ class SimpleIterator:
     def next(self, return_last_if_out=False, update_index=True):
         return self.forward(1, return_last_if_out, update_index)
 
-    def backward(self, step=1, return_first_if_out=False, update_index=True):
+    def backward(self, step=1, return_first_if_out=False, update_index=True, out_value=None):
         if self.current_index <= step - 1:
             if return_first_if_out:
                 res = self.lst[0]
             else:
-                res = None
+                res = out_value
         else:
             res = self.lst[self.current_index - 1]
 
@@ -43,17 +43,17 @@ class SimpleIterator:
     def prev(self, return_first_if_out=False, update_index=True):
         return self.backward(1, return_first_if_out, update_index)
 
-    def iter(self, step=1, direction='up'):
+    def iter(self, direction='up', step=1):
         yield self.current()
         while True:
             if direction == 'up':
-                if self.current_index == len(self.lst) - 1:
-                    break
-                yield self.forward(step)
+                next = self.forward(step, out_value=STUB)
             elif direction == 'down':
-                if self.current_index == 0:
-                    break
-                yield self.backward(step)
+                next = self.backward(step, out_value=STUB)
+
+            if next == STUB:
+                break
+            yield next
 
     def iter_sequences(self, n=2):
         for i in range(len(self) - n + 1):
@@ -84,8 +84,8 @@ def test_simple_bounded_iterator():
 
     it.reset()
 
-    # for v in it.forward(2):
-
+    for v in it.iter(step=2):
+        print(v)
 
 
 if __name__ == '__main__':
