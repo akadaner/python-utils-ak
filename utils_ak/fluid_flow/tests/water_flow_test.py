@@ -100,4 +100,5 @@ def test_water_line_flow_2_multiple_boilings():
 
 
 if __name__ == '__main__':
+    test_water_line_flow_1()
     test_water_line_flow_2_multiple_boilings()
