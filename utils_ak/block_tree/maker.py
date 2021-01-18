@@ -21,14 +21,14 @@ class BlockMaker:
         return self.block_factory(block_obj, **kwargs)
 
     def copy(self, block, with_children=True, with_props=False, prop_keys=None):
-        res = self.create_block(block.props['class'], **block.props.relative_props)
+        res = self.create_block(block.props['cls'], **block.props.relative_props)
 
         if with_children:
             for child in block.children:
                 res.add_child(self.copy(child))
 
         if with_props:
-            props = block.props.get_all_props()
+            props = block.props.all()
             prop_keys = prop_keys or []
             if prop_keys:
                 props = {k: v for k, v in props if k in prop_keys}
@@ -75,7 +75,7 @@ def test_block_maker1():
     make('b', size=[5, 0])
     make(maker.create_block('c', size=[2, 0]), test=5)
     print(maker.root)
-    print(maker.root['c'].props.get_all_props())
+    print(maker.root['c'].props.all())
 
 
 def test_block_maker2():

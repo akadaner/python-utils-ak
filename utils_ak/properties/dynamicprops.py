@@ -71,7 +71,7 @@ class DynamicProps:
         res = parent_keys + list(self.accumulators.keys()) + list(self.relative_props.keys()) + self.required_keys
         return list(set(res))
 
-    def get_all_props(self):
+    def all(self):
         return {key: self[key] for key in self.keys()}
 
 
@@ -94,7 +94,7 @@ def test_dynamic_props():
     print(pd.DataFrame(values, columns=['foo', 'bar', 'other', 'non-existent_key']))
 
     for node in [root, child1, child2]:
-        print(node.keys(), node.get_all_props())
+        print(node.keys(), node.all())
 
 
 if __name__ == '__main__':
