@@ -5,6 +5,7 @@ from utils_ak.fluid_flow.actor import Actor
 from utils_ak.fluid_flow.actors.pipe import *
 from utils_ak.fluid_flow.actors.container import Container
 from utils_ak.fluid_flow.calculations import *
+from utils_ak.iteration import SimpleIterator
 
 from functools import wraps
 
@@ -30,6 +31,12 @@ class Sequence(Actor, PipeMixin):
         self.containers = containers
         self.io_containers = {'in': containers[0], 'out': containers[-1]}
 
+        self.nodes = [self.containers[0]]
+        for c1, c2 in SimpleIterator(self.containers).iter_sequences(2):
+            pipe = pipe_connect(c1, c2)
+            self.nodes.append(pipe)
+            self.nodes.append(c2)
+
     def is_limit_reached(self, orient):
         return self.io_containers[orient].is_limit_reached(orient)
 
@@ -48,7 +55,7 @@ class Sequence(Actor, PipeMixin):
 
     @switch
     def update_speed(self, ts):
-        for node in self.containers:
+        for node in self.nodes:
             node.update_speed(ts)
 
     @switch

@@ -1,5 +1,6 @@
 from utils_ak.fluid_flow import *
-
+import warnings
+warnings.filterwarnings('ignore')
 
 def test_flow_processor_1():
     container = Container('Input', value=100, max_pressures=[None, 10])
