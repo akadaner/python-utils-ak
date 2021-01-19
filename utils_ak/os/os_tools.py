@@ -1,10 +1,14 @@
 import fnmatch
 import shutil
+from contextlib import contextmanager
 from _sha512 import sha512
 from uuid import uuid4
 import os
 import tempfile as tmp
-from contextlib import contextmanager
+import subprocess
+import os
+import platform
+
 
 from utils_ak.str import cast_bytes
 
@@ -160,7 +164,7 @@ def getenv_boolean(var_name, default_value=False):
 
 
 def open_file_in_os(fn):
-    import subprocess, os, platform
+    fn = os.path.abspath(fn)
     if platform.system() == 'Darwin':  # macOS
         subprocess.call(('open', fn))
     elif platform.system() == 'Windows':  # Windows

@@ -37,7 +37,7 @@ class Container(Actor, PipeMixin):
         self.df.at[orient, 'collected'] += abs(value)
         self.transactions.append([self.last_ts, ts, value])
 
-    def active_periods(self):
+    def active_periods(self, orient='in'):
         if not self.transactions:
             return []
         return [[self.item, self.transactions[0][0], self.transactions[-1][1]]]

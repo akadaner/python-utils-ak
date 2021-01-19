@@ -12,7 +12,7 @@ class SplitFile:
     def get_indexes(self):
         cur_indexes = []
         for fn in self.list():
-            if fn == self.fn:
+            if os.path.abspath(fn) == os.path.abspath(self.fn):
                 cur_indexes.append(0)
             else:
                 cur_indexes.append(int(os.path.splitext(fn)[0].rsplit('_', 1)[-1]))
@@ -39,6 +39,7 @@ class SplitFile:
 
         suffix = '_{}'.format(max(cur_indexes) + 1)
         return os.path.splitext(self.fn)[0] + suffix + os.path.splitext(self.fn)[-1]
+
 
 def test_split_file():
     sf = SplitFile('test.csv')

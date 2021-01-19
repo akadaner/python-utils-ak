@@ -73,4 +73,4 @@ class Sequence(Actor, PipeMixin):
         return [node.display_stats() for node in self.containers]
 
     def active_periods(self, orient='in'):
-        return self.io_containers[orient].active_periods()
+        return self.io_containers[orient].active_periods(orient=orient)
