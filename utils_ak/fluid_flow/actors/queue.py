@@ -25,12 +25,12 @@ def switch(f):
 
 
 class Queue(Actor, PipeMixin):
-    def __init__(self, id, containers, break_funcs=None):
+    def __init__(self, id, lines, break_funcs=None):
         super().__init__(id)
-        self.containers = containers
+        self.lines = lines
 
         self.df = pd.DataFrame(index=['in', 'out'], columns=['iterators', 'break_funcs', 'paused'])
-        self.df['iterator'] = [SimpleIterator(containers, 0) for _ in range(2)]
+        self.df['iterator'] = [SimpleIterator(lines, 0) for _ in range(2)]
         self.df['break_func'] = self.default_break_func
         self.df['paused'] = False
 
@@ -47,13 +47,12 @@ class Queue(Actor, PipeMixin):
         return self.df.at[orient, 'iterator'].current()
 
     def inner_actors(self):
-        return self.containers
+        return self.lines
 
     @switch
     def update_value(self, ts):
-        self.current('in').update_value(ts)
-        if self.current('in') != self.current('out'):
-            self.current('out').update_value(ts)
+        for line in self.lines:
+            line.update_value(ts)
 
         for orient in ['in', 'out']:
             if self.current(orient).is_limit_reached(orient):
@@ -91,6 +90,7 @@ class Queue(Actor, PipeMixin):
     def update_speed(self, ts):
         for node in self.inner_actors():
             node.update_speed(ts)
+
     @switch
     def update_triggers(self, ts):
         for node in self.inner_actors():
@@ -100,13 +100,13 @@ class Queue(Actor, PipeMixin):
         return f'Queue: {self.id}'
 
     def stats(self):
-        return [[node.id, node.stats()] for node in self.containers]
+        return [[node.id, node.stats()] for node in self.lines]
 
     def display_stats(self):
-        return [(node.id, node.display_stats()) for node in self.containers]
+        return [(node.id, node.display_stats()) for node in self.lines]
 
     def active_periods(self, orient='in'):
-        return sum([node.active_periods(orient) for node in self.containers], [])
+        return sum([node.active_periods(orient) for node in self.lines], [])
 
     def subscribe(self):
         super().subscribe()

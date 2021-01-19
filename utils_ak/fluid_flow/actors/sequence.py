@@ -41,7 +41,7 @@ class Sequence(Actor, PipeMixin):
         return self.io_containers[orient].is_limit_reached(orient)
 
     def inner_actors(self):
-        return self.containers
+        return self.nodes
 
     @switch
     def update_value(self, ts):
@@ -64,10 +64,10 @@ class Sequence(Actor, PipeMixin):
             node.update_triggers(ts)
 
     def __str__(self):
-        return f'Processor: {self.id}'
+        return f'Sequence: {self.id}'
 
     def stats(self):
-        return {node.id: node.stats() for node in self.containers}
+        return {node.id: node.stats() for node in self.nodes}
 
     def display_stats(self):
         return [node.display_stats() for node in self.containers]

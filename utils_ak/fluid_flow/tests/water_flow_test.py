@@ -1,6 +1,9 @@
 from utils_ak.fluid_flow import *
 from utils_ak.block_tree import *
 
+import warnings
+warnings.filterwarnings('ignore')
+
 
 def test_water_line_flow_1():
     drenator = Container('Drenator', value=1000, max_pressures=[None, None])
@@ -19,7 +22,11 @@ def test_water_line_flow_1():
     packing2 = Processor('Packing2', items=['b', 'b1'], max_pressures=[400, None], processing_time=0, limits=[100, None])
     packing_queue1 = Queue('PackingQueue1', [packing1, packing2])
 
-    packing3 = Processor('Packing3', items=['b', 'b2'], max_pressures=[200, None], processing_time=0, limits=[150, None])
+    # using sequence as packing
+    container = Container('Container3', item='b', max_pressures=[200, None], limits=[150, None])
+    # slow packing...
+    processor = Processor('Processor3', items=['b', 'b2'], max_pressures=[50, None], processing_time=0)
+    packing3 = Sequence('Packing3', [container, processor])
     packing_queue2 = Queue('PackingQueue1', [packing3])
 
     pipe_connect(drenator, melting_queue, 'drenator-melting')
@@ -101,4 +108,4 @@ def test_water_line_flow_2_multiple_boilings():
 
 if __name__ == '__main__':
     test_water_line_flow_1()
-    test_water_line_flow_2_multiple_boilings()
+    # test_water_line_flow_2_multiple_boilings()
