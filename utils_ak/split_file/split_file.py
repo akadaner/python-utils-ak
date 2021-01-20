@@ -55,5 +55,6 @@ def test_split_file():
         print('Removing', fn)
         os.remove(fn)
 
+
 if __name__ == '__main__':
     test_split_file()

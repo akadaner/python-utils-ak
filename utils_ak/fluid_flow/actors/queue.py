@@ -78,7 +78,7 @@ class Queue(Actor, PipeMixin):
     def on_resume(self, topic, ts, event):
         self.df.at[event['orient'], 'paused'] = False
         old = self.current(event['orient'])
-        new = self.df.at[event['orient'], 'iterator'].next(return_last_if_out=True)
+        new = self.df.at[event['orient'], 'iterator'].next(return_last_if_out=True, update_index=True)
         pipe_switch(old, new, event['orient'])
 
     @switch
