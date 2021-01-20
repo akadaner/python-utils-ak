@@ -12,17 +12,24 @@ class Job(Document):
     AUTO_FIELDS = ['created', '_id']
     type = StringField(required=True)
     payload = DictField()
+
     created = DateTimeField(default=datetime.utcnow)
+    status = StringField(required=True, default='pending', choices=['pending', 'locked', 'error', 'success'])
+    response = StringField()
+
+    locked_by = ReferenceField('Execution')
+    locked_at = DateTimeField(default=datetime.utcnow)
+
+    executions = ListField(ReferenceField('Execution'))
     meta = {'allow_inheritance': True}
 
 
 class Execution(Document):
     AUTO_FIELDS = ['created', '_id']
-    job = ReferenceField('Job')
+    job = ReferenceField(Job)
+    config = DictField()
     created = DateTimeField(default=datetime.utcnow)
+    status = StringField(required=True, default='pending', choices=['pending', 'running', 'serving', 'error', 'success'])
+    response = StringField()
 
-
-class Product(Document):
-    AUTO_FIELDS = ['created', 'version', '_id']
-    execution = ReferenceField('Execution')
-    created = DateTimeField(default=datetime.utcnow)
+    meta = {'allow_inheritance': True}
