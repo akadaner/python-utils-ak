@@ -58,7 +58,7 @@ def test_flow_queue_4_different_items():
 
 
 if __name__ == '__main__':
-    # test_flow_queue_1_in()
+    test_flow_queue_1_in()
     # test_flow_queue_2_out()
     # test_flow_queue_3()
-    test_flow_queue_4()
+    # test_flow_queue_4()

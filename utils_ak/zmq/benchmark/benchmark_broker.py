@@ -13,7 +13,7 @@ COUNT = 100_000
 # lat or thr
 now = time.perf_counter
 
-from utils_ak.zmq.zmq_client import ZMQClient
+from utils_ak.zmq.client import ZMQClient
 
 
 # docs

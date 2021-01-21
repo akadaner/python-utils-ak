@@ -1,0 +1,19 @@
+# necassary fields
+microservice_name: example_ping_pong
+configuration: default
+
+
+zmq:
+  endpoints:
+    heartbeat:
+      type: sub
+      endpoint: tcp://localhost:5555
+    system:
+      type: pub
+      endpoint: tcp://localhost:5556
+    ping:
+      type: sub
+      endpoint: tcp://localhost:5557
+    pong:
+      type: sub
+      endpoint: tcp://localhost:5558

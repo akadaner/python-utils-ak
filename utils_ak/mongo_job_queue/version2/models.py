@@ -14,13 +14,12 @@ class Job(Document):
     payload = DictField()
 
     created = DateTimeField(default=datetime.utcnow)
-    status = StringField(required=True, default='pending', choices=['pending', 'locked', 'error', 'success'])
-    response = StringField()
 
     locked_by = ReferenceField('Execution')
     locked_at = DateTimeField(default=datetime.utcnow)
 
     executions = ListField(ReferenceField('Execution'))
+
     meta = {'allow_inheritance': True}
 
 
@@ -29,7 +28,8 @@ class Execution(Document):
     job = ReferenceField(Job)
     config = DictField()
     created = DateTimeField(default=datetime.utcnow)
-    status = StringField(required=True, default='pending', choices=['pending', 'running', 'serving', 'error', 'success'])
+    status = StringField(required=True, default='pending', choices=['pending', 'initializing', 'running', 'error', 'success'])
     response = StringField()
 
     meta = {'allow_inheritance': True}
+

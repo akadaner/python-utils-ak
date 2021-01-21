@@ -1,1 +1,1 @@
-from utils_ak.zmq.zmq_client import ZMQClient
+from utils_ak.zmq.client import ZMQClient
