@@ -8,7 +8,6 @@ from utils_ak.mongo_job_queue.worker.worker import Worker
 from utils_ak.mongo_job_queue.worker.microservice import WorkerMicroservice
 
 
-
 class TestWorker(Worker):
     def __init__(self, id, payload, message_broker):
         super().__init__(id, payload)
@@ -54,7 +53,6 @@ def test_streaming():
     configure_logging(stream_level=logging.INFO)
 
     run_listener_async('monitor', message_broker=('zmq', {'endpoints': {'monitor': {'endpoint': 'tcp://localhost:5555', 'type': 'sub'}}}))
-    time.sleep(1)
     worker = TestWorker('WorkerId', {'type': 'streaming'}, message_broker=('zmq', {'endpoints': {'monitor': {'endpoint': 'tcp://localhost:5555', 'type': 'sub'}}}))
     worker.run()
 
