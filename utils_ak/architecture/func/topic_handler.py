@@ -45,8 +45,11 @@ class TopicHandler(object):
         if self.topic_formatter:
             topic = self.topic_formatter(topic)
 
-        if topic in self.handlers:
-            return await self.handlers[topic].aiocall(*args, **kwargs)
+        res = []
+        for _topic, handler in self.handlers.items():
+            if self.topic_filter(_topic, topic):
+                res.append(await handler.aiocall(*args, **kwargs))
+        return self.reducer(res)
 
     def has_topic(self, topic):
         return topic in self.handlers
