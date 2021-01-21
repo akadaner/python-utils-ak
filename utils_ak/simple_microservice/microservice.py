@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 TIME_EPS = 0.001
 
 
-class Microservice(object):
+class SimpleMicroservice(object):
     """ Microservice base class with timers and subscriber. Works on asyncio. """
 
     def __init__(self, id, logger=None, serializer=None, default_broker='zmq', brokers_config=None, asyncio_support=True):

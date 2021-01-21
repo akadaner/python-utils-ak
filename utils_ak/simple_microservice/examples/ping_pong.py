@@ -2,20 +2,14 @@ import time
 import asyncio
 
 from utils_ak.zmq import endpoint
-from utils_ak.microservices import BaseMicroservice
+from utils_ak.simple_microservice import SimpleMicroservice
 
 import logging
 logging.basicConfig(level=logging.INFO)
 
-ping_logger = logging.getLogger('ping')
-pong_logger = logging.getLogger('pong')
-
-BROKER = 'zmq'
-BROKERS_CONFIG = {'zmq': {'endpoints': {'ping': {'type': 'sub', 'endpoint': endpoint('localhost', 6554)},
-                                        'pong': {'type': 'sub', 'endpoint': endpoint('localhost', 6555)}}}}
 
 
-class Ping(SystemMicroservice):
+class Ping(SimpleMicroservice):
     def __init__(self, *args, **kwargs):
         super().__init__('Test publisher', *args, **kwargs)
         self.add_callback('ping', '', self.send_ping)
@@ -26,7 +20,7 @@ class Ping(SystemMicroservice):
         self.publish_json('pong', '', {'msg': 'ping'})
 
 
-class Pong(SystemMicroservice):
+class Pong(SimpleMicroservice):
     def __init__(self, *args, **kwargs):
         super().__init__('Test publisher', *args, **kwargs)
         self.add_callback('pong', '', self.send_pong)
@@ -36,6 +30,14 @@ class Pong(SystemMicroservice):
         time.sleep(1)
         self.publish_json('ping', '', {'msg': 'pong'})
 
+
+
+ping_logger = logging.getLogger('ping')
+pong_logger = logging.getLogger('pong')
+
+BROKER = 'zmq'
+BROKERS_CONFIG = {'zmq': {'endpoints': {'ping': {'type': 'sub', 'endpoint': endpoint('localhost', 6554)},
+                                        'pong': {'type': 'sub', 'endpoint': endpoint('localhost', 6555)}}}}
 
 def run_ping():
     ping = Ping(logger=ping_logger, default_broker=BROKER, brokers_config=BROKERS_CONFIG)

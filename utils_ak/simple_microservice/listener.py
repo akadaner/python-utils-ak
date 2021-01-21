@@ -1,8 +1,8 @@
-from utils_ak.microservices.microservice import Microservice
+from utils_ak.simple_microservice.microservice import SimpleMicroservice
 import multiprocessing
 
 
-class Listener(Microservice):
+class Listener(SimpleMicroservice):
     def __init__(self, collection, topic='', *args, **kwargs):
         super().__init__(f'Listener_{collection}', *args, **kwargs)
         self.add_callback(collection, topic, self._log, formatter='default')

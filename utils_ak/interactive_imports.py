@@ -39,7 +39,7 @@ from .str import *
 from .time import *
 from .tqdm import *
 from .jupyter import *
-from .microservices import *
+from .simple_microservice import *
 from .config import *
 from .streaming import *
 from .properties import *

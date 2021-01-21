@@ -3,11 +3,11 @@ import random
 import time
 
 from utils_ak.log import configure_stream_logging
-from utils_ak.microservices import Microservice, run_listener_async
+from utils_ak.simple_microservice import SimpleMicroservice, run_listener_async
 configure_stream_logging(stream_level=logging.INFO)
 
 
-class Heartbeater(Microservice):
+class Heartbeater(SimpleMicroservice):
     def __init__(self, *args, **kwargs):
         super().__init__(f'Publisher {random.randint(0, 10 ** 6)}', *args, **kwargs)
         self.add_timer(self.publish_json, 1.0, args=('monitor', 'asdf', {'id': self.id},))
