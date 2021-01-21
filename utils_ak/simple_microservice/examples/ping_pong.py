@@ -33,6 +33,7 @@ class Pong(SimpleMicroservice):
 ping_logger = logging.getLogger('ping')
 pong_logger = logging.getLogger('pong')
 
+
 def run_ping():
     ping = Ping(logger=ping_logger, message_broker=('zmq',  {'endpoints': {'ping': {'type': 'sub', 'endpoint': endpoint('localhost', 6554)},
                                         'pong': {'type': 'sub', 'endpoint': endpoint('localhost', 6555)}}}) )

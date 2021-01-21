@@ -2,7 +2,7 @@ import time
 import threading
 
 from utils_ak.mongoengine import *
-from .models import Job, Execution
+from .models import Job, Worker
 import logging
 
 
@@ -43,5 +43,5 @@ class ExecutorMonitor:
 class Worker:
     def __init__(self, worker_id, execution_id):
         self.id = worker_id
-        self.execution = cast_model(execution_id, Execution)
+        self.execution = cast_model(execution_id, Worker)
 

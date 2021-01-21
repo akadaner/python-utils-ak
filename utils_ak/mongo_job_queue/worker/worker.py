@@ -5,4 +5,4 @@ class Worker:
         self.payload = payload
 
     def run(self):
-        pass
+        raise NotImplemented

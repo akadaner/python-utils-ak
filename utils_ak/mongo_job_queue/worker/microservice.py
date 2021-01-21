@@ -13,10 +13,12 @@ class WorkerMicroservice(SimpleMicroservice):
     def send_state(self, state):
         self.publish_json('monitor', 'state', {'id': self.id, 'state': state})
 
+
 def test():
     run_listener_async('monitor', message_broker=('zmq', {'endpoints': {'monitor': {'endpoint': 'tcp://localhost:5555', 'type': 'sub'}}}))
     ms = WorkerMicroservice('Worker', message_broker=('zmq', {'endpoints': {'monitor': {'endpoint': 'tcp://localhost:5555', 'type': 'sub'}}}))
     ms.run()
+
 
 if __name__ == '__main__':
     test()

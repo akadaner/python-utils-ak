@@ -1,22 +1,10 @@
-
-class ExecutorManager:
-    def start_executor(self, id, type, payload):
-        pass
-
-    def disable_executor(self, id):
-        pass
+import multiprocessing
 
 
-class LocalExecutorManager(ExecutorManager):
-    def __init__(self):
-        self.executors = {}  # {id: thread}
+class WorkerManager:
+    def start_worker(self, id, type, payload):
+        raise NotImplemented
 
-    def start_executor(self, id, type, payload):
-        pass
+    def disable_worker(self, id):
+        raise NotImplemented
 
-    def disable_executor(self, id):
-        pass
-
-
-class KubernetesExecutorManager(ExecutorManager):
-    pass

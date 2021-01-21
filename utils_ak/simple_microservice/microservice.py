@@ -46,6 +46,9 @@ class SimpleMicroservice(object):
 
         self.serializer = serializer or JsonSerializer()
 
+    def stop(self):
+        self.is_active = False
+
     def _args_formatter(self, topic, msg):
         return (topic, self.serializer.decode(msg)), {}
 
@@ -209,9 +212,9 @@ class SimpleMicroservice(object):
 
     def run(self, asyncio=True):
         if asyncio:
-            self._aiorun()
+            return self._aiorun()
         else:
-            self._run()
+            return self._run()
 
     def on_exception(self, e, msg):
         self.logger.error((e, msg))

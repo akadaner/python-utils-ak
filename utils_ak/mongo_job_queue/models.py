@@ -18,12 +18,12 @@ class Job(Document):
     locked_by = ReferenceField('Execution')
     locked_at = DateTimeField(default=datetime.utcnow)
 
-    executions = ListField(ReferenceField('Execution'))
+    workers = ListField(ReferenceField('Worker'))
 
     meta = {'allow_inheritance': True}
 
 
-class Execution(Document):
+class Worker(Document):
     AUTO_FIELDS = ['created', '_id']
     job = ReferenceField(Job)
     config = DictField()
