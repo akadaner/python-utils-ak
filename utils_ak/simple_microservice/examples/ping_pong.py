@@ -33,12 +33,9 @@ class Pong(SimpleMicroservice):
 ping_logger = logging.getLogger('ping')
 pong_logger = logging.getLogger('pong')
 
-BROKER = 'zmq'
-BROKERS_CONFIG = {'zmq': {'endpoints': {'ping': {'type': 'sub', 'endpoint': endpoint('localhost', 6554)},
-                                        'pong': {'type': 'sub', 'endpoint': endpoint('localhost', 6555)}}}}
-
 def run_ping():
-    ping = Ping(logger=ping_logger, default_broker=BROKER, brokers_config=BROKERS_CONFIG)
+    ping = Ping(logger=ping_logger, message_broker=('zmq',  {'endpoints': {'ping': {'type': 'sub', 'endpoint': endpoint('localhost', 6554)},
+                                        'pong': {'type': 'sub', 'endpoint': endpoint('localhost', 6555)}}}) )
 
     async def send_initial():
         await asyncio.sleep(1.0)
@@ -49,7 +46,8 @@ def run_ping():
 
 
 def run_pong():
-    Pong(logger=pong_logger, default_broker=BROKER, brokers_config=BROKERS_CONFIG).run()
+    Pong(logger=pong_logger, message_broker=('zmq',  {'endpoints': {'ping': {'type': 'sub', 'endpoint': endpoint('localhost', 6554)},
+                                        'pong': {'type': 'sub', 'endpoint': endpoint('localhost', 6555)}}})).run()
 
 
 if __name__ == '__main__':
