@@ -24,6 +24,8 @@ class ZMQBroker(Broker):
 
         self.cli = ZMQClient()
 
+        self.async_supported = False
+
     def _get_endpoint_info(self, collection, action):
         """
         :param collection: str

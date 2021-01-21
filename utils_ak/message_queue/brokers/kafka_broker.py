@@ -9,6 +9,7 @@ logger = logging.getLogger(__name__)
 class KafkaBroker(Broker):
     def __init__(self):
         self.cli = KafkaClient()
+        self.async_supported = False  # todo: swithc to True?
 
     def _get_kafka_topic(self, collection, topic):
         if topic:

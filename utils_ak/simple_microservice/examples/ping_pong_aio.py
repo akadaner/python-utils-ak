@@ -4,7 +4,7 @@ import numpy as np
 import logging
 
 from utils_ak.zmq import endpoint
-from utils_ak.microservices import SystemMicroservice, run_listener_async
+from utils_ak.simple_microservice import SimpleMicroservice, run_listener_async
 logging.basicConfig(level=logging.INFO)
 
 ping_logger = logging.getLogger('ping')
@@ -14,7 +14,7 @@ BROKER = 'zmq'
 BROKERS_CONFIG = {'zmq': {'endpoints': {'ping': {'type': 'sub', 'endpoint': endpoint('localhost', 6554)},
                                         'pong': {'type': 'sub', 'endpoint': endpoint('localhost', 6555)}}}}
 
-class Ping(SystemMicroservice):
+class Ping(SimpleMicroservice):
     def __init__(self, *args, **kwargs):
         super().__init__('Test publisher', logger=ping_logger, *args, **kwargs)
         self.add_callback('pong', '', self.send_ping)
@@ -32,7 +32,7 @@ class Ping(SystemMicroservice):
         self.publish_json('ping', '', {'msg': 'ping'})
 
 
-class Pong(SystemMicroservice):
+class Pong(SimpleMicroservice):
     def __init__(self, *args, **kwargs):
         super().__init__('Test publisher', logger=pong_logger, *args, **kwargs)
         self.add_callback('ping', '', self.send_pong)

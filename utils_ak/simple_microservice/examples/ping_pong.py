@@ -11,7 +11,7 @@ logging.basicConfig(level=logging.INFO)
 
 class Ping(SimpleMicroservice):
     def __init__(self, *args, **kwargs):
-        super().__init__('Test publisher', *args, **kwargs)
+        super().__init__('Ping', *args, **kwargs)
         self.add_callback('ping', '', self.send_ping)
 
     def send_ping(self, topic, msg):
@@ -22,15 +22,13 @@ class Ping(SimpleMicroservice):
 
 class Pong(SimpleMicroservice):
     def __init__(self, *args, **kwargs):
-        super().__init__('Test publisher', *args, **kwargs)
+        super().__init__('Pong', *args, **kwargs)
         self.add_callback('pong', '', self.send_pong)
 
     def send_pong(self, topic, msg):
         self.logger.info(f'Received {topic} {msg}')
         time.sleep(1)
         self.publish_json('ping', '', {'msg': 'pong'})
-
-
 
 ping_logger = logging.getLogger('ping')
 pong_logger = logging.getLogger('pong')

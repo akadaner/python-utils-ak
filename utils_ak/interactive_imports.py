@@ -53,3 +53,4 @@ from .openpyxl import *
 from .dag import *
 from .iteration import *
 from .fluid_flow import *
+from .message_queue import *

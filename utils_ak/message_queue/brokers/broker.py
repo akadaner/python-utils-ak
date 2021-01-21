@@ -1,5 +1,5 @@
 class Broker:
-    support_async = False
+    async_supported = False
 
     def subscribe(self, collection, topic):
         raise NotImplementedError
@@ -12,3 +12,4 @@ class Broker:
 
     async def aiopoll(self, timeout=0.):
         raise NotImplementedError
+

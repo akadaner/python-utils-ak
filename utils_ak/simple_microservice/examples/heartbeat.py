@@ -2,8 +2,8 @@ import logging
 import random
 import time
 
-from utils_ak.log import configure_stream_logging
-from utils_ak.simple_microservice import SimpleMicroservice, run_listener_async
+from utils_ak.interactive_imports import *
+
 configure_stream_logging(stream_level=logging.INFO)
 
 
@@ -14,7 +14,5 @@ class Heartbeater(SimpleMicroservice):
 
 
 if __name__ == '__main__':
-    BROKER = 'zmq'
-    BROKERS_CONFIG = {'zmq': {'endpoints': {'monitor': {'endpoint': 'tcp://localhost:5555', 'type': 'sub'}}}}
-    run_listener_async('monitor', brokers_config=BROKERS_CONFIG, default_broker=BROKER)
-    Heartbeater(brokers_config=BROKERS_CONFIG, default_broker=BROKER).run()
+    run_listener_async('monitor', message_broker=('zmq', {'endpoints': {'monitor': {'endpoint': 'tcp://localhost:5555', 'type': 'sub'}}}))
+    Heartbeater(message_broker=('zmq', {'endpoints': {'monitor': {'endpoint': 'tcp://localhost:5555', 'type': 'sub'}}})).run()
