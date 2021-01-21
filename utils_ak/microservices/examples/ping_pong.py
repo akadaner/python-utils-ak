@@ -2,7 +2,7 @@ import time
 import asyncio
 
 from utils_ak.zmq import endpoint
-from utils_ak.microservices import SystemMicroservice, run_listener_async
+from utils_ak.microservices import BaseMicroservice
 
 import logging
 logging.basicConfig(level=logging.INFO)

@@ -1,6 +1,6 @@
 import anyconfig
 
-from utils_ak.microservices import SystemMicroservice
+from utils_ak.microservices.archive.version1.system import SystemMicroservice
 from utils_ak.serialization import MsgPackSerializer
 from utils_ak.config.config import get_config
 

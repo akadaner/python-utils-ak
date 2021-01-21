@@ -8,22 +8,22 @@ import asyncio
 from utils_ak.callback_timer import CallbackTimer, ScheduleTimer, CallbackTimers
 from utils_ak.architecture.func import PrefixHandler
 from utils_ak.str import cast_unicode
+from utils_ak.message_queue.brokers import BrokerManager
+from utils_ak.serialization import JsonSerializer
+
 
 logger = logging.getLogger(__name__)
 
-from utils_ak.message_queue.brokers import BrokerManager
-from utils_ak.serialization import JsonSerializer
 
 TIME_EPS = 0.001
 
 
-# todo: make failure processing better
-
-
-class BaseMicroservice(object):
+class Microservice(object):
     """ Microservice base class with timers and subscriber. Works on asyncio. """
 
-    def __init__(self, logger=None, serializer=None, default_broker='zmq', brokers_config=None, asyncio_support=True):
+    def __init__(self, id, logger=None, serializer=None, default_broker='zmq', brokers_config=None, asyncio_support=True):
+        self.id = id
+
         # aio
         self.tasks = []
         # sync
@@ -84,11 +84,10 @@ class BaseMicroservice(object):
         if formatter == 'default':
             formatter = self._args_formatter
 
-        # todo: change to topic handler!!! Be careful here
-        topic_handler = self.callbacks.setdefault(collection, PrefixHandler())
-        topic_handler.set_topic_formatter(topic_formatter)
-        topic_handler.add(topic, callback=callback, filter=filter, formatter=formatter)
-        return topic_handler
+        handler = self.callbacks.setdefault(collection, PrefixHandler())
+        handler.set_topic_formatter(topic_formatter)
+        handler.add(topic, callback=callback, filter=filter, formatter=formatter)
+        return handler
 
     def publish(self, collection, topic, msg, broker=None):
         self.broker_manager.publish(collection, topic, msg, broker)
@@ -153,7 +152,7 @@ class BaseMicroservice(object):
     def _aiorun(self):
         self.loop = asyncio.get_event_loop()
         # self.loop.set_debug(True)
-        self.logger.info('Microservice started')
+        self.logger.info(f'Microservice started: {self.id}')
 
         for timer in self.timers:
             self.tasks.append(self.wrap_coroutine_timer(timer))

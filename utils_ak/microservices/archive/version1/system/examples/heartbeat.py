@@ -1,7 +1,7 @@
 import logging
 import random
 
-from utils_ak.microservices import SystemMicroservice, run_listener_async
+from utils_ak.microservices.archive.version1 import SystemMicroservice, run_listener_async
 from utils_ak.log import configure_stream_logging
 
 
