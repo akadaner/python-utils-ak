@@ -20,6 +20,7 @@ class LocalWorkerManager(WorkerManager):
         worker.run()
 
     def disable_worker(self, id):
+        # todo: send stop signal instead
         self.workers[id].kill()
 
 
@@ -32,6 +33,7 @@ def test():
     worker_factory = TestWorkerFactory(message_broker=('zmq', {'endpoints': {'monitor': {'endpoint': 'tcp://localhost:5555', 'type': 'sub'}}}))
     worker_manager = LocalWorkerManager(worker_factory)
     worker_manager.start_worker('Worker 1', 'test', {'type': 'batch'})
+
 
 if __name__ == '__main__':
     test()

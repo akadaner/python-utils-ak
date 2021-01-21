@@ -16,19 +16,19 @@ class TestWorker(Worker):
     async def process(self, payload):
         if payload['type'] == 'batch':
             await asyncio.sleep(3)
-            self.microservice.send_state({'status': 'running'})
+            self.microservice.send_state('running', {})
             for i in range(5):
-                self.microservice.send_state({'progress': (i + 1) * 20})
+                self.microservice.send_state('running', {'progress': (i + 1) * 20})
                 await asyncio.sleep(1)
-            self.microservice.send_state({'status': 'success'})
+            self.microservice.send_state('success', {'output': 42})
             self.microservice.stop()
 
         elif payload['type'] == 'streaming':
             await asyncio.sleep(3)
-            self.microservice.send_state({'status': 'running'})
+            self.microservice.send_state('running', {})
 
             while True:
-                self.microservice.send_state({'foo': 'bar'})
+                self.microservice.send_state('running', {'foo': 'bar'})
                 await asyncio.sleep(3)
 
     def run(self):
@@ -58,5 +58,5 @@ def test_streaming():
 
 
 if __name__ == '__main__':
-    # test_batch()
-    test_streaming()
+    test_batch()
+    # test_streaming()
