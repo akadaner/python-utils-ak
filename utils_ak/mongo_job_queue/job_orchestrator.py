@@ -5,32 +5,39 @@ from utils_ak.mongoengine import *
 from .models import Job, Worker
 import logging
 
+from utils_ak.mongo_job_queue.worker.monitor import MonitorActor
+from utils_ak.simple_microservice import SimpleMicroservice
+
 
 class JobOrchestrator:
-    def __init__(self, executor_manager, executor_monitor):
+    def __init__(self, worker_controller, message_broker):
         self.timeout = 1
-        self.executor_manager = executor_manager
-        self.executor_monitor = executor_monitor
+        self.controller = worker_controller
+        self.ms = SimpleMicroservice('JobOrchestrator', message_broker=message_broker)
+        self.monitor = MonitorActor(self.ms)
+        self.process_active_jobs()
+        self.ms.add_timer(self.process_new_jobs, 1.0)
+        self.ms.add_callback('monitor_out', '', self.on_monitor)
 
-    # todo: Run on init
+    def run(self):
+        self.ms.run()
+
     def process_active_jobs(self):
         pass # todo: go through all active jobs and process them
 
-    # todo: run periodically
     def process_new_jobs(self):
-        pass # todo: go through all new jobs and process them
+        new_jobs = Job.objects(workers__size=0).all()
 
-    def init_executor(self, job):
-        pass # todo: create executor database entity
+        if new_jobs:
+            self.ms.logger.info(f'Processing {len(new_jobs)} new jobs')
 
-    def disable_executor(self, executor):
-        self.executor_manager.disable_executor(executor)
-        pass # todo: change executor status
+        for new_job in new_jobs:
+            worker_model = Worker()
+            worker_model.save()
+            new_job.workers.append(worker_model)
+            new_job.save()
+            self.ms.logger.info(f'Starting new worker {worker_model.id} {new_job.type} {new_job.payload}')
+            self.controller.start_worker(str(worker_model.id), new_job.type, new_job.payload)
 
-    def start_executor(self, executor):
-        # todo: add timeout for failed start
-        res = self.executor_manager.start_executor(executor)
-        # todo: change executor state
-
-    def on_executor_monitor(self, ts, topic, msg):
-        pass  # process monitor messages
+    def on_monitor(self, topic, msg):
+        self.ms.logger.info(('On monitor', topic, msg))

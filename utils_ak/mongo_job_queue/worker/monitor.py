@@ -23,6 +23,8 @@ class MonitorActor:
                 self.update_status(worker_id, 'stalled')
 
     def on_monitor(self, topic, msg):
+        self.microservice.logger.info(('On monitor', topic, msg))
+
         worker_id = msg['id']
         if worker_id not in self.workers:
             self.microservice.publish_json('monitor_out', 'new', {'id': worker_id})

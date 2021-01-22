@@ -1,4 +1,5 @@
 import time
+import logging
 import multiprocessing
 from utils_ak.mongo_job_queue.controller.controller import WorkerController
 from utils_ak.mongo_job_queue.worker.factory import TestWorkerFactory

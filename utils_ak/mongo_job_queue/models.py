@@ -7,6 +7,7 @@ from mongoengine import *
 from utils_ak.time import cast_str
 from utils_ak.mongoengine import *
 
+from datetime import datetime
 
 class Job(Document):
     AUTO_FIELDS = ['created', '_id']
@@ -16,7 +17,7 @@ class Job(Document):
     created = DateTimeField(default=datetime.utcnow)
 
     locked_by = ReferenceField('Execution')
-    locked_at = DateTimeField(default=datetime.utcnow)
+    locked_at = DateTimeField()
 
     workers = ListField(ReferenceField('Worker'))
 
@@ -32,4 +33,3 @@ class Worker(Document):
     response = StringField()
 
     meta = {'allow_inheritance': True}
-
