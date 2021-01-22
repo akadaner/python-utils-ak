@@ -27,10 +27,15 @@ class MonitorActor:
         if worker_id not in self.workers:
             self.microservice.publish_json('monitor_out', 'new', {'id': worker_id})
             self.workers[worker_id] = {}
+
         if topic == 'heartbeat':
             self.workers[worker_id]['last_heartbeat'] = datetime.utcnow()
         elif topic == 'state':
             self.update_status(worker_id, msg['status'])
             self.workers[worker_id]['state'] = msg['state']
+        elif topic in ['status_change', 'new']:
+            pass
         else:
             raise ValueError(topic)
+
+        self.microservice.logger.info(('Current monitor state', self.workers))

@@ -1,11 +1,11 @@
 import time
 import multiprocessing
-from utils_ak.mongo_job_queue.manager.manager import WorkerManager
+from utils_ak.mongo_job_queue.controller.controller import WorkerController
 from utils_ak.mongo_job_queue.worker.factory import TestWorkerFactory
 from utils_ak.simple_microservice import run_listener_async
 
 
-class LocalWorkerManager(WorkerManager):
+class LocalWorkerController(WorkerController):
     def __init__(self, worker_factory):
         self.workers = {}  # {id: process}
         self.worker_factory = worker_factory
@@ -19,7 +19,7 @@ class LocalWorkerManager(WorkerManager):
         worker = self.worker_factory.make_worker(id, type, payload)
         worker.run()
 
-    def disable_worker(self, id):
+    def stop_worker(self, id):
         # todo: send stop signal instead
         self.workers[id].kill()
 
@@ -31,7 +31,7 @@ def test():
     run_listener_async('monitor', message_broker=('zmq', {'endpoints': {'monitor': {'endpoint': 'tcp://localhost:5555', 'type': 'sub'}}}))
 
     worker_factory = TestWorkerFactory(message_broker=('zmq', {'endpoints': {'monitor': {'endpoint': 'tcp://localhost:5555', 'type': 'sub'}}}))
-    worker_manager = LocalWorkerManager(worker_factory)
+    worker_manager = LocalWorkerController(worker_factory)
     worker_manager.start_worker('Worker 1', 'test', {'type': 'batch'})
 
 

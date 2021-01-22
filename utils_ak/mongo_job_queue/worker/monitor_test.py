@@ -9,7 +9,7 @@ from utils_ak.mongo_job_queue.worker.workers.test import TestWorker
 from utils_ak.mongo_job_queue.worker.monitor import MonitorActor
 
 BROKER = 'zmq'
-BROKER_CONFIG = {'endpoints': {'monitor': {'endpoint': 'tcp://localhost:5555', 'type': 'sub'}, 'monitor_out': {'endpoint': 'tcp://localhost:5556', 'type': 'pub'}}}
+BROKER_CONFIG = {'endpoints': {'monitor': {'endpoint': 'tcp://localhost:5555', 'type': 'sub'}, 'monitor_out': {'endpoint': 'tcp://localhost:5556', 'type': 'sub'}}}
 MESSAGE_BROKER = (BROKER, BROKER_CONFIG)
 
 

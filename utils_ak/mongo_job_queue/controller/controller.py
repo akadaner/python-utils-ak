@@ -1,10 +1,10 @@
 import multiprocessing
 
 
-class WorkerManager:
+class WorkerController:
     def start_worker(self, id, type, payload):
         raise NotImplemented
 
-    def disable_worker(self, id):
+    def stop_worker(self, id):
         raise NotImplemented
 
