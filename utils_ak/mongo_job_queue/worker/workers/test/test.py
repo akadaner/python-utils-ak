@@ -11,16 +11,16 @@ from utils_ak.mongo_job_queue.worker.microservice import WorkerMicroservice
 class TestWorker(Worker):
     def __init__(self, id, payload, message_broker):
         super().__init__(id, payload)
-        self.microservice = WorkerMicroservice(f'Test Worker Microservice {id}', message_broker=message_broker)
+        self.microservice = WorkerMicroservice(id, message_broker=message_broker)
 
     async def process(self, payload):
         if payload.get('type') == 'batch':
-            await asyncio.sleep(3)
+            await asyncio.sleep(1)
             self.microservice.send_state('running', {})
             for i in range(5):
                 self.microservice.send_state('running', {'progress': (i + 1) * 20})
-                await asyncio.sleep(1)
-            self.microservice.send_state('success', {'output': 42})
+                await asyncio.sleep(0.1)
+            self.microservice.send_state('success', {'response': '42'})
             self.microservice.stop()
         elif payload.get('type') == 'streaming':
             await asyncio.sleep(3)

@@ -17,7 +17,7 @@ class JobOrchestrator:
         self.monitor = MonitorActor(self.ms)
         self.process_active_jobs()
         self.ms.add_timer(self.process_new_jobs, 1.0)
-        self.ms.add_callback('monitor_out', '', self.on_monitor)
+        self.ms.add_callback('monitor_out', '', self.on_monitor_out)
 
     def run(self):
         self.ms.run()
@@ -39,5 +39,11 @@ class JobOrchestrator:
             self.ms.logger.info(f'Starting new worker {worker_model.id} {new_job.type} {new_job.payload}')
             self.controller.start_worker(str(worker_model.id), new_job.type, new_job.payload)
 
-    def on_monitor(self, topic, msg):
-        self.ms.logger.info(('On monitor', topic, msg))
+    def on_monitor_out(self, topic, msg):
+        self.ms.logger.info(('On monitor out', topic, msg))
+        if topic == 'status_change':
+            worker = Worker.objects(pk=msg['id']).first() # todo: check if missing
+            worker.status = msg['new_status']
+            if worker.status == 'success':
+                worker.response = self.monitor.workers[msg['id']]['state']['response']
+            worker.save()

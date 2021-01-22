@@ -19,6 +19,9 @@ class MonitorActor:
 
     def update_stalled(self):
         for worker_id in self.workers:
+            if self.workers[worker_id]['status'] == 'success':
+                continue
+
             if 'last_heartbeat' in self.workers[worker_id] and (datetime.utcnow() - self.workers[worker_id]['last_heartbeat']).total_seconds() > self.heartbeat_timeout:
                 self.update_status(worker_id, 'stalled')
 

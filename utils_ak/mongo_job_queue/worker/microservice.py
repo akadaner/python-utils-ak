@@ -7,7 +7,7 @@ configure_logging(stream_level=logging.INFO)
 
 class WorkerMicroservice(SimpleMicroservice):
     def __init__(self, id, *args, **kwargs):
-        super().__init__(f'Test Worker {id}', *args, **kwargs)
+        super().__init__(id, *args, **kwargs)
         self.add_timer(self.publish_json, 3.0, args=('monitor', 'heartbeat', {'id': self.id},))
 
     def send_state(self, status, state):

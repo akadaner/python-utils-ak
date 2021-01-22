@@ -29,7 +29,7 @@ class Worker(Document):
     job = ReferenceField(Job)
     config = DictField()
     created = DateTimeField(default=datetime.utcnow)
-    status = StringField(required=True, default='pending', choices=['pending', 'initializing', 'running', 'error', 'success'])
+    status = StringField(required=True, default='pending', choices=['pending', 'initializing', 'running', 'error', 'success', 'stalled'])
     response = StringField()
 
     meta = {'allow_inheritance': True}

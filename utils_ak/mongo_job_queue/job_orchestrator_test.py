@@ -15,9 +15,10 @@ from mongoengine import connect
 
 def create_new_job():
     connect()
-    time.sleep(5)
+    time.sleep(2)
     print('Creating new job...')
     Job.drop_collection()
+    Worker.drop_collection()
     job = Job(type='test', payload={'type': 'batch'})
     job.save()
 
