@@ -37,5 +37,5 @@ def cast_model(obj, cls):
 
 
 def cast_dict(obj, cls=None):
-    model = cast_model(obj, cls=None)
+    model = cast_model(obj, cls=cls)
     return dict(model.to_mongo())

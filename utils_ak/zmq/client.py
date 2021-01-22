@@ -25,12 +25,9 @@ class ZMQClient:
     def _register(self, receiver):
         self.poller.register(receiver.socket, zmq.POLLIN)
 
-    def _create_publisher(self, endpoint, conn_type='auto'):
+    def publish(self, endpoint, topic, msg, conn_type='auto'):
         if endpoint not in self.publishers:
             self.publishers[endpoint] = Publisher(endpoint, context=self.context, conn_type=conn_type)
-
-    def publish(self, endpoint, topic, msg, conn_type='auto'):
-        self._create_publisher(endpoint, conn_type=conn_type)
         self.publishers[endpoint].publish(topic, msg)
 
     def poll(self, timeout=0.):

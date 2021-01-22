@@ -19,6 +19,7 @@ class ZMQBroker(Broker):
             if config['type'] in ['pub', 'sub']:
                 self.collections[config['endpoint']] = collection
             else:
+                # forwarder
                 self.collections[config['endpoint_pub']] = collection
                 self.collections[config['endpoint_sub']] = collection
 
