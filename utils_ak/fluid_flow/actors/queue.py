@@ -25,8 +25,8 @@ def switch(f):
 
 
 class Queue(Actor, PipeMixin):
-    def __init__(self, id, lines, break_funcs=None):
-        super().__init__(id)
+    def __init__(self, name, lines, break_funcs=None):
+        super().__init__(name)
         self.lines = lines
 
         self.df = pd.DataFrame(index=['in', 'out'], columns=['iterators', 'break_funcs', 'paused'])
@@ -97,13 +97,13 @@ class Queue(Actor, PipeMixin):
             node.update_triggers(ts)
 
     def __str__(self):
-        return f'Queue: {self.id}'
+        return f'Queue: {self.name}'
 
     def stats(self):
-        return [[node.id, node.stats()] for node in self.lines]
+        return [[node.name, node.stats()] for node in self.lines]
 
     def display_stats(self):
-        return [(node.id, node.display_stats()) for node in self.lines]
+        return [(node.name, node.display_stats()) for node in self.lines]
 
     def active_periods(self, orient='in'):
         return sum([node.active_periods(orient) for node in self.lines], [])

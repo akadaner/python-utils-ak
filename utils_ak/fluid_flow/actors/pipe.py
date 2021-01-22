@@ -13,8 +13,8 @@ def cast_pipe(pipe_obj):
 
 
 class Pipe(Actor):
-    def __init__(self, id=None):
-        super().__init__(id)
+    def __init__(self, name=None):
+        super().__init__(name)
         self.current_speed = 0
         self.current_item = None
         self.pressures = {'out': None, 'in': None}
@@ -40,7 +40,7 @@ class Pipe(Actor):
             self.current_speed = 0
 
     def __str__(self):
-        return f'Pipe {self.id}'
+        return f'Pipe {self.name}'
 
     def stats(self):
         return {'current_speed': self.current_speed, 'pressures': self.pressures}

@@ -25,6 +25,7 @@ class SimpleMicroservice(object):
 
         # aio
         self.tasks = []
+
         # sync
         self.timers = []
 
@@ -50,7 +51,7 @@ class SimpleMicroservice(object):
         self.is_active = False
 
     def _args_formatter(self, topic, msg):
-        return (topic, self.serializer.decode(msg)), {}
+        return (cast_unicode(topic), self.serializer.decode(msg)), {}
 
     def add_timer(self, *args, **kwargs):
         """
@@ -72,8 +73,7 @@ class SimpleMicroservice(object):
     def subscribe(self, collection, topic):
         self.broker.subscribe(collection, topic)
 
-    def add_callback(self, collection, topic, callback=None, formatter='default',
-                     filter=None, topic_formatter=cast_unicode):
+    def add_callback(self, collection, topic, callback=None, formatter='default', filter=None, topic_formatter=cast_unicode):
         self.broker.subscribe(collection, topic)
         self._add_callback(collection, topic, callback, formatter, filter, topic_formatter)
 
@@ -114,7 +114,7 @@ class SimpleMicroservice(object):
 
         return f()
 
-    def wrap_coroutine(self, timeout=0.01):
+    def wrap_broker_coroutine(self, timeout=0.01):
         async_supported = self.broker.async_supported
 
         async def f():
@@ -157,7 +157,7 @@ class SimpleMicroservice(object):
         for timer in self.timers:
             self.tasks.append(self.wrap_coroutine_timer(timer))
 
-        self.tasks.append(self.wrap_coroutine())
+        self.tasks.append(self.wrap_broker_coroutine())
 
         self.tasks = [asyncio.ensure_future(task) for task in self.tasks]
         self.loop.run_until_complete(asyncio.wait(self.tasks))

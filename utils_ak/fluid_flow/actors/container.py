@@ -6,8 +6,8 @@ import pandas as pd
 
 
 class Container(Actor, PipeMixin):
-    def __init__(self, id, value=0, item='default', max_pressures=None, limits=None):
-        super().__init__(id)
+    def __init__(self, name, value=0, item='default', max_pressures=None, limits=None):
+        super().__init__(name)
         self.item = item
         self.value = value
 
@@ -74,7 +74,7 @@ class Container(Actor, PipeMixin):
             self.add_event('update.trigger', ts + min(etas), {})
 
     def __str__(self):
-        return f'Container {self.id}:{self.item}'
+        return f'Container {self.name}:{self.item}'
 
     def stats(self):
         return {'value': self.value}

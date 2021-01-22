@@ -3,10 +3,11 @@ from utils_ak.dag import DAGNode
 
 
 class Actor(DAGNode):
-    def __init__(self, id=None):
+    def __init__(self, name=None):
         super().__init__()
         self.last_ts = None
-        self.id = id or str(uuid.uuid4())
+        self.name = name
+        self.id = str(uuid.uuid4())
         self.event_manager = None
 
     def set_event_manager(self, event_manager):

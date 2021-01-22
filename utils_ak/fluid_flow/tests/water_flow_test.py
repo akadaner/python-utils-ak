@@ -44,7 +44,7 @@ def test_water_line_flow_1():
     for node in drenator.iterate('down'):
         if node.active_periods():
             for period in node.active_periods():
-                label = '-'.join([str(node.id), period[0]])
+                label = '-'.join([str(node.name), period[0]])
                 beg, end = period[1:]
                 beg, end = custom_round(beg * 60, 5) // 5, custom_round(end * 60, 5) // 5
                 make(label, x=[beg, 0], size=(end - beg, 1))
@@ -91,7 +91,7 @@ def test_water_line_flow_2_multiple_boilings():
         for node in drenator.iterate('down'):
             if node.active_periods():
                 for period in node.active_periods():
-                    label = '-'.join([str(node.id), period[0]])
+                    label = '-'.join([str(node.name), period[0]])
                     beg, end = period[1:]
                     beg, end = custom_round(beg * 60, 5) // 5, custom_round(end * 60, 5) // 5
                     make(label, x=[beg, 0], size=(end - beg, 1))

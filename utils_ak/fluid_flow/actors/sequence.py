@@ -25,8 +25,8 @@ def switch(f):
 
 
 class Sequence(Actor, PipeMixin):
-    def __init__(self, id, containers):
-        super().__init__(id)
+    def __init__(self, name, containers):
+        super().__init__(name)
         assert len(containers) >= 2
         self.containers = containers
         self.io_containers = {'in': containers[0], 'out': containers[-1]}
@@ -64,10 +64,10 @@ class Sequence(Actor, PipeMixin):
             node.update_triggers(ts)
 
     def __str__(self):
-        return f'Sequence: {self.id}'
+        return f'Sequence: {self.name}'
 
     def stats(self):
-        return {node.id: node.stats() for node in self.nodes}
+        return {node.name: node.stats() for node in self.nodes}
 
     def display_stats(self):
         return [node.display_stats() for node in self.containers]

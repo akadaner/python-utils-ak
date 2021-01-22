@@ -24,8 +24,8 @@ def switch(f):
 
 
 class Processor(Actor, PipeMixin):
-    def __init__(self, id, items=None, processing_time=0, transformation_factor=1, max_pressures=None, limits=None):
-        super().__init__(id)
+    def __init__(self, name, items=None, processing_time=0, transformation_factor=1, max_pressures=None, limits=None):
+        super().__init__(name)
 
         max_pressures = max_pressures or [None, None]
         limits = limits or [None, None]
@@ -83,10 +83,10 @@ class Processor(Actor, PipeMixin):
             node.update_triggers(ts)
 
     def __str__(self):
-        return f'Processor: {self.id}'
+        return f'Processor: {self.name}'
 
     def stats(self):
-        return {node.id: node.stats() for node in [self.io_containers['in'], self._pipe, self.io_containers['out']]}
+        return {node.name: node.stats() for node in [self.io_containers['in'], self._pipe, self.io_containers['out']]}
 
     def display_stats(self):
         return [self.io_containers['in'].display_stats(), self.io_containers['out'].display_stats()]

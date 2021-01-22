@@ -6,8 +6,6 @@ from .models import Job, Worker
 import logging
 
 
-
-
 class JobOrchestrator:
     def __init__(self, executor_manager, executor_monitor):
         self.timeout = 1
@@ -36,14 +34,3 @@ class JobOrchestrator:
 
     def on_executor_monitor(self, ts, topic, msg):
         pass  # process monitor messages
-
-
-class ExecutorMonitor:
-    pass  # listen to the all heartbeats. Send events when executor is not-active and when resumed
-
-
-class Worker:
-    def __init__(self, worker_id, execution_id):
-        self.id = worker_id
-        self.execution = cast_model(execution_id, Worker)
-

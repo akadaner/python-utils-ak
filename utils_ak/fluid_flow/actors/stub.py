@@ -2,8 +2,8 @@ from utils_ak.fluid_flow.actor import Actor
 
 
 class Stub(Actor):
-    def __init__(self, id=None):
-        super().__init__(id)
+    def __init__(self, name=None):
+        super().__init__(name)
 
     def update_pressure(self, ts):
         for pipe in self.parents:
@@ -12,4 +12,4 @@ class Stub(Actor):
             pipe.pressures['out'] = 0
 
     def __str__(self):
-        return f'Stub {self.id}'
+        return f'Stub {self.name}'

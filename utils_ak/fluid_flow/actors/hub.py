@@ -4,8 +4,8 @@ from utils_ak.fluid_flow.calculations import *
 
 
 class Hub(Actor):
-    def __init__(self, id):
-        super().__init__(id)
+    def __init__(self, name):
+        super().__init__(name)
 
     def update_pressure(self, ts):
         # todo: hardcode. Need updated children pressures. Better solution? Update pressure top-down?
@@ -47,5 +47,5 @@ class Hub(Actor):
                 pipe.pressures['out'] = 0
 
     def __str__(self):
-        return f'Hub: {self.id}'
+        return f'Hub: {self.name}'
 
