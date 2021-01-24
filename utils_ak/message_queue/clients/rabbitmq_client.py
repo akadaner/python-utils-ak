@@ -1,0 +1,1 @@
+from utils_ak.rabbitmq.rabbitmq_client import RabbitMQClient
