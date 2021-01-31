@@ -1,4 +1,3 @@
-import logging
 import copy
 
 from utils_ak.clock import *
@@ -9,6 +8,8 @@ from utils_ak.simple_vector import *
 from utils_ak.block_tree.parallelepiped_block import ParallelepipedBlock
 from utils_ak.block_tree.block import Block
 from utils_ak.block_tree.validation import validate_disjoint_by_axis
+
+from loguru import logger
 
 
 def stack_push(parent, block):
@@ -22,13 +23,14 @@ def stack_push(parent, block):
 
 
 def test_stack_push():
-    print('Stack push test')
+    logger.debug('Stack push test')
     root = ParallelepipedBlock('root', n_dims=1, x=[2], axis=0)
     a = ParallelepipedBlock('a', n_dims=1, size=[4], axis=0)
     b = ParallelepipedBlock('b', n_dims=1, size=[3], axis=0)
     stack_push(root, a)
     stack_push(root, b)
-    print(root)
+    logger.debug(root)
+
 
 @clockify()
 def simple_push(parent, block, validator=None, new_props=None):
@@ -59,12 +61,11 @@ def add_push(parent, block, new_props=None):
 
 
 def dummy_push(parent, block, validator, max_tries=24, start_from='last_end', iter_props=None):
-    # print('Pushing', parent.props['class'], block.props['class'])
     clock('1')
     axis = parent.props['axis']
 
-    if is_int(start_from):
-        cur_start = start_from
+    if is_int_like(start_from):
+        cur_start = int(float(start_from))
     elif start_from == 'beg':
         cur_start = block.props['x_rel'][axis]
     else:
@@ -85,6 +86,8 @@ def dummy_push(parent, block, validator, max_tries=24, start_from='last_end', it
     cur_try = 0
     clock('1')
 
+    logger.debug('Inserting blocks', parent=parent.props['cls'], block=block.props['cls'])
+
     while cur_try < max_tries:
         dispositions = []
         for props in iter_props:
@@ -92,25 +95,22 @@ def dummy_push(parent, block, validator, max_tries=24, start_from='last_end', it
             props = copy.deepcopy(props)
             cur_x[axis] = cur_start
             props['x'] = cur_x
-            # print('Trying to push from ', cur_start)
+            logger.debug('Trying to push from ', cur_start=cur_start)
             res = simple_push(parent, block, validator=validator, new_props=props)
 
             if isinstance(res, Block):
                 # success
+                logger.debug('Success')
                 return block
             else:
                 assert isinstance(res, dict)
 
                 if 'disposition' in res:
-                    # print('Disposition', res)
                     dispositions.append(res['disposition'])
-        # print('Dispositions', dispositions)
-        if len(dispositions) == len(iter_props):
-            # all iter_props failed because of bad disposition
-            cur_start += min(dispositions)
-        else:
-            # other reason
-            cur_start += 1
+
+        disposition = min(dispositions) if len(dispositions) == len(iter_props) else 1
+        logger.debug('Disposition', disposition=disposition)
+        cur_start += disposition
     raise Exception('Failed to push element')
 
 
@@ -119,13 +119,13 @@ def test_dummy_push():
         for c in parent.children:
             validate_disjoint_by_axis(c, block, axis=parent.props['axis'])
 
-    print('Dummy push test')
+    logger.debug('Dummy push test')
     root = ParallelepipedBlock('root', n_dims=1, x=[2], axis=0)
     a = ParallelepipedBlock('a', n_dims=1, size=[4], axis=0)
     b = ParallelepipedBlock('b', n_dims=1, size=[3], axis=0)
     dummy_push(root, a, brute_validator)
     dummy_push(root, b, brute_validator, start_from=0)
-    print(root)
+    logger.debug('Root', root=root)
 
 
 

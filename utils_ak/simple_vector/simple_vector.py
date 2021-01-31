@@ -57,6 +57,9 @@ class SimpleVector:
             self.values[i] += v
         return self
 
+    def __iter__(self):
+        return iter(self.values)
+
 def test_simple_vector():
     v1 = SimpleVector([1, 2])
     v2 = SimpleVector([3, 5])

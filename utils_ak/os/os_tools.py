@@ -20,6 +20,7 @@ def make_directories(path):
     if not os.path.exists(dirname):
         os.makedirs(dirname)
 
+makedirs = make_directories
 
 def remove_path(path):
     if not os.path.exists(path):
