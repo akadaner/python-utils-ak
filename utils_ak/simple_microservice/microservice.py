@@ -11,7 +11,7 @@ from utils_ak.str import cast_unicode
 from utils_ak.serialization import JsonSerializer
 from utils_ak.message_queue import cast_message_broker
 
-logger = logging.getLogger(__name__)
+from loguru import logger
 
 
 TIME_EPS = 0.001
@@ -37,7 +37,7 @@ class SimpleMicroservice(object):
         # {broker: f'{collection}::{topic}'}
         self.subscribed_to = {}
 
-        self.logger = logger or logging.getLogger('-'.join([os.path.basename(sys.argv[0])]))
+        self.logger = logger.bind(inner_source=str(id))
 
         self.default_exception_timeout = 10.
         self.max_exception_timeout = 3600
@@ -130,7 +130,7 @@ class SimpleMicroservice(object):
 
                     collection, topic, msg = received
                     try:
-                        self.logger.debug(f'Received new message', custom={'topic': topic, 'msg': msg})
+                        self.logger.info(f'Received new message', custom={'topic': topic, 'msg': msg})
                         await self.callbacks[collection].aiocall(topic, msg)
 
                         if self.fail_count != 0:
@@ -152,7 +152,7 @@ class SimpleMicroservice(object):
     def _aiorun(self):
         self.loop = asyncio.get_event_loop()
         # self.loop.set_debug(True)
-        self.logger.info(f'Microservice started: {self.id}')
+        self.logger.info('Microservice started')
 
         for timer in self.timers:
             self.tasks.append(self.wrap_coroutine_timer(timer))
@@ -189,7 +189,7 @@ class SimpleMicroservice(object):
                         continue
                     collection, topic, msg = received
                     try:
-                        self.logger.debug(f'Received new message', custom={'topic': topic, 'msg': msg})
+                        self.logger.debug(f'Received new message', topic=topic, msg=msg)
                         self.callbacks[collection].call(topic, msg)
                     except Exception as e:
                         self.on_exception(e, f"Exception occurred")
@@ -217,9 +217,7 @@ class SimpleMicroservice(object):
             return self._run()
 
     def on_exception(self, e, msg):
-        self.logger.error((e, msg))
-        # todo: log traceback properly
-        traceback.print_exc()
+        self.logger.error('Generic microservice error')
         to_sleep = min(self.default_exception_timeout * 2 ** (self.fail_count - 1), self.max_exception_timeout)
         time.sleep(to_sleep)
         self.fail_count += 1
