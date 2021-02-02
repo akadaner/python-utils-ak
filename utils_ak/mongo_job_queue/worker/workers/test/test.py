@@ -13,8 +13,8 @@ class TestWorker(Worker):
         super().__init__(id, payload)
         self.microservice = WorkerMicroservice(id, message_broker=message_broker)
 
-    async def process(self, payload):
-        if payload.get('type') == 'batch':
+    async def process(self):
+        if self.payload.get('type') == 'batch':
             await asyncio.sleep(1)
             self.microservice.send_state('running', {})
             for i in range(5):
@@ -22,7 +22,7 @@ class TestWorker(Worker):
                 await asyncio.sleep(0.1)
             self.microservice.send_state('success', {'response': '42'})
             self.microservice.stop()
-        elif payload.get('type') == 'streaming':
+        elif self.payload.get('type') == 'streaming':
             await asyncio.sleep(3)
             self.microservice.send_state('running', {})
 
@@ -30,12 +30,12 @@ class TestWorker(Worker):
                 self.microservice.send_state('running', {'foo': 'bar'})
                 await asyncio.sleep(3)
         else:
-            raise Exception(f'Bad payload type {payload.get("type")}')
+            raise Exception(f'Bad payload type {self.payload.get("type")}')
 
     def run(self):
         async def send_initial():
             await asyncio.sleep(0.1)
-            await self.process(self.payload)
+            await self.process()
 
         self.microservice.tasks.append(asyncio.ensure_future(send_initial()))
         self.microservice.run()
@@ -60,4 +60,4 @@ def test_streaming():
 
 if __name__ == '__main__':
     test_batch()
-    # test_streaming()
+    test_streaming()

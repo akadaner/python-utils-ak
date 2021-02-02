@@ -11,6 +11,7 @@ from utils_ak.block_tree.validation import validate_disjoint_by_axis
 
 from loguru import logger
 
+# todo: uncom debug
 
 def stack_push(parent, block):
     axis = parent.props['axis']
@@ -86,7 +87,7 @@ def dummy_push(parent, block, validator, max_tries=24, start_from='last_end', it
     cur_try = 0
     clock('1')
 
-    logger.debug('Inserting blocks', parent=parent.props['cls'], block=block.props['cls'])
+    # logger.debug('Inserting blocks', parent=parent.props['cls'], block=block.props['cls'])
 
     while cur_try < max_tries:
         dispositions = []
@@ -95,12 +96,12 @@ def dummy_push(parent, block, validator, max_tries=24, start_from='last_end', it
             props = copy.deepcopy(props)
             cur_x[axis] = cur_start
             props['x'] = cur_x
-            logger.debug('Trying to push from ', cur_start=cur_start)
+            # logger.debug('Trying to push from ', cur_start=cur_start)
             res = simple_push(parent, block, validator=validator, new_props=props)
 
             if isinstance(res, Block):
                 # success
-                logger.debug('Success')
+                # logger.debug('Success')
                 return block
             else:
                 assert isinstance(res, dict)
@@ -109,7 +110,7 @@ def dummy_push(parent, block, validator, max_tries=24, start_from='last_end', it
                     dispositions.append(res['disposition'])
 
         disposition = min(dispositions) if len(dispositions) == len(iter_props) else 1
-        logger.debug('Disposition', disposition=disposition)
+        # logger.debug('Disposition', disposition=disposition)
         cur_start += disposition
     raise Exception('Failed to push element')
 

@@ -36,11 +36,11 @@ class JobOrchestrator:
             worker_model.save()
             new_job.workers.append(worker_model)
             new_job.save()
-            self.ms.logger.info(f'Starting new worker {worker_model.id} {new_job.type} {new_job.payload}')
+            self.ms.logger.info('Starting new worker', id=worker_model.id, type=new_job.type, payload=new_job.payload)
             self.controller.start_worker(str(worker_model.id), new_job.type, new_job.payload)
 
     def on_monitor_out(self, topic, msg):
-        self.ms.logger.info(('On monitor out', topic, msg))
+        self.ms.logger.info('On monitor out', topic=str(topic), msg=str(msg))
         if topic == 'status_change':
             worker = Worker.objects(pk=msg['id']).first() # todo: check if missing
             worker.status = msg['new_status']

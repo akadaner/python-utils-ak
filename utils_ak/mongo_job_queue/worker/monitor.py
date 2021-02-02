@@ -26,7 +26,7 @@ class MonitorActor:
                 self.update_status(worker_id, 'stalled')
 
     def on_monitor(self, topic, msg):
-        self.microservice.logger.info(('On monitor', topic, msg))
+        self.microservice.logger.info('On monitor', topic=topic, msg=msg)
 
         worker_id = msg['id']
         if worker_id not in self.workers:
@@ -43,4 +43,4 @@ class MonitorActor:
         else:
             raise ValueError(topic)
 
-        self.microservice.logger.info(('Current monitor state', self.workers))
+        self.microservice.logger.info('Current monitor state', state=self.workers)

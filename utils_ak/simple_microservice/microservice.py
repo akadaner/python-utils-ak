@@ -11,7 +11,7 @@ from utils_ak.str import cast_unicode
 from utils_ak.serialization import JsonSerializer
 from utils_ak.message_queue import cast_message_broker
 
-from loguru import logger
+from loguru import logger as global_logger
 
 
 TIME_EPS = 0.001
@@ -37,7 +37,8 @@ class SimpleMicroservice(object):
         # {broker: f'{collection}::{topic}'}
         self.subscribed_to = {}
 
-        self.logger = logger.bind(inner_source=str(id))
+        self.logger = logger or global_logger
+        self.logger = self.logger.bind(inner_source=str(id))
 
         self.default_exception_timeout = 10.
         self.max_exception_timeout = 3600
@@ -102,7 +103,7 @@ class SimpleMicroservice(object):
                     has_ran = await timer.aiocheck()
 
                     if has_ran and self.fail_count != 0:
-                        self.logger.info('Success. Resetting the failure counter')
+                        self.logger.debug('Success. Resetting the failure counter')
                         self.fail_count = 0
 
                 except Exception as e:
