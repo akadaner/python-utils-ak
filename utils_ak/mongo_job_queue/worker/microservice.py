@@ -1,8 +1,6 @@
 import multiprocessing
 
-from utils_ak.interactive_imports import *
-
-configure_logging(stream_level=logging.INFO)
+from utils_ak.simple_microservice import *
 
 
 class WorkerMicroservice(SimpleMicroservice):

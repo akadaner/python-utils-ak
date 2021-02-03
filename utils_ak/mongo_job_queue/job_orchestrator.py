@@ -42,7 +42,7 @@ class JobOrchestrator:
     def on_monitor_out(self, topic, msg):
         self.ms.logger.info('On monitor out', topic=str(topic), msg=str(msg))
         if topic == 'status_change':
-            worker = Worker.objects(pk=msg['id']).first() # todo: check if missing
+            worker = Worker.objects(pk=msg['id']).first()  # todo: check if missing
             worker.status = msg['new_status']
             if worker.status == 'success':
                 worker.response = self.monitor.workers[msg['id']]['state']['response']

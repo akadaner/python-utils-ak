@@ -7,12 +7,13 @@ import base64
 from PIL import Image
 from io import BytesIO
 
-from IPython.display import HTML, display
 
 pd.set_option('display.max_colwidth', None)
 
 
 def display_with_image_thumbnails(df, shape=None):
+    from IPython.display import HTML, display
+
     def _get_thumbnail(path, shape=None):
         if shape is None:
             shape = (150, 150)

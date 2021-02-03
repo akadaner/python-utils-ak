@@ -1,8 +1,7 @@
 import asyncio
 import time
-import logging
 
-from utils_ak.log import configure_logging
+
 from utils_ak.simple_microservice import run_listener_async
 from utils_ak.mongo_job_queue.worker.worker import Worker
 from utils_ak.mongo_job_queue.worker.microservice import WorkerMicroservice
@@ -42,22 +41,22 @@ class TestWorker(Worker):
 
 
 def test_batch():
-    configure_logging(stream_level=logging.INFO)
-
+    from utils_ak.loguru import configure_loguru_stdout
+    configure_loguru_stdout('INFO')
     run_listener_async('monitor', message_broker=('zmq', {'endpoints': {'monitor': {'endpoint': 'tcp://localhost:5555', 'type': 'sub'}}}))
-    time.sleep(1)
+    time.sleep(2)
     worker = TestWorker('WorkerId', {'type': 'batch'}, message_broker=('zmq', {'endpoints': {'monitor': {'endpoint': 'tcp://localhost:5555', 'type': 'sub'}}}))
     worker.run()
 
 
 def test_streaming():
-    configure_logging(stream_level=logging.INFO)
-
+    from utils_ak.loguru import configure_loguru_stdout
+    configure_loguru_stdout('INFO')
     run_listener_async('monitor', message_broker=('zmq', {'endpoints': {'monitor': {'endpoint': 'tcp://localhost:5555', 'type': 'sub'}}}))
     worker = TestWorker('WorkerId', {'type': 'streaming'}, message_broker=('zmq', {'endpoints': {'monitor': {'endpoint': 'tcp://localhost:5555', 'type': 'sub'}}}))
     worker.run()
 
 
 if __name__ == '__main__':
-    test_batch()
+    # test_batch()
     test_streaming()

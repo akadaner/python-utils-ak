@@ -6,13 +6,14 @@ from utils_ak.mongo_job_queue.worker.factory import TestWorkerFactory
 from utils_ak.simple_microservice import run_listener_async
 
 
+# processes work only when controller works - so we don't need to keep cache
 class LocalWorkerController(WorkerController):
     def __init__(self, worker_factory):
         self.workers = {}  # {id: process}
         self.worker_factory = worker_factory
 
     def start_worker(self, id, type, payload):
-        p = multiprocessing.Process(target=self._start_worker, args=(id, type, payload))
+        p = multiprocessing.Process(target=self._start_worker, args=(id, type, payload), daemon=True)
         self.workers[id] = p
         p.start()
 

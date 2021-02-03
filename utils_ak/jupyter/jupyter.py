@@ -1,14 +1,15 @@
-from notebook import notebookapp
 import urllib
 import json
 import os
-import ipykernel
 import re
 
 from utils_ak.os import remove_path, execute
 
 
 def get_current_notebook_path():
+    from notebook import notebookapp
+    import ipykernel
+
     """Returns the absolute path of the Notebook or None if it cannot be determined
     NOTE: works only when the security is token-based or there is also no password
     """
@@ -17,7 +18,7 @@ def get_current_notebook_path():
 
     for srv in notebookapp.list_running_servers():
         try:
-            if srv['token']=='' and not srv['password']:  # No token and no password, ahem...
+            if srv['token'] =='' and not srv['password']:  # No token and no password, ahem...
                 req = urllib.request.urlopen(srv['url']+'api/sessions')
             else:
                 req = urllib.request.urlopen(srv['url']+'api/sessions?token='+srv['token'])
