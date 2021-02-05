@@ -11,7 +11,7 @@ import json
 
 class Clock(object):
     """ Time measurement of any code piece. """
-    def __init__(self, checkpoints=None, laps=None, auto_close=False, sep='/', max_observations=10000):
+    def __init__(self, checkpoints=None, laps=None, auto_close=False, sep='/', max_observations=10000, enabled=True):
         self.checkpoints = checkpoints or {}
         self.laps = laps or {}
 
@@ -23,7 +23,7 @@ class Clock(object):
 
         self.max_observations = max_observations
 
-        self.enabled = False
+        self.enabled = enabled
 
     def enable(self):
         self.enabled = True
@@ -186,7 +186,7 @@ class Clock(object):
             self.laps = js['laps']
 
 
-clock = Clock()
+clock = Clock(enabled=False)
 
 
 class ContextClockWithKey:
