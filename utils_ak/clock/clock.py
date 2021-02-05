@@ -23,6 +23,14 @@ class Clock(object):
 
         self.max_observations = max_observations
 
+        self.enabled = True
+
+    def enable(self):
+        self.enabled = True
+
+    def disable(self):
+        self.enabled = False
+
     def set_prefix(self, prefix=None):
         if not prefix:
             self.prefix = None
@@ -36,6 +44,9 @@ class Clock(object):
             self.laps[key] = self.laps[key][-self.max_observations:]
 
     def clock(self, key='clock', reset=False):
+        if not self.enabled:
+            return
+
         if isinstance(key, list):
             key = self.sep.join(key)
 
@@ -63,6 +74,9 @@ class Clock(object):
         :param rie:
         :return: bool. Raise if exists
         """
+        if not self.enabled:
+            return
+
         t = time.perf_counter()
         if not key:
             for key, t0 in self.checkpoints.items():
@@ -80,6 +94,9 @@ class Clock(object):
         :param rie:  bool. Raise if exists
         :return:
         """
+        if not self.enabled:
+            return
+
         if key not in self.checkpoints:
             return self.clock(key)
         elif rie:
