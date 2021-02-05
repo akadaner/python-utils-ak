@@ -23,7 +23,7 @@ class Clock(object):
 
         self.max_observations = max_observations
 
-        self.enabled = True
+        self.enabled = False
 
     def enable(self):
         self.enabled = True
