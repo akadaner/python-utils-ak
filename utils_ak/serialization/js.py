@@ -3,8 +3,10 @@ from decimal import Decimal
 from datetime import datetime
 import numpy as np
 import os
-
+from io import StringIO
+from utils_ak.builtin import delistify
 from utils_ak.numeric import is_int, is_float
+import yaml
 
 
 # ultimate json tool for convenient json handling and stuff
@@ -64,12 +66,22 @@ def cast_dict_or_list(js_obj, *args, **kwargs):
             with open(js_obj, 'r') as f:
                 js_obj = f.read()
 
-    try:
-        res = json.loads(js_obj, *args, **kwargs)
-        if isinstance(res, (dict, list)):
-            return res
-    except:
-        pass
+        try:
+            res = json.loads(js_obj, *args, **kwargs)
+            if isinstance(res, (dict, list)):
+                return res
+        except:
+            pass
+
+        res = delistify(list(yaml.load_all(StringIO(js_obj))))
+
+        # try load as yaml
+        try:
+            res = delistify(list(yaml.load_all(StringIO(js_obj))))
+            if isinstance(res, (dict, list)):
+                return res
+        except:
+            pass
 
     raise Exception('Unknown type')
 

@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{deployment_id}"
+spec:
+  selector:
+    matchLabels:
+      deployment_id: "{deployment_id}"
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        deployment_id: "{deployment_id}"
+    spec:
+      containers:
+      - name: "{entity}"
+        image: "{image}"
+        imagePullPolicy: Always
+        envFrom:
+        - configMapRef:
+            name: "{deployment_id}-config"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "{deployment_id}-config"
+data: {}

@@ -3,9 +3,11 @@ import copy
 import os
 import tempfile
 from loguru import logger
+from utils_ak.deployment.config import BASE_DIR
 from utils_ak.deployment.controller import Controller
-from utils_ak.serialization import cast_js
+from utils_ak.serialization import cast_js, cast_dict_or_list
 from utils_ak.os import *
+from utils_ak.dict import fill_template
 
 # todo: success and failure responses (or errors?)
 
@@ -15,13 +17,11 @@ class DockerController(Controller):
 
         assert len(deployment['containers']) == 1, "Only one-container pods are supported for now"
 
-        # create docker-compose file and run it without building
-        with open('../../example/docker-compose.yml.template', 'r') as f:
-            template_str = f.read()
         entity, container = list(deployment['containers'].items())[0]
         params = {'entity': entity, 'deployment_id': id, 'image': container['image']}
-        config = template_str.format(**params)
-        config = anyconfig.loads(config, 'yaml')
+
+        config = cast_dict_or_list(os.path.join(BASE_DIR, 'example/docker-compose.yml.template'))
+        config = fill_template(config, **params)
 
         for k, v in container['command_line_arguments'].items():
             config['services'][entity]['command'].append(f'--{k}')
@@ -35,22 +35,20 @@ class DockerController(Controller):
 
         execute(f'docker-compose -f "{fn}" up -d --no-build')
 
-
-    def stop(self, deployment):
-        for id in self._get_docker_ids(deployment):
+    def stop(self, deployment_id):
+        for id in self._get_docker_ids(deployment_id):
             execute(f'docker stop {id}')
             execute(f'docker rm {id}')
 
-        remove_path(f'data/docker-compose/{deployment["id"]}/')
+        remove_path(f'data/docker-compose/{deployment_id}/')
 
-
-    def _get_docker_ids(self, deployment):
-        ids = execute(f'docker ps -q -f name={deployment["id"]}*').split('\n')
+    def _get_docker_ids(self, deployment_id):
+        ids = execute(f'docker ps -q -f name={deployment_id}*').split('\n')
         ids = [id for id in ids if id]
         return ids
 
-    def log(self, deployment):
-        ids = self._get_docker_ids(deployment)
+    def log(self, deployment_id):
+        ids = self._get_docker_ids(deployment_id)
         for id in ids:
             logger.debug('Logs for id', id=id, logs=execute(f'docker logs {id}'))
 
@@ -65,8 +63,8 @@ def test_docker_controller():
     ctrl = DockerController()
     ctrl.start(deployment)
     time.sleep(3)
-    ctrl.log(deployment)
-    ctrl.stop(deployment)
+    ctrl.log(deployment['id'])
+    ctrl.stop(deployment['id'])
 
 
 if __name__ == '__main__':

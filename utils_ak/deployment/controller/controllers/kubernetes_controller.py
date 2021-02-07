@@ -2,13 +2,14 @@ import anyconfig
 import copy
 import os
 import tempfile
-import yaml
 
-from io import StringIO
 from loguru import logger
+
+from utils_ak.deployment.config import BASE_DIR
 from utils_ak.deployment.controller import Controller
-from utils_ak.serialization import cast_js
+from utils_ak.serialization import cast_js, cast_dict_or_list
 from utils_ak.os import *
+from utils_ak.dict import fill_template
 
 
 class KubernetesController(Controller):
@@ -17,13 +18,11 @@ class KubernetesController(Controller):
         assert len(deployment['containers']) == 1, "Only one-container pods are supported for now"
 
         # create docker-compose file and run it without building
-        with open('../../example/kubernetes.deployment.yml.template', 'r') as f:
-            template_str = f.read()
         entity, container = list(deployment['containers'].items())[0]
         params = {'entity': entity, 'deployment_id': id, 'image': container['image']}
-        config = template_str.format(**params)
 
-        configs = list(yaml.load_all(StringIO(config)))
+        configs = cast_dict_or_list(os.path.join(BASE_DIR, 'example/kubernetes.deployment.yml.template'))
+        configs = [fill_template(config, **params) for config in configs]
 
         for config in configs:
             if config['kind'] == 'ConfigMap':
@@ -39,14 +38,13 @@ class KubernetesController(Controller):
 
         execute(f'kubectl apply -f "{fn}"')
 
-    def stop(self, deployment):
-        id = deployment['id']
-        fn = f'data/kubernetes/{id}/kubernetes.yml'
+    def stop(self, deployment_id):
+        fn = f'data/kubernetes/{deployment_id}/kubernetes.yml'
         execute(f'kubectl delete -f "{fn}"')
-        remove_path(f'data/kubernetes/{id}/')
+        remove_path(f'data/kubernetes/{deployment_id}/')
 
-    def log(self, deployment):
-        logger.debug('Logs', logs=execute(f'kubectl logs -l deployment_id={deployment["id"]}'))
+    def log(self, deployment_id):
+        logger.debug('Logs', logs=execute(f'kubectl logs -l deployment_id={deployment_id}'))
 
 
 def test_kubernetes_controller():
@@ -59,8 +57,8 @@ def test_kubernetes_controller():
     ctrl = KubernetesController()
     ctrl.start(deployment)
     time.sleep(10)
-    ctrl.log(deployment)
-    ctrl.stop(deployment)
+    ctrl.log(deployment['id'])
+    ctrl.stop(deployment['id'])
 
 
 if __name__ == '__main__':
