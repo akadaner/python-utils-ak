@@ -10,7 +10,12 @@ from utils_ak.os import *
 class KubernetesController(Controller):
     def start(self, deployment):
         id = deployment['id']
-        # create docker-compose file and run it without building
+
+        # create kubernetes file
+
+        res = ''
+
+        kc = {'apiVersion'}
 
         dcc = {'version': '3', 'services': {}}  # docker compose config
         for i, (name, container) in enumerate(deployment['containers'].items()):

@@ -11,24 +11,26 @@ from utils_ak.os import *
 class DockerController(Controller):
     def start(self, deployment):
         id = deployment['id']
+
+        assert len(deployment['containers']) == 1, "Only one-container pods are supported for now"
+
         # create docker-compose file and run it without building
+        with open('../../example/docker-compose.template', 'r') as f:
+            template_str = f.read()
+        entity, container = list(deployment['containers'].items())[0]
+        params = {'entity': entity, 'container_name': id + '_0', 'image': container['image']}
+        config = template_str.format(**params)
+        config = anyconfig.loads(config, 'yaml')
 
-        dcc = {'version': '3', 'services': {}}  # docker compose config
-        for i, (name, container) in enumerate(deployment['containers'].items()):
-            service = {'image': container['image'], 'tty': True, 'container_name': f'{id}_{i}'}
-
-            service['command'] = []
-
-            for k, v in container['command_line_arguments'].items():
-                service['command'].append(f'--{k}')
-                service['command'].append(cast_js(v))
-            dcc['services'][name] = service
+        for k, v in container['command_line_arguments'].items():
+            config['services'][entity]['command'].append(f'--{k}')
+            config['services'][entity]['command'].append(cast_js(v))
 
         makedirs(f'data/{id}/')
         fn = f'data/{id}/docker-compose.yml'
 
         with open(fn, 'w') as f:
-            f.write(anyconfig.dumps(dcc, 'yaml'))
+            f.write(anyconfig.dumps(config, 'yaml'))
 
         execute(f'docker-compose -f "{fn}" up -d --no-build')
 
