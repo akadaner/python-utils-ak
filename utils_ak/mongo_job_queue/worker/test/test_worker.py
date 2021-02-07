@@ -1,15 +1,13 @@
 import time
 import asyncio
 from loguru import logger
-from utils_ak.mongo_job_queue.worker.microservice import WorkerMicroservice
 from utils_ak.simple_microservice import run_listener_async
+from utils_ak.mongo_job_queue.worker.worker import Worker
 
 
-class TestWorker:
-    def __init__(self, id, payload, message_broker):
-        self.id = id
-        self.payload = payload
-        self.microservice = WorkerMicroservice(id, message_broker=message_broker)
+class TestWorker(Worker):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
     async def process(self):
         if self.payload.get('type') == 'batch':
@@ -29,14 +27,6 @@ class TestWorker:
                 await asyncio.sleep(3)
         else:
             raise Exception(f'Bad payload type {self.payload.get("type")}')
-
-    def run(self):
-        async def send_initial():
-            await asyncio.sleep(0.1)
-            await self.process()
-        self.microservice.tasks.append(asyncio.ensure_future(send_initial()))
-        self.microservice.run()
-
 
 def test_batch():
     from utils_ak.loguru import configure_loguru_stdout

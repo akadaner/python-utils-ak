@@ -32,7 +32,7 @@ def test():
     connect()
     logger.remove()
     configure_loguru_stdout()
-    controller = DockerController()
+    controller = KubernetesController()
     orchestrator = JobOrchestrator(controller, MESSAGE_BROKER)
     multiprocessing.Process(target=create_new_job).start()
     orchestrator.run()

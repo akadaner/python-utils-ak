@@ -22,9 +22,9 @@ def cast_model(obj, cls):
     elif isinstance(obj, dict):
         if '_id' in obj:
             # fetch and return updated version from server
-            db_fs = cast_model(cls.objects(pk=obj['_id']).first(), cls)
+            db_obj = cast_model(cls.objects(pk=obj['_id']).first(), cls)
             pk = obj['_id']
-            d1, d2 = dict(db_fs), dict(obj)
+            d1, d2 = db_obj.to_mongo(), dict(obj)
             d1.pop('_id', None), d2.pop('_id', None)
             return cls(pk=pk, **update_dic(d1, d2))
         else:
