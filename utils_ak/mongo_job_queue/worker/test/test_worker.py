@@ -1,5 +1,6 @@
 import time
 import asyncio
+from loguru import logger
 from utils_ak.mongo_job_queue.worker.microservice import WorkerMicroservice
 from utils_ak.simple_microservice import run_listener_async
 
@@ -33,7 +34,6 @@ class TestWorker:
         async def send_initial():
             await asyncio.sleep(0.1)
             await self.process()
-
         self.microservice.tasks.append(asyncio.ensure_future(send_initial()))
         self.microservice.run()
 
@@ -45,6 +45,7 @@ def test_batch():
     time.sleep(2)
     worker = TestWorker('worker_id', {'type': 'batch'}, message_broker=('zmq', {'endpoints': {'monitor': {'endpoint': 'tcp://localhost:5555', 'type': 'sub'}}}))
     worker.run()
+    logger.info('Finished batch')
 
 
 def test_streaming():
@@ -72,6 +73,6 @@ def test_deployment():
 
 
 if __name__ == '__main__':
-    # test_batch()
+    test_batch()
     # test_streaming()
-    test_deployment()
+    # test_deployment()

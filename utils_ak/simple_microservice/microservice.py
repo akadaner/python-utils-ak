@@ -102,7 +102,7 @@ class SimpleMicroservice(object):
         async def f():
             while True:
                 try:
-                    has_ran = await timer.aiocheck()
+                    has_ran = await timer.run_if_possible_aio()
 
                     if has_ran and self.fail_count != 0:
                         self.logger.debug('Success. Resetting the failure counter')
@@ -113,6 +113,7 @@ class SimpleMicroservice(object):
 
                 if not self.is_active:
                     return
+
                 await asyncio.sleep(max(timer.next_call - time.time() + TIME_EPS, 0))
 
         return f()
@@ -124,24 +125,22 @@ class SimpleMicroservice(object):
             while True:
                 try:
                     if async_supported:
-                        received = await self.broker.aiopoll()
+                        received = await self.broker.aiopoll(timeout=1.)
                     else:
                         received = self.broker.poll(timeout)
-                    if not received:
-                        await asyncio.sleep(0)
-                        continue
 
-                    collection, topic, msg = received
-                    try:
-                        self.logger.info(f'Received new message', custom={'topic': str(topic), 'msg': str(msg)})
-                        await self.callbacks[collection].aiocall(topic, msg)
+                    if received:
+                        collection, topic, msg = received
+                        try:
+                            self.logger.info(f'Received new message', custom={'topic': str(topic), 'msg': str(msg)})
+                            await self.callbacks[collection].aiocall(topic, msg)
 
-                        if self.fail_count != 0:
-                            self.logger.info('Success. Resetting the failure counter')
-                            self.fail_count = 0
+                            if self.fail_count != 0:
+                                self.logger.info('Success. Resetting the failure counter')
+                                self.fail_count = 0
 
-                    except Exception as e:
-                        self.on_exception(e, f"Exception occurred at the callback")
+                        except Exception as e:
+                            self.on_exception(e, f"Exception occurred at the callback")
                 except Exception as e:
                     self.on_exception(e, f'Failed to receive the message')
 

@@ -34,7 +34,6 @@ class CallbackTimer:
     def run_if_possible(self):
         if time.time() > self.next_call:
             if self.timer_type == "right":
-
                 try:
                     self.run()
                 except:
@@ -52,11 +51,11 @@ class CallbackTimer:
     def run(self):
         return self.callback(*self.args, **self.kwargs)
 
-    async def aiocheck(self):
+    async def run_if_possible_aio(self):
         if time.time() > self.next_call:
             if self.timer_type == "right":
                 try:
-                    await self.aiorun()
+                    await self.run_aio()
                 except:
                     self.last_call = time.time()
                     raise
@@ -64,11 +63,11 @@ class CallbackTimer:
                     self.last_call = time.time()
             elif self.timer_type == "left":
                 self.last_call = time.time()
-                await self.aiorun()
+                await self.run_aio()
             return True
         return False
 
-    async def aiorun(self):
+    async def run_aio(self):
         if inspect.iscoroutinefunction(self.callback):
             return await self.callback(*self.args, **self.kwargs)
         else:
