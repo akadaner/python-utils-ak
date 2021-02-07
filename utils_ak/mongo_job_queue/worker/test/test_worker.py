@@ -54,12 +54,28 @@ def test_streaming():
     worker.run()
 
 
-def test_deployment():
+def test_docker_deployment():
     from utils_ak.loguru import configure_loguru_stdout
     configure_loguru_stdout('DEBUG')
     run_listener_async('monitor', message_broker=('zmq', {'endpoints': {'monitor': {'endpoint': 'tcp://localhost:5555', 'type': 'sub'}}}))
 
     from utils_ak.deployment import DockerController
+    ctrl = DockerController()
+
+    import anyconfig
+    deployment = anyconfig.load('deployment.yml')
+    ctrl.stop(deployment)
+    ctrl.start(deployment)
+    time.sleep(5)
+    ctrl.stop(deployment)
+
+
+def test_kubernetes_deployment():
+    from utils_ak.loguru import configure_loguru_stdout
+    configure_loguru_stdout('DEBUG')
+    run_listener_async('monitor', message_broker=('zmq', {'endpoints': {'monitor': {'endpoint': 'tcp://localhost:5555', 'type': 'sub'}}}))
+
+    from utils_ak.deployment import Ku
     ctrl = DockerController()
 
     import anyconfig
