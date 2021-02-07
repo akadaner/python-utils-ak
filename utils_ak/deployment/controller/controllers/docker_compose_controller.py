@@ -3,6 +3,7 @@ import copy
 import os
 import tempfile
 from utils_ak.deployment.controller import Controller
+from utils_ak.serialization import cast_js
 from utils_ak.os import *
 
 # todo: success and failure responses (or errors?)
@@ -19,7 +20,7 @@ class DockerController(Controller):
 
             for k, v in container['command_line_arguments'].items():
                 service['command'].append(f'--{k}')
-                service['command'].append(v)
+                service['command'].append(cast_js(v))
             dcc['services'][name] = service
 
         makedirs(f'data/{deployment["id"]}/')

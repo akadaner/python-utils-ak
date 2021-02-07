@@ -1,2 +1,2 @@
-docker build -t akadaner/test_worker:latest . --no-cache
+docker build -t akadaner/test-worker:latest . --no-cache
 pause

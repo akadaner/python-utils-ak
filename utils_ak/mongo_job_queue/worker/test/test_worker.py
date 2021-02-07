@@ -42,7 +42,7 @@ def test_batch():
     configure_loguru_stdout('INFO')
     run_listener_async('monitor', message_broker=('zmq', {'endpoints': {'monitor': {'endpoint': 'tcp://localhost:5555', 'type': 'sub'}}}))
     time.sleep(2)
-    worker = TestWorker('WorkerId', {'type': 'batch'}, message_broker=('zmq', {'endpoints': {'monitor': {'endpoint': 'tcp://localhost:5555', 'type': 'sub'}}}))
+    worker = TestWorker('worker_id', {'type': 'batch'}, message_broker=('zmq', {'endpoints': {'monitor': {'endpoint': 'tcp://localhost:5555', 'type': 'sub'}}}))
     worker.run()
 
 
@@ -50,10 +50,27 @@ def test_streaming():
     from utils_ak.loguru import configure_loguru_stdout
     configure_loguru_stdout('INFO')
     run_listener_async('monitor', message_broker=('zmq', {'endpoints': {'monitor': {'endpoint': 'tcp://localhost:5555', 'type': 'sub'}}}))
-    worker = TestWorker('WorkerId', {'type': 'streaming'}, message_broker=('zmq', {'endpoints': {'monitor': {'endpoint': 'tcp://localhost:5555', 'type': 'sub'}}}))
+    worker = TestWorker('worker_id', {'type': 'streaming'}, message_broker=('zmq', {'endpoints': {'monitor': {'endpoint': 'tcp://localhost:5555', 'type': 'sub'}}}))
     worker.run()
+
+
+def test_deployment():
+    from utils_ak.loguru import configure_loguru_stdout
+    configure_loguru_stdout('DEBUG')
+    run_listener_async('monitor', message_broker=('zmq', {'endpoints': {'monitor': {'endpoint': 'tcp://localhost:5555', 'type': 'sub'}}}))
+
+    from utils_ak.deployment import DockerController
+    ctrl = DockerController()
+
+    import anyconfig
+    deployment = anyconfig.load('deployment.yml')
+    ctrl.stop(deployment)
+    ctrl.start(deployment)
+    time.sleep(5)
+    ctrl.stop(deployment)
 
 
 if __name__ == '__main__':
     # test_batch()
-    test_streaming()
+    # test_streaming()
+    test_deployment()
