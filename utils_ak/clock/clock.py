@@ -227,6 +227,7 @@ def clockify(key=None):
 def test_time():
     time.sleep(1)
 
+
 @clockify('time_with_exception')
 def test_time_with_exception():
     time.sleep(1)

@@ -1,0 +1,5 @@
+containers:
+  hello-world:
+    image: akadaner/hello-world
+    command_line_arguments:
+      name: Friend

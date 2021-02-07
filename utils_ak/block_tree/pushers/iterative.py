@@ -53,7 +53,7 @@ class IterativePusher:
                     results.append(res)
 
             self.update(results)
-
+            cur_try += 1
         raise AssertionError('Failed to push element')
 
 
@@ -82,6 +82,7 @@ class AxisPusher(IterativePusher):
         self.cur_x = cast_simple_vector(self.block.n_dims)
         self.cur_x[self.axis] = cur_start
         self.block.props.update(x=self.cur_x)
+
 
     def update(self, results):
         dispositions = [result.get('disposition', None) for result in results]
