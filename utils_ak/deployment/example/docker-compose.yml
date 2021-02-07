@@ -1,0 +1,9 @@
+version: '3'
+services:
+  hello-world:
+    image: akadaner/hello-world
+    tty: true
+    container_name: 'my_deployment_id_0'
+    command:
+    - --name
+    - Friend

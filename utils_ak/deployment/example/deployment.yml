@@ -1,4 +1,4 @@
-id: 123
+id: my_deployment_id
 containers:
   hello-world:
     image: akadaner/hello-world

@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-deployment-id
+spec:
+  selector:
+    matchLabels:
+      deployment_id: my-deployment-id
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        deployment_id: my-deployment-id
+    spec:
+      containers:
+      - name: hello-world
+        image: akadaner/hello-world:latest
+        imagePullPolicy: Always
+        envFrom:
+        - configMapRef:
+            name: my-deployment-id-config
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: my-deployment-id-config
+data:
+  NAME: Friend

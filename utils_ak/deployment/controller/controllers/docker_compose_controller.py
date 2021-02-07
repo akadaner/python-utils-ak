@@ -52,7 +52,7 @@ def test_docker_controller():
     from utils_ak.loguru import logger, configure_loguru_stdout
     configure_loguru_stdout('DEBUG')
 
-    deployment = anyconfig.load('../../examples/hello-world.yml')
+    deployment = anyconfig.load('../../example/deployment.yml')
     ctrl = DockerController()
     ctrl.start(deployment)
     ids = ctrl._get_docker_ids(deployment)
