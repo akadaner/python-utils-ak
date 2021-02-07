@@ -1,0 +1,7 @@
+version: '3'
+services:
+  {entity}:
+    image: {image}
+    tty: true
+    container_name: {deployment_id}
+    command: []
