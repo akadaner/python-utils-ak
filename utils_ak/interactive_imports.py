@@ -18,6 +18,7 @@ import inspect
 from datetime import datetime, timedelta
 from pprint import pprint
 from bson.objectid import *
+from loguru import logger
 
 from .builtin import *
 from .callback_timer import *
@@ -54,4 +55,5 @@ from .dag import *
 from .iteration import *
 from .fluid_flow import *
 from .message_queue import *
-from loguru import logger
+from .deployment import *
+from .loguru import *
