@@ -10,6 +10,7 @@ from utils_ak.architecture.func import PrefixHandler
 from utils_ak.str import cast_unicode
 from utils_ak.serialization import JsonSerializer
 from utils_ak.message_queue import cast_message_broker
+from utils_ak.loguru import patch_trace
 
 from loguru import logger as global_logger
 
@@ -39,6 +40,7 @@ class SimpleMicroservice(object):
 
         self.logger = logger or global_logger
         self.logger = self.logger.bind(inner_source=str(id))
+        self.logger = self.logger.patch(patch_trace)
 
         self.default_exception_timeout = 10.
         self.max_exception_timeout = 3600
@@ -131,7 +133,7 @@ class SimpleMicroservice(object):
 
                     collection, topic, msg = received
                     try:
-                        self.logger.info(f'Received new message', custom={'topic': topic, 'msg': msg})
+                        self.logger.info(f'Received new message', custom={'topic': str(topic), 'msg': str(msg)})
                         await self.callbacks[collection].aiocall(topic, msg)
 
                         if self.fail_count != 0:

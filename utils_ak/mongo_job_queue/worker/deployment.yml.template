@@ -1,0 +1,9 @@
+id: "{deployment_id}"
+containers:
+  test-worker:
+    image: "{image}"
+    command_line_arguments:
+      config:
+        worker_id: "{deployment_id}"
+        payload: "{payload}"
+        message_broker: "{message_broker}"

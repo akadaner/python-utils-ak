@@ -14,8 +14,10 @@ def serialize(record):
         'level': record['level'].name,
         'message': record['message'],
         'ts': int(math.floor(record['time'].timestamp() * 1000)),  # epoch millis
-        'inner_source': record['extra'].get('source', 'default'),
-        'extra': extra
+        'inner_source': record['extra'].get('source', ''),
+        'extra': extra,
+        'stack': '',
+        'error': ''
     }
 
     exception_info = sys.exc_info()
@@ -27,3 +29,10 @@ def serialize(record):
 
 def patch_serialized_generic_extra(record):
     record['extra']['serialized'] = serialize(record)
+
+
+def patch_trace(record):
+    exception_info = sys.exc_info()
+    if exception_info[0]:
+        record['extra']['stack'] = stackprinter.format(record["exception"])
+        record['extra']['error'] = record['extra']['stack'].split('\n')[-1]

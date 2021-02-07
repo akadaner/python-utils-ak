@@ -37,6 +37,7 @@ class TestWorker:
         self.microservice.tasks.append(asyncio.ensure_future(send_initial()))
         self.microservice.run()
 
+
 def test_batch():
     from utils_ak.loguru import configure_loguru_stdout
     configure_loguru_stdout('INFO')
@@ -54,7 +55,7 @@ def test_streaming():
     worker.run()
 
 
-def test_docker_deployment():
+def test_deployment():
     from utils_ak.loguru import configure_loguru_stdout
     configure_loguru_stdout('DEBUG')
     run_listener_async('monitor', message_broker=('zmq', {'endpoints': {'monitor': {'endpoint': 'tcp://localhost:5555', 'type': 'sub'}}}))
@@ -64,26 +65,10 @@ def test_docker_deployment():
 
     import anyconfig
     deployment = anyconfig.load('deployment.yml')
-    ctrl.stop(deployment)
+    ctrl.stop(deployment['id'])
     ctrl.start(deployment)
     time.sleep(5)
-    ctrl.stop(deployment)
-
-
-def test_kubernetes_deployment():
-    from utils_ak.loguru import configure_loguru_stdout
-    configure_loguru_stdout('DEBUG')
-    run_listener_async('monitor', message_broker=('zmq', {'endpoints': {'monitor': {'endpoint': 'tcp://localhost:5555', 'type': 'sub'}}}))
-
-    from utils_ak.deployment import Ku
-    ctrl = DockerController()
-
-    import anyconfig
-    deployment = anyconfig.load('deployment.yml')
-    ctrl.stop(deployment)
-    ctrl.start(deployment)
-    time.sleep(5)
-    ctrl.stop(deployment)
+    ctrl.stop(deployment['id'])
 
 
 if __name__ == '__main__':

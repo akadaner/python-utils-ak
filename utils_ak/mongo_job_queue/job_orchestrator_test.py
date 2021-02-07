@@ -2,11 +2,10 @@ import multiprocessing
 import time
 import sys
 
-from utils_ak.mongo_job_queue.job_orchestrator import JobOrchestrator
-from utils_ak.mongo_job_queue.controller.controllers.local import LocalWorkerController
-from utils_ak.mongo_job_queue.worker.factory.test import TestWorkerFactory
-from utils_ak.mongo_job_queue.models import *
+from utils_ak.deployment import *
 from utils_ak.loguru import configure_loguru_stdout
+from utils_ak.mongo_job_queue.job_orchestrator import JobOrchestrator
+from utils_ak.mongo_job_queue.models import *
 
 from loguru import logger
 
@@ -33,8 +32,7 @@ def test():
     connect()
     logger.remove()
     configure_loguru_stdout()
-    worker_factory = TestWorkerFactory(MESSAGE_BROKER)
-    controller = LocalWorkerController(worker_factory)
+    controller = DockerController()
     orchestrator = JobOrchestrator(controller, MESSAGE_BROKER)
     multiprocessing.Process(target=create_new_job).start()
     orchestrator.run()

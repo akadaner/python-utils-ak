@@ -60,6 +60,12 @@ def cast_dict_or_list(js_obj, *args, **kwargs):
     if isinstance(js_obj, (dict, list)):
         return js_obj
 
+    if isinstance(js_obj, bytes):
+        try:
+            js_obj = js_obj.decode('utf-8')
+        except:
+            raise Exception('Unknown bytes encoding')
+
     # load object from file if path exists
     if isinstance(js_obj, str):
         if os.path.exists(js_obj):
@@ -72,8 +78,6 @@ def cast_dict_or_list(js_obj, *args, **kwargs):
                 return res
         except:
             pass
-
-        res = delistify(list(yaml.load_all(StringIO(js_obj))))
 
         # try load as yaml
         try:

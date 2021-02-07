@@ -5,8 +5,8 @@ import multiprocessing
 
 from utils_ak.log import configure_logging
 from utils_ak.simple_microservice import SimpleMicroservice, run_listener_async
-from utils_ak.mongo_job_queue.worker.workers.test import TestWorker
-from utils_ak.mongo_job_queue.worker.monitor import MonitorActor
+from utils_ak.mongo_job_queue.worker.test import TestWorker
+from utils_ak.mongo_job_queue.monitor import MonitorActor
 
 BROKER = 'zmq'
 BROKER_CONFIG = {'endpoints': {'monitor': {'endpoint': 'tcp://localhost:5555', 'type': 'sub'}, 'monitor_out': {'endpoint': 'tcp://localhost:5556', 'type': 'sub'}}}
