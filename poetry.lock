@@ -692,6 +692,14 @@ optional = false
 python-versions = "*"
 
 [[package]]
+name = "stackprinter"
+version = "0.2.5"
+description = "Debug-friendly stack traces, with variable values and semantic highlighting"
+category = "main"
+optional = false
+python-versions = ">=3.4"
+
+[[package]]
 name = "telegram"
 version = "0.0.1"
 description = "Telegram APIs"
@@ -771,7 +779,7 @@ dev = ["pytest (>=4.6.2)", "black (>=19.3b0)"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "e37a9e70c6c27adc03fd710010967e52eff15e676e5173404a92ebeb3a01505a"
+content-hash = "49329853fe52b213d156606750aee48e5095e7b4ecff1fdc76d2d62270ecb1ad"
 
 [metadata.files]
 anyconfig = [
@@ -1435,6 +1443,10 @@ sortedcollections = [
 sortedcontainers = [
     {file = "sortedcontainers-2.3.0-py2.py3-none-any.whl", hash = "sha256:37257a32add0a3ee490bb170b599e93095eed89a55da91fa9f48753ea12fd73f"},
     {file = "sortedcontainers-2.3.0.tar.gz", hash = "sha256:59cc937650cf60d677c16775597c89a960658a09cf7c1a668f86e1e4464b10a1"},
+]
+stackprinter = [
+    {file = "stackprinter-0.2.5-py3-none-any.whl", hash = "sha256:e6770d1f932992caa37f1c734ca40429ee7358163ec7f262dcd3c8371b260006"},
+    {file = "stackprinter-0.2.5.tar.gz", hash = "sha256:e0197c54dafe7867020731c3dcab96a14d103c1e39130fa0b5159a2f0af427b6"},
 ]
 telegram = [
     {file = "telegram-0.0.1.tar.gz", hash = "sha256:d405a0af4c868a8dbeae6d03e297e21c7ee6269e11e2ed3810e15544aba02591"},

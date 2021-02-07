@@ -45,6 +45,7 @@ PyYAML = "^5.4.1"
 openpyxl = "^3.0.6"
 portion = "^2.1.4"
 fire = "^0.4.0"
+stackprinter = "^0.2.5"
 
 [tool.poetry.dev-dependencies]
 

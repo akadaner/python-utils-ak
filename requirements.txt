@@ -60,6 +60,7 @@ slacker==0.14.0
 smmap==3.0.5; python_version >= "3.4" and python_full_version < "3.0.0" or python_full_version >= "3.4.0" and python_version >= "3.4"
 sortedcollections==2.1.0
 sortedcontainers==2.3.0; python_version >= "3.5" and python_version < "4.0"
+stackprinter==0.2.5; python_version >= "3.4"
 telegram==0.0.1
 tenacity==6.3.1
 termcolor==1.1.0
