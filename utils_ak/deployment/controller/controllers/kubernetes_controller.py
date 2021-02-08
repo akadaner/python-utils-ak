@@ -41,7 +41,7 @@ class KubernetesController(Controller):
     def stop(self, deployment_id):
         fn = f'data/kubernetes/{deployment_id}/kubernetes.yml'
         execute(f'kubectl delete -f "{fn}"')
-        remove_path(f'data/kubernetes/{deployment_id}/')
+        # remove_path(f'data/kubernetes/{deployment_id}/')
 
     def log(self, deployment_id):
         logger.debug('Logs', logs=execute(f'kubectl logs -l deployment_id={deployment_id}'))

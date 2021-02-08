@@ -47,7 +47,8 @@ class JobOrchestrator:
             # todo: Hardcode, use new_job.type
             IMAGE = 'akadaner/test-worker'
             # todo: hardcode, use generic message broker
-            MESSAGE_BROKER = ['zmq', {'endpoints': {'monitor': {'endpoint': 'tcp://host.docker.internal:5555', 'type': 'sub'}}}]
+            MESSAGE_BROKER = ['zmq', {'endpoints': {'monitor': {'endpoint': 'tcp://host.k3d.internal:5555', 'type': 'sub'}}}]
+            # MESSAGE_BROKER = ['zmq', {'endpoints': {'monitor': {'endpoint': 'tcp://host.docker.internal:5555', 'type': 'sub'}}}]
 
             params = {'deployment_id': str(worker_model.id), 'payload': new_job.payload, 'image': IMAGE, 'message_broker': MESSAGE_BROKER}
             deployment = fill_template(deployment, **params)
@@ -62,3 +63,6 @@ class JobOrchestrator:
             if worker.status == 'success':
                 worker.response = self.monitor.workers[msg['id']]['state']['response']
             worker.save()
+
+            if worker.status == 'success':
+                self.controller.stop(msg['id'])

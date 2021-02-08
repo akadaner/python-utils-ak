@@ -12,6 +12,9 @@ class MonitorActor:
         self.microservice.add_callback('monitor', '', self.on_monitor)
         self.microservice.add_timer(self.update_stalled, 3.0)
 
+        # todo: del, hardcode
+        self.received_messages_cache = []
+
     def update_status(self, worker_id, status):
         if status != self.workers[worker_id].get('status'):
             self.microservice.publish_json('monitor_out', 'status_change', {'id': worker_id, 'old_status': self.workers[worker_id].get('status'), 'new_status': status})
@@ -19,6 +22,11 @@ class MonitorActor:
 
     def update_stalled(self):
         for worker_id in self.workers:
+            if 'status' not in self.workers[worker_id]:
+                # non-initialized
+                # todo: make properly
+                continue
+
             if self.workers[worker_id]['status'] == 'success':
                 continue
 
@@ -26,6 +34,13 @@ class MonitorActor:
                 self.update_status(worker_id, 'stalled')
 
     def on_monitor(self, topic, msg):
+        # todo: preview hardcode
+        if 'state' in msg:
+            if str(msg['state']) not in self.received_messages_cache:
+                self.received_messages_cache.append(str(msg['state']))
+            else:
+                return
+
         self.microservice.logger.info('On monitor', topic=topic, msg=msg)
 
         worker_id = msg['id']

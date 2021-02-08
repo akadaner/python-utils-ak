@@ -79,6 +79,7 @@ def cast_dict_or_list(js_obj, *args, **kwargs):
         except:
             pass
 
+        # todo: put away form js file - non-intuitive at all
         # try load as yaml
         try:
             res = delistify(list(yaml.load_all(StringIO(js_obj))))

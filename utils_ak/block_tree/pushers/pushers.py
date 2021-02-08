@@ -36,13 +36,13 @@ def simple_push(parent, block, validator=None, new_props=None):
         try:
             validator(parent, block)
         except AssertionError as e:
-
             try:
                 # reset parent
                 block.parent = None
-
                 # extract assertion message json
-                return cast_dict_or_list(e.__str__())  # {'disposition': 2}
+                res = cast_dict_or_list(e.__str__())  # {'disposition': 2}
+                res = res or {}
+                return res
             except:
                 return {}
     res = parent.add_child(block)
