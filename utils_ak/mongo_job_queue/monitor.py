@@ -36,8 +36,9 @@ class MonitorActor:
     def on_monitor(self, topic, msg):
         # todo: preview hardcode
         if 'state' in msg:
-            if str(msg['state']) not in self.received_messages_cache:
-                self.received_messages_cache.append(str(msg['state']))
+            key = msg['id'] + str(msg['state'])
+            if key not in self.received_messages_cache:
+                self.received_messages_cache.append(key)
             else:
                 return
 

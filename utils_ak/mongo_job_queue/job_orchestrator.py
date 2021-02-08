@@ -11,7 +11,8 @@ from utils_ak.dict import fill_template
 from utils_ak.serialization import cast_dict_or_list
 
 from utils_ak.mongo_job_queue.monitor import MonitorActor
-from utils_ak.mongo_job_queue.config import  BASE_DIR
+from utils_ak.mongo_job_queue.config import BASE_DIR
+
 
 class JobOrchestrator:
     def __init__(self, deployment_controller, message_broker):

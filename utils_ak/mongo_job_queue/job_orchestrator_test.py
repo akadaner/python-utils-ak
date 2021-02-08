@@ -17,7 +17,8 @@ from mongoengine import connect
 
 
 def create_new_job():
-    connect()
+    connect(host='mongodb+srv://arseniikadaner:Nash0lsapog@cluster0.2umoy.mongodb.net/feature-store?retryWrites=true&w=majority')
+    logger.info('Connected to mongodb')
     logger.remove()
     configure_loguru_stdout()
     time.sleep(2)
@@ -28,13 +29,15 @@ def create_new_job():
     job.save()
 
 
+
 def test():
-    connect()
     logger.remove()
     configure_loguru_stdout()
+    connect(host='mongodb+srv://arseniikadaner:Nash0lsapog@cluster0.2umoy.mongodb.net/feature-store?retryWrites=true&w=majority')
+    logger.info('Connected to mongodb')
     controller = KubernetesController()
     orchestrator = JobOrchestrator(controller, MESSAGE_BROKER)
-    multiprocessing.Process(target=create_new_job).start()
+    # multiprocessing.Process(target=create_new_job).start()
     orchestrator.run()
 
 
