@@ -22,7 +22,10 @@ def cast_model(obj, cls):
     elif isinstance(obj, dict):
         if '_id' in obj:
             # fetch and return updated version from server
-            db_obj = cast_model(cls.objects(pk=obj['_id']).first(), cls)
+            element = cls.objects(pk=obj['_id']).first()
+            if not element:
+                raise Exception('Object not found')
+            db_obj = cast_model(element, cls)
             pk = obj['_id']
             d1, d2 = db_obj.to_mongo(), dict(obj)
             d1.pop('_id', None), d2.pop('_id', None)
@@ -36,6 +39,8 @@ def cast_model(obj, cls):
         raise Exception('Unknown model format')
 
 
-def cast_dict(obj, cls=None):
+def cast_dict(obj, cls):
     model = cast_model(obj, cls=cls)
-    return dict(model.to_mongo())
+    res = dict(model.to_mongo())
+    res['_cls'] = cls.__name__
+    return res
