@@ -1,1 +1,0 @@
-""" Table is a class to store table-like granular_storage in stream to files. """

@@ -1,1 +1,0 @@
-""" 'Granular dataframe format' is a format to store pandas dataframes in binary dataframes with the time granularity based it's index (for storing large timeseries tables). """

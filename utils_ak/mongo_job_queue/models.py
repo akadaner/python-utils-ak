@@ -9,6 +9,7 @@ from utils_ak.mongoengine import *
 
 from datetime import datetime
 
+
 class Job(Document):
     AUTO_FIELDS = ['created', '_id']
     type = StringField(required=True)

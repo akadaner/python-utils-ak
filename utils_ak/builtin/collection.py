@@ -19,7 +19,7 @@ def listify(obj):
     return obj
 
 
-def list_get(lst, index, default=None):
+def list_get(lst, index=0, default=None):
     try:
         return lst[index]
     except IndexError:
