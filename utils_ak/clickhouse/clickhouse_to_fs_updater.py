@@ -3,22 +3,19 @@ import tqdm
 from datetime import datetime, timedelta
 from utils_ak.time import *
 from utils_ak.pandas import PandasSplitCombineETL
+from utils_ak.tqdm import tqdm_vanilla
 from clickhouse_driver import Client
+
 
 
 
 clickhouse_client = Client(CLICKHOUSE_URL, database=CLICKHOUSE_DB)
 
 
-class DefaultJobRunner:
-    def run_jobs(self, worker, jobs):
-        return [worker(job) for job in tqdm.tqdm(jobs)]
-
-
 class Clickhouse2FsDatasetUpdater:
-    def __init__(self, clickhouse_dataset, state_provider, start_id, job_runner=None, freq='1d'):
+    def __init__(self, clickhouse_dataset, state_provider, job_runner, start_id=None, freq='1d'):
         self.state_provider = state_provider
-        self.job_runner = job_runner or DefaultJobRunner()
+        self.job_runner = job_runner
         self.start_id = start_id
 
         self.clickhouse_dataset = clickhouse_dataset
@@ -53,15 +50,30 @@ class Clickhouse2FsDatasetUpdater:
         df = df[['ticker', 'pOpen']]
         self.etl.split_and_load(df)
 
+    def _init_start_id(self):
+        first_id = clickhouse_client.execute(f'SELECT startRange FROM {self.clickhouse_dataset} LIMIT 1')[0][0]
+        self.start_id = round_datetime(first_id, timedelta(days=1), rounding='floor')
+
     def update(self, worker):
         self._init()
         state = self.state_provider.get_state()
+        if not state.get('last_id'):
+            self._init_start_id()
         last_id = state.get('last_id', self.start_id)
         jobs = self._generate_jobs(last_id)
         outputs = self.job_runner.run_jobs(worker, jobs)
         new_state, update = self._combine(outputs)
         self._apply(update)
         self.state_provider.set_state(new_state)
+
+
+def list_tables():
+    res = clickhouse_client.execute('SHOW TABLES')
+    return [x[0] for x in res]
+
+class JobsRunner:
+    def run_jobs(self, worker, jobs):
+        return [worker(job) for job in tqdm.tqdm(jobs)]
 
 
 def worker(job):
@@ -72,8 +84,8 @@ def worker(job):
 def test_clickhouse_to_fs_updater():
     from utils_ak.state.provider import PickleDBStateProvider
     updater = Clickhouse2FsDatasetUpdater(clickhouse_dataset='binance_timebars_600',
-                                          state_provider=PickleDBStateProvider('clickhouse_dataset2.pickle'),
-                                          start_id=cast_dt('2020.07.01'))
+                                          state_provider=PickleDBStateProvider('clickhouse_dataset.pickle'),
+                                          job_runner=JobsRunner())
     updater.update(worker)
     print(updater.etl.extract_and_combine())
 
