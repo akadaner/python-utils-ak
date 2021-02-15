@@ -2,7 +2,8 @@ import pandas as pd
 import os
 from utils_ak.pandas import pd_write, pd_read
 from utils_ak.data_pipelines.etl.SplitCombineETL import SplitCombineETL
-from utils_ak.os import makedirs, list_files
+from utils_ak.os import makedirs, list_files, remove_path
+from utils_ak.time import cast_dt, cast_str, cast_datetime_series
 
 
 class PandasSplitCombineETL(SplitCombineETL):
@@ -56,19 +57,26 @@ class PandasSplitCombineETL(SplitCombineETL):
 
 
 class PandasGranularSplitCombineETL(PandasSplitCombineETL):
-    def __init__(self, key_pattern):
-        super().__init__('data/')
+    def __init__(self, key_pattern, **kwargs):
+        super().__init__(**kwargs)
         self.key_pattern = key_pattern
 
     def _calc_key_pattern(self, df):
         return pd.Series(df.index, index=df.index).apply(lambda dt: cast_str(dt, self.key_pattern))
 
 
-if __name__ == '__main__':
-    from utils_ak.interactive_imports import *
+def test_pandas_grnular_split_combine_etl():
+    from utils_ak import cast_dt, remove_path
     df = pd.DataFrame(list(range(100)), index=pd.date_range(cast_dt('2020.01.01'), periods=100, freq='1d'))
 
-    etl = PandasGranularSplitCombineETL('%Y%m')
+    etl = PandasGranularSplitCombineETL('%Y%m', path='data/', extension='.parquet')
     print(etl._calc_key_pattern(df))
     etl.split_and_load(df)
     print(etl.extract_and_combine())
+
+    for key in etl.get_keys():
+        remove_path(etl._fn(key))
+
+
+if __name__ == '__main__':
+    test_pandas_grnular_split_combine_etl()
