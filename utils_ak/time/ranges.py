@@ -20,6 +20,7 @@ def iter_range_by_months(beg, end):
         if next_end == end:
             return
 
+
 def _get_quarter_by_month(month_name):
     if month_name in range(1, 4):
         return 'Q1'
