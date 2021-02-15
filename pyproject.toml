@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "utils-ak"
-version = "0.1.2"
+version = "0.1.5"
 description = "Lots of small utils"
 authors = ["akadaner <arseniikadaner@gmail.com>"]
 license = "MIT"
@@ -9,7 +9,7 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.7.1"
 boto3 = "^1.15.18"
 GitPython = "^3.1.9"
 numpy = "^1.19.2"
