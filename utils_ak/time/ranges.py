@@ -58,7 +58,7 @@ def datetime_range(beg, end, period):
         beg = min(beg + period, end)
 
 
-if __name__ == '__main__':
+def test_ranges():
     from utils_ak.time import cast_datetime, cast_timedelta
 
     # add months
@@ -74,3 +74,7 @@ if __name__ == '__main__':
     print(list(iter_range(cast_datetime('2020.01.01 12:00:00'), cast_datetime('2020.01.01 12:16:00'), cast_timedelta('5m'))))
 
     print(list(iter_quarters(cast_datetime('2020.02.15'), cast_datetime('2020.07.15'))))
+
+
+if __name__ == '__main__':
+    test_ranges()
