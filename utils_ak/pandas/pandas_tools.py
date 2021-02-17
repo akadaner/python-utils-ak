@@ -7,6 +7,8 @@ import base64
 from PIL import Image
 from io import BytesIO
 
+from utils_ak.os import *
+
 
 pd.set_option('display.max_colwidth', None)
 
@@ -186,12 +188,22 @@ def find_gaps(index, gap):
 # todo: search for existing solutions
 def pd_read(fn, **kwargs):
     ext = os.path.splitext(fn)[-1]
+    if '.zip' in ext:
+        ext = os.path.splitext(fn[:-4])[-1]
     return getattr(pd, f'read_{ext[1:]}')(fn, **kwargs)
 
 
 def pd_write(df, fn, **kwargs):
     ext = os.path.splitext(fn)[-1]
-    return getattr(df, f'to_{ext[1:]}')(fn, **kwargs)
+    if '.zip' in ext:
+        ext = os.path.splitext(fn[:-4])[-1]
+        kwargs['compression'] = 'zip'
+    tmp_fn = fn + '.tmp'
+    res = getattr(df, f'to_{ext[1:]}')(tmp_fn, **kwargs)
+    if os.path.exists(fn):
+        remove_path(fn)
+    rename_path(tmp_fn, fn)
+    return res
 
 
 def mark_consecutive_groups(df, key, groups_key):

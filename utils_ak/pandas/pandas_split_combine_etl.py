@@ -7,12 +7,13 @@ from utils_ak.pandas import merge
 
 
 class PandasSplitCombineETL:
-    def __init__(self, path, key_func, extension='.csv', merge_by=None):
+    def __init__(self, path, key_func, prefix='', extension='.csv', merge_by=None):
         self.path = path
         self.extension = extension
         makedirs(path)
         self.key_func = key_func
         self.merge_by = merge_by
+        self.prefix = prefix
 
     def _split(self, combined):
         df = combined
@@ -25,7 +26,9 @@ class PandasSplitCombineETL:
             yield key, split.drop(['_key'], axis=1)
 
     def _fn(self, key):
-        return os.path.join(self.path, key + self.extension)
+        values = [self.prefix, key]
+        values = [v for v in values if v]
+        return os.path.join(self.path, '-'.join(values) + self.extension)
 
     def _load(self, key, split):
         fn = self._fn(key)
@@ -38,8 +41,10 @@ class PandasSplitCombineETL:
         pd_write(split, fn, index=False)
 
     def _get_keys(self):
-        fns = list_files(self.path, recursive=True)
+        fns = list_files(self.path, pattern='*' + self.extension, recursive=True)
         keys = [os.path.splitext(os.path.basename(fn))[0] for fn in fns]
+        # remove prefix if needed
+        keys = [key[len(self.prefix + '-'):] if key.startswith(self.prefix + '-') else key for key in keys]
         return keys
 
     def _extract(self, key):

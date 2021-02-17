@@ -30,8 +30,8 @@ class PickleDBStateProvider(StateProvider):
 
     def get_state(self):
         if self.state is None:
-            self.state = self.db.get(self.key)
-            return self.state or {}
+            self.state = self.db.get(self.key) or {}
+            return self.state
         return self.state
 
     def set_state(self, state):

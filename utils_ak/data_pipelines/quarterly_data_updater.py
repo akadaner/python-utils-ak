@@ -11,6 +11,11 @@ from utils_ak import tqdm
 from clickhouse_driver import Client
 from utils_ak.state.provider import PickleDBStateProvider
 from utils_ak.hash import *
+from utils_ak.pandas import *
+from google.cloud import storage
+from loguru import logger
+from utils_ak.loguru import configure_loguru_stdout
+
 
 
 class QuarterlyTableUpdater:
@@ -25,22 +30,31 @@ class QuarterlyTableUpdater:
                                          key_func=lambda df: table,
                                          merge_by=['startRange', 'ticker'])
 
+    def _upload_to_gcp(self, bucket, path_from, path_to):
+        client = storage.Client()
+        bucket = client.get_bucket(bucket)
+        blob = bucket.blob(path_to)
+        blob.upload_from_filename(filename=path_from)
+
     def update(self):
+        logger.info('Updating', table=self.table)
         df = self.etl.extract_and_combine()
         beg = df.index[0].to_pydatetime()
         end = round_datetime(datetime.now(), '1d', rounding='floor')
 
         state = self.state_provider.get_state()
 
-        print('Current state', state)
+        logger.info('Current state', state=state)
         cur_year, cur_q_num = state.get('year'), state.get('q_num')
 
         for year, q_num, quarter_beg, quarter_end in list(iter_quarters(beg, end)):
-            print(year, q_num, quarter_beg, quarter_end)
             if cur_year:
                 # skip if already processed
                 if (year, q_num) < (cur_year, cur_q_num):
+                    logger.info('Skipping', year=year, q_num=q_num)
                     continue
+
+            logger.info('Processing', year=year, q_num=q_num)
 
             if quarter_end == end:
                 # add one month for the last file
@@ -51,11 +65,13 @@ class QuarterlyTableUpdater:
             base_fn = f'{self.table}_{year}{q_num}'
 
             fn = os.path.join(self.output_root, self.table, f'{base_fn}_{uid}.csv.zip')
-            quarter_df.to_csv(fn, index=False, compression='zip')
+            pd_write(quarter_df, fn, index=True)
+            self._upload_to_gcp('qset-storage-master', fn, f'datasets/{self.table}/{base_fn}_{uid}.csv.zip')
 
         sample_fn = os.path.join(self.output_root, self.table, f'{base_fn}_sample.csv')
         if not os.path.exists(sample_fn):
-            df.iloc[:20].to_csv(sample_fn, index=False)
+            pd_write(df.iloc[:20], sample_fn, index=True)
+            self._upload_to_gcp('qset-storage-master', sample_fn, f'datasets/{self.table}/{base_fn}_sample.csv')
 
         new_state = {'year': year, 'q_num': q_num}
         self.state_provider.set_state(new_state)
@@ -82,14 +98,20 @@ class QuarterlyUpdater:
 def test_clickhouse_to_fs_updater():
     updater = QuarterlyTableUpdater(input_root=r'C:\Users\Mi\Desktop\master\code\git\python-utils-ak\utils_ak\clickhouse\data',
                                     output_root=r'C:\Users\Mi\Desktop\master\code\git\python-utils-ak\utils_ak\clickhouse\quarterly_data',
-                                    table='binance_timebars_600')
+                                    table='binance_timebars_1800')
     updater.update()
 
 
 def main(input_root='data', output_root='quarterly_data'):
+    # todo: del
+    input_root = r'C:\Users\Mi\Desktop\master\code\git\python-utils-ak\utils_ak\clickhouse\data'
+    output_root = r'C:\Users\Mi\Desktop\master\code\git\python-utils-ak\utils_ak\clickhouse\quarterly_data'
     QuarterlyUpdater(input_root, output_root).update()
 
 
 if __name__ == '__main__':
-    # test_clickhouse_to_fs_updater()
-    fire.Fire(main)
+    import os
+    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = r"C:\Users\Mi\Desktop\master\qset\google-cloud-storage\storage-3552e1d26426.json"
+    configure_loguru_stdout('INFO')
+    test_clickhouse_to_fs_updater()
+    # fire.Fire(main)
