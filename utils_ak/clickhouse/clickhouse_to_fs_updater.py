@@ -5,6 +5,7 @@ import fire
 from datetime import datetime, timedelta
 from utils_ak.time import *
 from utils_ak.pandas import PandasSplitCombineETL
+from utils_ak.builtin import *
 from utils_ak import tqdm
 from clickhouse_driver import Client
 from utils_ak.state.provider import PickleDBStateProvider
@@ -63,11 +64,15 @@ class Clickhouse2FsDatasetUpdater:
         if not state.get('last_id'):
             self._init_start_id()
         last_id = state.get('last_id', self.start_id)
+
         jobs = self._generate_jobs(last_id)
-        outputs = [self._process(job) for job in tqdm(jobs, desc=jobs[0]['clickhouse_dataset'])]
-        new_state, update = self._combine(outputs)
-        self._apply(update)
-        self.state_provider.set_state(new_state)
+        chunks = list(crop_to_chunks(jobs, 100))
+
+        for i, chunk in enumerate(chunks):
+            outputs = [self._process(job) for job in tqdm(chunk, desc='{} {}/{}'.format(jobs[0]['clickhouse_dataset'], i, len(chunks)))]
+            new_state, update = self._combine(outputs)
+            self._apply(update)
+            self.state_provider.set_state(new_state)
 
 
 class Clickhouse2FsUpdater:

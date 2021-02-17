@@ -75,7 +75,7 @@ def update_dic(dic, new_dic):
     return dic
 
 
-def chunks(lst, n):
+def crop_to_chunks(lst, n):
     """Yield successive n-sized chunks from l."""
     for i in range(0, len(lst), n):
         yield lst[i:i + n]
