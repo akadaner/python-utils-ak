@@ -10,7 +10,10 @@ from utils_ak.builtin import update_dic
 
 def cast_config(obj, required=False):
     if obj is None:
-        return {}
+        if not required:
+            return {}
+        else:
+            raise Exception('Config required')
     elif isinstance(obj, collections.abc.Mapping):
         return obj
     elif isinstance(obj, str):

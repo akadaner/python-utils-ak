@@ -7,7 +7,7 @@ from utils_ak.pandas import merge
 
 
 class PandasSplitCombineETL:
-    def __init__(self, path, key_func, prefix='', extension='.csv', merge_by=None):
+    def __init__(self, path, key_func=None, prefix='', extension='.csv', merge_by=None):
         self.path = path
         self.extension = extension
         makedirs(path)
@@ -16,6 +16,7 @@ class PandasSplitCombineETL:
         self.prefix = prefix
 
     def _split(self, combined):
+        assert self.key_func, 'Key func not defined'
         df = combined
         df['_key'] = self.key_func(df)
         df.columns = [str(c) for c in df.columns]
