@@ -8,7 +8,7 @@ from PIL import Image
 from io import BytesIO
 
 from utils_ak.os import *
-
+from utils_ak.builtin import list_get
 
 pd.set_option('display.max_colwidth', None)
 
@@ -198,6 +198,8 @@ def pd_write(df, fn, **kwargs):
     if '.zip' in ext:
         ext = os.path.splitext(fn[:-4])[-1]
         kwargs['compression'] = 'zip'
+    kwargs['index'] = False
+
     tmp_fn = fn + '.tmp'
     res = getattr(df, f'to_{ext[1:]}')(tmp_fn, **kwargs)
     if os.path.exists(fn):
