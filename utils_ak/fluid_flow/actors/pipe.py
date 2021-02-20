@@ -9,7 +9,7 @@ def cast_pipe(pipe_obj):
     elif isinstance(pipe_obj, Pipe):
         return pipe_obj
     else:
-        raise Exception('Unknown pipe object')
+        raise Exception("Unknown pipe object")
 
 
 class Pipe(Actor):
@@ -17,7 +17,7 @@ class Pipe(Actor):
         super().__init__(name)
         self.current_speed = 0
         self.current_item = None
-        self.pressures = {'out': None, 'in': None}
+        self.pressures = {"out": None, "in": None}
 
     @property
     def parent(self):
@@ -40,20 +40,21 @@ class Pipe(Actor):
             self.current_speed = 0
 
     def __str__(self):
-        return f'Pipe {self.name}'
+        return f"Pipe {self.name}"
 
     def stats(self):
-        return {'current_speed': self.current_speed, 'pressures': self.pressures}
+        return {"current_speed": self.current_speed, "pressures": self.pressures}
 
     def set_pressure(self, orient, pressure, item):
         self.pressures[orient] = pressure
         self.current_item = item
 
+
 class PipeMixin:
     def pipe(self, orient):
-        if orient == 'in':
+        if orient == "in":
             nodes = self.parents
-        elif orient == 'out':
+        elif orient == "out":
             nodes = self.children
 
         if not nodes:
@@ -63,22 +64,22 @@ class PipeMixin:
             return nodes[0]
 
     def speed(self, orient):
-        if orient == 'in':
-            if not self.pipe('in'):
+        if orient == "in":
+            if not self.pipe("in"):
                 return 0
-            return self.pipe('in').current_speed
-        elif orient == 'out':
-            if not self.pipe('out'):
+            return self.pipe("in").current_speed
+        elif orient == "out":
+            if not self.pipe("out"):
                 return 0
-            return self.pipe('out').current_speed
+            return self.pipe("out").current_speed
 
     def drain(self):
-        return self.speed('in') - self.speed('out')
+        return self.speed("in") - self.speed("out")
 
 
 def pipe_connect(node1, node2, pipe=None):
     if not pipe:
-        pipe = cast_pipe(f'{node1} -> {node2}')
+        pipe = cast_pipe(f"{node1} -> {node2}")
     else:
         pipe = cast_pipe(pipe)
     connect(node1, pipe)
@@ -99,7 +100,7 @@ def pipe_disconnect(node1, node2):
         disconnect(pipe, node2)
 
 
-def pipe_switch(node1, node2, orient='in'):
+def pipe_switch(node1, node2, orient="in"):
     if node1 == node2:
         return
     piped_nodes = [node for node in [node1, node2] if node.pipe(orient)]
@@ -109,12 +110,12 @@ def pipe_switch(node1, node2, orient='in'):
 
     pipe1, pipe2 = node1.pipe(orient), node2.pipe(orient)
 
-    if orient == 'in':
+    if orient == "in":
         disconnect(pipe1, node1)
         disconnect(pipe2, node2)
         connect(pipe1, node2)
         connect(pipe2, node1)
-    elif orient == 'out':
+    elif orient == "out":
         disconnect(node1, pipe1)
         disconnect(node2, pipe2)
         connect(node2, pipe1)

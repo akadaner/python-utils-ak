@@ -8,6 +8,7 @@ def add_map(f):
             return [f(x) for x in value]
         else:
             return f(value, *args, **kwds)
+
     return wrapper
 
 
@@ -18,10 +19,12 @@ def add_uni(f):
             return f(value, *args, **kwds)
         else:
             return f([value], *args, **kwds)[0]
+
     return wrapper
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
+
     def f(v):
         return v ** 2
 

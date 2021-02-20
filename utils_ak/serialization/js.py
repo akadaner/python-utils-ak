@@ -28,7 +28,7 @@ else:
 
 class JsonEncoder(json.JSONEncoder):
     def default(self, obj):
-        if hasattr(obj, 'to_json'):
+        if hasattr(obj, "to_json"):
             return obj.to_json()
         elif isinstance(obj, Decimal):
             return str(obj)
@@ -62,14 +62,14 @@ def cast_dict_or_list(js_obj, *args, **kwargs):
 
     if isinstance(js_obj, bytes):
         try:
-            js_obj = js_obj.decode('utf-8')
+            js_obj = js_obj.decode("utf-8")
         except:
-            raise Exception('Unknown bytes encoding')
+            raise Exception("Unknown bytes encoding")
 
     # load object from file if path exists
     if isinstance(js_obj, str):
         if os.path.exists(js_obj):
-            with open(js_obj, 'r') as f:
+            with open(js_obj, "r") as f:
                 js_obj = f.read()
 
         try:
@@ -88,19 +88,17 @@ def cast_dict_or_list(js_obj, *args, **kwargs):
         except:
             pass
 
-    raise Exception('Unknown type')
+    raise Exception("Unknown type")
 
 
 dumps = cast_js
 loads = cast_dict_or_list
 
 
-
-
-if __name__ == '__main__':
-    print(dumps({'a': 'foo'}))
-    print(loads(dumps({'a': 'foo', 'dec': Decimal('10.1'), 'today': datetime.now()})))
-    print(cast_dict_or_list('columns'))
+if __name__ == "__main__":
+    print(dumps({"a": "foo"}))
+    print(loads(dumps({"a": "foo", "dec": Decimal("10.1"), "today": datetime.now()})))
+    print(cast_dict_or_list("columns"))
     print(cast_js(None))
 
     import apache_beam.transforms.window

@@ -19,13 +19,16 @@ class Worker:
         async def send_initial():
             await asyncio.sleep(0.1)
             await self.process()
+
         self.microservice.tasks.append(asyncio.ensure_future(send_initial()))
         self.microservice.run()
 
 
 def run_worker(worker_cls, config=None):
-    config = config or os.environ.get('CONFIG')
-    assert config is not None, 'Config not specified'
+    config = config or os.environ.get("CONFIG")
+    assert config is not None, "Config not specified"
     config = cast_dict_or_list(config)
-    worker = worker_cls(config['worker_id'], config['payload'], config['message_broker'])
+    worker = worker_cls(
+        config["worker_id"], config["payload"], config["message_broker"]
+    )
     worker.run()

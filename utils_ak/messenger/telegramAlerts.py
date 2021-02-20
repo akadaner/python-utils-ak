@@ -6,16 +6,16 @@ import enum
 
 
 class EventType(enum.Enum):
-    disconnected = 'DISCONNECTED'
-    connection_lost = 'CONNECTION LOST'
-    connection_failed = 'CONNECTION FAILED'
+    disconnected = "DISCONNECTED"
+    connection_lost = "CONNECTION LOST"
+    connection_failed = "CONNECTION FAILED"
     reconnected = "RECONNECTED"
     connected = "CONNECTED"
     snapshot_failed = "SNAPSHOT FAILED"
     gap = "GAP"
 
 
-class NotifierBot():
+class NotifierBot:
     def __init__(self):
         # @qtb_bot token
         self.bot_token = "442059717:AAFUUCQ0mDcoOBYqTZrcoIa8JUY35o82b0E"
@@ -28,27 +28,37 @@ class NotifierBot():
     def notify(self, exchange=None, time=None, errtype=None, curr=None, mss=None):
         if not mss:
             if errtype == EventType.disconnected:
-                msg = "{} {}: a disconnect occured on {} at {}. \n Attempting reconnect..." \
-                    .format(exchange.upper(), errtype.value, exchange, time)
+                msg = "{} {}: a disconnect occured on {} at {}. \n Attempting reconnect...".format(
+                    exchange.upper(), errtype.value, exchange, time
+                )
             elif errtype == EventType.connected:
-                msg = "{} {}: successfully connected to {} at {}." \
-                    .format(exchange.upper(), errtype.value, exchange, time)
+                msg = "{} {}: successfully connected to {} at {}.".format(
+                    exchange.upper(), errtype.value, exchange, time
+                )
             elif errtype == EventType.reconnected:
-                msg = "{} {}: successfully reconnected to {} at {}." \
-                    .format(exchange.upper(), errtype.value, exchange, time)
+                msg = "{} {}: successfully reconnected to {} at {}.".format(
+                    exchange.upper(), errtype.value, exchange, time
+                )
             elif errtype == EventType.gap:
-                msg = "{} {}: a gap of more than 1 minute has been observed when downloading from {} at {}".format(exchange.upper(), errtype.value, exchange, time)
+                msg = "{} {}: a gap of more than 1 minute has been observed when downloading from {} at {}".format(
+                    exchange.upper(), errtype.value, exchange, time
+                )
             elif errtype == EventType.connection_lost:
-                msg = "{} {}: connection lost with {} at {}." \
-                    .format(exchange.upper(), errtype.value, exchange, time)
+                msg = "{} {}: connection lost with {} at {}.".format(
+                    exchange.upper(), errtype.value, exchange, time
+                )
             elif errtype == EventType.connection_failed:
-                msg = "{} {}: connection failed with {} at {}." \
-                    .format(exchange.upper(), errtype.value, exchange, time)
+                msg = "{} {}: connection failed with {} at {}.".format(
+                    exchange.upper(), errtype.value, exchange, time
+                )
             elif errtype == EventType.snapshot_failed:
-                msg = "{} {}: {} snapshot failed on {} at {}." \
-                    .format(exchange.upper(), errtype.value, curr, exchange, time)
+                msg = "{} {}: {} snapshot failed on {} at {}.".format(
+                    exchange.upper(), errtype.value, curr, exchange, time
+                )
             else:
-                msg = "{}: UNKNOWN ERROR TYPE ENCOUNTRED ON {} AT {}!".format(exchange.upper(), exchange, time)
+                msg = "{}: UNKNOWN ERROR TYPE ENCOUNTRED ON {} AT {}!".format(
+                    exchange.upper(), exchange, time
+                )
         else:
             msg = mss
 

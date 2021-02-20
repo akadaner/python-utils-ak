@@ -15,22 +15,29 @@ def validate_disjoint_by_axis(b1, b2, axis=0):
     i1 = cast_interval(b1.x[axis], b1.y[axis])
     i2 = cast_interval(b2.x[axis], b2.y[axis])
 
-    assert calc_interval_length(i1 & i2) == 0, cast_js({'disposition': disposition})
+    assert calc_interval_length(i1 & i2) == 0, cast_js({"disposition": disposition})
 
     if disposition > 0:
-        logger.debug('Disposition', result={'disposition': disposition, 'cls1': b1.props['cls'], 'cls2': b2.props['cls']})
+        logger.debug(
+            "Disposition",
+            result={
+                "disposition": disposition,
+                "cls1": b1.props["cls"],
+                "cls2": b2.props["cls"],
+            },
+        )
 
 
 def test_validate_disjoint_by_axis():
-    print('Validate disjoint test')
+    print("Validate disjoint test")
     for t in range(0, 10):
-        a = ParallelepipedBlock('a', n_dims=1, x=[t], size=[4])
-        b = ParallelepipedBlock('b', n_dims=1, x=[3], size=[3])
+        a = ParallelepipedBlock("a", n_dims=1, x=[t], size=[4])
+        b = ParallelepipedBlock("b", n_dims=1, x=[3], size=[3])
         print(a, b)
         try:
             validate_disjoint_by_axis(a, b, 0)
         except AssertionError as e:
-            print('AssertionError on disposition', e)
+            print("AssertionError on disposition", e)
 
 
 class ClassValidator:
@@ -45,29 +52,33 @@ class ClassValidator:
             self.validators[(class2, class1)] = validator
 
     def validate(self, b1, b2):
-        key = (b1.props['cls'], b2.props['cls'])
+        key = (b1.props["cls"], b2.props["cls"])
         if key in self.validators:
             self.validators[key](b1, b2)
 
     def __call__(self, parent, block):
-        parent_blocks = parent.children[-self.window:]
+        parent_blocks = parent.children[-self.window :]
 
         if not parent_blocks:
             return
 
         b2 = block
 
-        if not self.window_by_classes.get(block.props['cls']):
+        if not self.window_by_classes.get(block.props["cls"]):
             for b1 in parent_blocks:
                 self.validate(b1, b2)
         else:
-            parent_classes = set([b.props['cls'] for b in parent_blocks])
+            parent_classes = set([b.props["cls"] for b in parent_blocks])
             for parent_cls in parent_classes:
-                if parent_cls not in self.window_by_classes[block.props['cls']]:
+                if parent_cls not in self.window_by_classes[block.props["cls"]]:
                     # don't check at all
                     continue
-                cls_parent_blocks = [b for b in parent_blocks if b.props['cls'] == parent_cls]
-                cls_parent_blocks = cls_parent_blocks[-self.window_by_classes[block.props['cls']][parent_cls]:]
+                cls_parent_blocks = [
+                    b for b in parent_blocks if b.props["cls"] == parent_cls
+                ]
+                cls_parent_blocks = cls_parent_blocks[
+                    -self.window_by_classes[block.props["cls"]][parent_cls] :
+                ]
 
                 for b1 in cls_parent_blocks:
                     self.validate(b1, b2)
@@ -75,12 +86,12 @@ class ClassValidator:
 
 def test_class_validator():
     class_validator = ClassValidator(window=1)
-    class_validator.add('a', 'a', validator=validate_disjoint_by_axis)
+    class_validator.add("a", "a", validator=validate_disjoint_by_axis)
 
-    root = ParallelepipedBlock('root', axis=0)
-    a1 = ParallelepipedBlock('a', n_dims=2, x=[0, 0], size=[5, 1])
-    a2 = ParallelepipedBlock('a', n_dims=2, x=[2, 0], size=[5, 1])
-    b = ParallelepipedBlock('b', n_dims=2, x=[0, 1], size=[5, 1])
+    root = ParallelepipedBlock("root", axis=0)
+    a1 = ParallelepipedBlock("a", n_dims=2, x=[0, 0], size=[5, 1])
+    a2 = ParallelepipedBlock("a", n_dims=2, x=[2, 0], size=[5, 1])
+    b = ParallelepipedBlock("b", n_dims=2, x=[0, 1], size=[5, 1])
     root.add_child(a1)
 
     try:
@@ -98,6 +109,6 @@ def test_class_validator():
     root.add_child(a2)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     test_validate_disjoint_by_axis()
     test_class_validator()

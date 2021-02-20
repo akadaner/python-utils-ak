@@ -3,8 +3,8 @@ import zmq
 
 from multiprocessing import Process
 
-URL = 'tcp://127.0.0.1:5556'
-SYSTEM_URL = 'tcp://127.0.0.1:5557'
+URL = "tcp://127.0.0.1:5556"
+SYSTEM_URL = "tcp://127.0.0.1:5557"
 POLL = True
 # copy=True is much faster
 COPY = True
@@ -29,7 +29,7 @@ def throughput_sink():
     # router_system - server analogue
     router_system = context.socket(zmq.ROUTER)
     sub = context.socket(zmq.SUB)
-    sub.setsockopt(zmq.SUBSCRIBE, b'')
+    sub.setsockopt(zmq.SUBSCRIBE, b"")
 
     #  Add your router_system options here.
     #  For example ZMQ_RATE, ZMQ_RECOVERY_IVL and ZMQ_MCAST_LOOP for PGM.
@@ -44,8 +44,8 @@ def throughput_sink():
     time.sleep(0.1)
 
     msg = router_system.recv_multipart()
-    assert msg[1] == b'BEGIN', msg
-    count = int(msg[2].decode('ascii'))
+    assert msg[1] == b"BEGIN", msg
+    count = int(msg[2].decode("ascii"))
     router_system.send_multipart(msg)
 
     flags = zmq.NOBLOCK if POLL else 0
@@ -62,7 +62,7 @@ def throughput_sink():
             counter += 1
 
     # msg[0] - instance to which we send message!
-    router_system.send_multipart([msg[0], b'DONE'])
+    router_system.send_multipart([msg[0], b"DONE"])
 
     router_system.close()
     sub.close()
@@ -86,34 +86,34 @@ def get_throughput():
     pub.connect(URL)
 
     time.sleep(0.1)
-    data = b' ' * SIZE
+    data = b" " * SIZE
 
     flags = 0
-    system_dealer.send_multipart([b'BEGIN', str(COUNT).encode('ascii')])
+    system_dealer.send_multipart([b"BEGIN", str(COUNT).encode("ascii")])
     # Wait for the other side to connect.
     msg = system_dealer.recv_multipart()
-    assert msg[0] == b'BEGIN'
+    assert msg[0] == b"BEGIN"
     start = now()
     for i in range(COUNT):
-        pub.send_multipart([b'', data], flags=flags, copy=COPY)
+        pub.send_multipart([b"", data], flags=flags, copy=COPY)
     sent = now()
     # wait for receiver
     reply = system_dealer.recv_multipart()
     elapsed = now() - start
-    assert reply[0] == b'DONE'
+    assert reply[0] == b"DONE"
     send_only = sent - start
 
     send_throughput = COUNT / send_only
     throughput = COUNT / elapsed
     megabits = throughput * SIZE * 8 / 1e6
 
-    print('Throughput')
-    print(f'Message size   : {SIZE}     [B]')
-    print(f'Message count  : {COUNT}     [msgs]')
-    print(f'Send only      : {send_throughput}     [msg/s]')
-    print(f'Mean throughput: {throughput}     [msg/s]')
-    print(f'Mean throughput: {megabits} [Mb/s]')
-    print(f'Test time      : {elapsed} [s]')
+    print("Throughput")
+    print(f"Message size   : {SIZE}     [B]")
+    print(f"Message count  : {COUNT}     [msgs]")
+    print(f"Send only      : {send_throughput}     [msg/s]")
+    print(f"Mean throughput: {throughput}     [msg/s]")
+    print(f"Mean throughput: {megabits} [Mb/s]")
+    print(f"Test time      : {elapsed} [s]")
     print()
     context.destroy()
     return (send_throughput, throughput)
@@ -126,5 +126,5 @@ def benchmark_throughput():
     p.join()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     benchmark_throughput()

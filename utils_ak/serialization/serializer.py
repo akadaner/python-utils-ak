@@ -1,4 +1,3 @@
-
 class Serializer:
     def encode(self, obj):
         pass

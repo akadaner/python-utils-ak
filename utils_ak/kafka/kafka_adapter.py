@@ -4,21 +4,22 @@ import uuid
 
 # https://github.com/edenhill/librdkafka/wiki/Manually-setting-the-consumer-start-offset
 
+
 class KafkaAdapter:
     """ Allows to read. """
 
-    def __init__(self, bootstrap_servers='localhost:9092', auto_offset_reset='largest'):
+    def __init__(self, bootstrap_servers="localhost:9092", auto_offset_reset="largest"):
         self.kafka_topics = []
         self.state = None
-        self.consumer = Consumer({
-            'bootstrap.servers': bootstrap_servers,
-            'group.id': str(uuid.uuid4()),
-            'default.topic.config': {
-                'auto.offset.reset': auto_offset_reset
-            },
-            'enable.auto.commit': False,
-            'enable.partition.eof': False,
-        })
+        self.consumer = Consumer(
+            {
+                "bootstrap.servers": bootstrap_servers,
+                "group.id": str(uuid.uuid4()),
+                "default.topic.config": {"auto.offset.reset": auto_offset_reset},
+                "enable.auto.commit": False,
+                "enable.partition.eof": False,
+            }
+        )
 
         self.topic = None
         self.topic_partition = None

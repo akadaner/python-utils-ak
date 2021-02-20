@@ -25,8 +25,8 @@ class CallbackTimer:
         self.args = args or tuple()
         self.kwargs = kwargs or {}
 
-        if timer_type not in ['right', 'left']:
-            raise Exception('Only right/left timer is supported')
+        if timer_type not in ["right", "left"]:
+            raise Exception("Only right/left timer is supported")
 
     @property
     def next_call(self):
@@ -77,7 +77,10 @@ class CallbackTimer:
 
 class ScheduleTimer:
     """ Run callback function at schedule. """
-    def __init__(self, callback, pattern=None, freq=None, init_run=False, args=None, kwargs=None):
+
+    def __init__(
+        self, callback, pattern=None, freq=None, init_run=False, args=None, kwargs=None
+    ):
         """
         :param pattern: (seconds) (minutes) (hours) (day) (month) (day-of-week) in cron-like manner: * 5 * * * * ...
         """
@@ -92,11 +95,13 @@ class ScheduleTimer:
             # cast pattern by frequency
             if cast_timedelta(freq) >= timedelta(days=1):
                 # freq is supported only for hour and less frequency
-                raise Exception(f'Too large frequency: {cast_sec(freq)}. Use frequency less than a day')
+                raise Exception(
+                    f"Too large frequency: {cast_sec(freq)}. Use frequency less than a day"
+                )
             freq_sec = round(cast_sec(freq))
 
             if freq_sec <= 0:
-                raise Exception('Bad frequency: {}'.format(freq_sec))
+                raise Exception("Bad frequency: {}".format(freq_sec))
 
             unit_secs = [1, 60, 3600, 3600 * 24]
 
@@ -108,29 +113,47 @@ class ScheduleTimer:
                 unit_i += 1
 
             if unit_secs[unit_i + 1] % freq_sec != 0:
-                raise Exception('Bad frequency: {}'.format(freq_sec))
+                raise Exception("Bad frequency: {}".format(freq_sec))
 
             freq_units = int(freq_sec / unit_secs[unit_i])
-            freq_vals = [i * freq_units for i in range(unit_secs[unit_i + 1] // freq_sec)]
+            freq_vals = [
+                i * freq_units for i in range(unit_secs[unit_i + 1] // freq_sec)
+            ]
             freq_vals = map(str, freq_vals)
 
             pattern_vals = []
             for i in range(6):
                 if i < unit_i:
-                    pattern_vals.append('0')
+                    pattern_vals.append("0")
                 elif i == unit_i:
                     if freq_units != 1:
-                        pattern_vals.append(','.join(freq_vals))
+                        pattern_vals.append(",".join(freq_vals))
                     else:
-                        pattern_vals.append('*')
+                        pattern_vals.append("*")
                 elif i > unit_i:
-                    pattern_vals.append('*')
-            self.pattern = ' '.join(pattern_vals)
+                    pattern_vals.append("*")
+            self.pattern = " ".join(pattern_vals)
         else:
             self.pattern = pattern
-        units = sec, min, hou, day, mon, dow = [self._parse_time_unit(unit) for unit in self.pattern.split()]
-        freqs = [rrule.SECONDLY, rrule.MINUTELY, rrule.HOURLY, rrule.DAILY, rrule.MONTHLY, rrule.DAILY]
-        param_names = ['bysecond', 'byminute', 'byhour', 'bymonthday', 'bymonth', 'byweekday']
+        units = sec, min, hou, day, mon, dow = [
+            self._parse_time_unit(unit) for unit in self.pattern.split()
+        ]
+        freqs = [
+            rrule.SECONDLY,
+            rrule.MINUTELY,
+            rrule.HOURLY,
+            rrule.DAILY,
+            rrule.MONTHLY,
+            rrule.DAILY,
+        ]
+        param_names = [
+            "bysecond",
+            "byminute",
+            "byhour",
+            "bymonthday",
+            "bymonth",
+            "byweekday",
+        ]
 
         try:
             freq = freqs[units.index(None)]
@@ -139,26 +162,32 @@ class ScheduleTimer:
             freq = rrule.YEARLY
 
         self.rrule_params = dict(zip(param_names, units))
-        self.rrule_params['freq'] = freq
+        self.rrule_params["freq"] = freq
 
         self._update_next_call()
 
     def _parse_time_unit(self, unit):
-        if unit == '*':
+        if unit == "*":
             return None
-        unit = unit.split(',')
+        unit = unit.split(",")
         return [int(x) for x in unit]
 
     def _update_next_call(self):
         # set next_call to closest
-        self.last_call_dt = datetime.fromtimestamp(self.next_call) if self.next_call else datetime.now()
-        next_call_lst = list(rrule.rrule(dtstart=self.last_call_dt + timedelta(seconds=1),
-                                         until=self.last_call_dt + timedelta(seconds=1) + timedelta(days=366),
-                                         count=1,
-                                         **self.rrule_params))
+        self.last_call_dt = (
+            datetime.fromtimestamp(self.next_call) if self.next_call else datetime.now()
+        )
+        next_call_lst = list(
+            rrule.rrule(
+                dtstart=self.last_call_dt + timedelta(seconds=1),
+                until=self.last_call_dt + timedelta(seconds=1) + timedelta(days=366),
+                count=1,
+                **self.rrule_params,
+            )
+        )
 
         if not next_call_lst:
-            raise Exception('Bad scheduler input!')
+            raise Exception("Bad scheduler input!")
 
         self.next_call = next_call_lst[0].timestamp()
 
@@ -205,7 +234,7 @@ class CallbackTimers(object):
         return min([timer.next_call for timer in self.timers])
 
     def next_call_timeout(self):
-        return max(self.next_call - time.time(), 0.)
+        return max(self.next_call - time.time(), 0.0)
 
     def __len__(self):
         return len(self.timers)
@@ -218,28 +247,28 @@ class CallbackTimers(object):
 
 def test():
     def print_msg(msg=None):
-        print('Callback:', datetime.now(), msg)
+        print("Callback:", datetime.now(), msg)
 
-    print('Timer 1')
+    print("Timer 1")
     timer1 = CallbackTimer(print_msg, 1)
-    timer2 = CallbackTimer(print_msg, 1, args=('asdf',))
+    timer2 = CallbackTimer(print_msg, 1, args=("asdf",))
     for i in range(300):
         timer1.run_if_possible()
         timer2.run_if_possible()
         time.sleep(0.01)
 
-    print('Timer 2')
+    print("Timer 2")
     # run every second
-    timer1 = ScheduleTimer(print_msg, '* * * * * *')
-    timer2 = ScheduleTimer(print_msg, '* * * * * *', args=('asdf',))
+    timer1 = ScheduleTimer(print_msg, "* * * * * *")
+    timer2 = ScheduleTimer(print_msg, "* * * * * *", args=("asdf",))
     for i in range(300):
         timer1.run_if_possible()
         timer2.run_if_possible()
         time.sleep(0.01)
 
-    print('Timer 3')
+    print("Timer 3")
     # run every second
-    timer = ScheduleTimer(print_msg, freq='2s', init_run=True)
+    timer = ScheduleTimer(print_msg, freq="2s", init_run=True)
     print(timer.pattern)
     N = 3 * 1000
     for i in range(N):
@@ -249,13 +278,14 @@ def test():
 
 def test_aio():
     import numpy as np
+
     async def print_msg(msg=None):
         timeout = np.random.uniform(0, 1)
         await asyncio.sleep(timeout)
-        print('Callback:', datetime.now(), msg, timeout)
+        print("Callback:", datetime.now(), msg, timeout)
 
         if timeout > 0.5:
-            raise Exception('Test')
+            raise Exception("Test")
 
     timer = CallbackTimer(print_msg, 1.0)
 
@@ -271,6 +301,6 @@ def test_aio():
     loop.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     test()
     test_aio()

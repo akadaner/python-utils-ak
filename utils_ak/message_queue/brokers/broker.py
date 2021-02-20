@@ -7,8 +7,8 @@ class Broker:
     def publish(self, collection, topic, msg):
         raise NotImplementedError
 
-    def poll(self, timeout=0.):
+    def poll(self, timeout=0.0):
         raise NotImplementedError
 
-    async def aiopoll(self, timeout=0.):
+    async def aiopoll(self, timeout=0.0):
         raise NotImplementedError

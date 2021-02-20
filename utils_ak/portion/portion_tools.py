@@ -11,6 +11,6 @@ def calc_interval_length(interval):
     return sum([c.upper - c.lower for c in interval])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     interval = cast_interval(1, 3)
     print(calc_interval_length(interval))

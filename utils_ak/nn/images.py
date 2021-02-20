@@ -25,7 +25,7 @@ def cast_numpy(im):
             if im.shape[-1] not in [1, 3] and im.shape[0] in [1, 3]:
                 im = np.transpose(im, (1, 2, 0))
         else:
-            raise Exception('Not an image')
+            raise Exception("Not an image")
         return im
     elif isinstance(im, PIL.Image.Image):
         return np.asarray(im)
@@ -36,7 +36,7 @@ def cast_numpy(im):
         im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
         return im
     else:
-        raise Exception('Unknown image type')
+        raise Exception("Unknown image type")
 
 
 def cast_pytorch_image(im):
@@ -44,13 +44,13 @@ def cast_pytorch_image(im):
         im = cast_numpy(im)
 
     if len(im.shape) != 3:
-        raise NotImplementedError('Not implemented')
+        raise NotImplementedError("Not implemented")
 
     if im.shape[0] not in [1, 3]:
         if im.shape[-1] in [1, 3]:
             im = np.transpose(im, (2, 0, 1))
         else:
-            raise Exception('Not an image')
+            raise Exception("Not an image")
     return im
 
 
@@ -74,7 +74,7 @@ def cast_grayscale(im):
 def show(im):
     im = cast_numpy(im)
     if len(im.shape) == 2:
-        plt.imshow(im, cmap='gray')
+        plt.imshow(im, cmap="gray")
     else:
         plt.imshow(im)
 

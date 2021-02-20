@@ -9,7 +9,7 @@ class LimitUsageManager(object):
 
     def is_active(self, item):
         if item not in self.usage_times.keys():
-            raise Exception('Wrong item')
+            raise Exception("Wrong item")
 
         for time_interval, limit in self.limits.items():
             usage_times = self.usage_times[item]
@@ -39,34 +39,34 @@ class LimitUsageManager(object):
         self._clean_old_usages(item)
 
 
-if __name__ == '__main__':
-    limit_usage_manager = LimitUsageManager({2: 2, 3: 3}, ['first', 'second', 'third'])
+if __name__ == "__main__":
+    limit_usage_manager = LimitUsageManager({2: 2, 3: 3}, ["first", "second", "third"])
 
-    assert limit_usage_manager.is_active('first')
-    assert limit_usage_manager.is_active('second')
-    assert limit_usage_manager.is_active('third')
+    assert limit_usage_manager.is_active("first")
+    assert limit_usage_manager.is_active("second")
+    assert limit_usage_manager.is_active("third")
 
-    limit_usage_manager.add_usage('first')
-    limit_usage_manager.add_usage('first')
-    limit_usage_manager.add_usage('first')
-    limit_usage_manager.add_usage('second')
-    limit_usage_manager.add_usage('second')
-    limit_usage_manager.add_usage('third')
+    limit_usage_manager.add_usage("first")
+    limit_usage_manager.add_usage("first")
+    limit_usage_manager.add_usage("first")
+    limit_usage_manager.add_usage("second")
+    limit_usage_manager.add_usage("second")
+    limit_usage_manager.add_usage("third")
 
-    assert not limit_usage_manager.is_active('first')
-    assert not limit_usage_manager.is_active('second')
-    assert limit_usage_manager.is_active('third')
+    assert not limit_usage_manager.is_active("first")
+    assert not limit_usage_manager.is_active("second")
+    assert limit_usage_manager.is_active("third")
 
     time.sleep(2)
 
-    assert not limit_usage_manager.is_active('first')
-    assert limit_usage_manager.is_active('second')
-    assert limit_usage_manager.is_active('third')
+    assert not limit_usage_manager.is_active("first")
+    assert limit_usage_manager.is_active("second")
+    assert limit_usage_manager.is_active("third")
 
     time.sleep(1)
 
-    assert limit_usage_manager.is_active('first')
-    assert limit_usage_manager.is_active('second')
-    assert limit_usage_manager.is_active('third')
+    assert limit_usage_manager.is_active("first")
+    assert limit_usage_manager.is_active("second")
+    assert limit_usage_manager.is_active("third")
 
     print("Test LimitUsageManager OK")

@@ -7,7 +7,7 @@ from utils_ak.pandas import merge
 
 
 class PandasSplitCombineETL:
-    def __init__(self, path, key_func=None, prefix='', extension='.csv', merge_by=None):
+    def __init__(self, path, key_func=None, prefix="", extension=".csv", merge_by=None):
         self.path = path
         self.extension = extension
         makedirs(path)
@@ -16,20 +16,20 @@ class PandasSplitCombineETL:
         self.prefix = prefix
 
     def _split(self, combined):
-        assert self.key_func, 'Key func not defined'
+        assert self.key_func, "Key func not defined"
         df = combined
-        df['_key'] = self.key_func(df)
+        df["_key"] = self.key_func(df)
         df.columns = [str(c) for c in df.columns]
         if not df.index.name:
-            df.index.name = 'index'
+            df.index.name = "index"
         df = df.reset_index()
-        for key, split in df.groupby('_key'):
-            yield key, split.drop(['_key'], axis=1)
+        for key, split in df.groupby("_key"):
+            yield key, split.drop(["_key"], axis=1)
 
     def _fn(self, key):
         values = [self.prefix, key]
         values = [v for v in values if v]
-        return os.path.join(self.path, '-'.join(values) + self.extension)
+        return os.path.join(self.path, "-".join(values) + self.extension)
 
     def _load(self, key, split):
         fn = self._fn(key)
@@ -42,10 +42,13 @@ class PandasSplitCombineETL:
         pd_write(split, fn, index=False)
 
     def _get_keys(self):
-        fns = list_files(self.path, pattern='*' + self.extension, recursive=True)
+        fns = list_files(self.path, pattern="*" + self.extension, recursive=True)
         keys = [os.path.splitext(os.path.basename(fn))[0] for fn in fns]
         # remove prefix if needed
-        keys = [key[len(self.prefix + '-'):] if key.startswith(self.prefix + '-') else key for key in keys]
+        keys = [
+            key[len(self.prefix + "-") :] if key.startswith(self.prefix + "-") else key
+            for key in keys
+        ]
         return keys
 
     def _extract(self, key):
@@ -78,11 +81,19 @@ class PandasSplitCombineETL:
 
 def test_pandas_split_combine_etl():
     from utils_ak import cast_dt, remove_path
-    df = pd.DataFrame(list(range(100)), index=pd.date_range(cast_dt('2020.01.01'), periods=100, freq='1d'))
 
-    etl = PandasSplitCombineETL(path='data/',
-                                extension='.parquet',
-                                key_func=lambda df: pd.Series(df.index, index=df.index).apply(lambda dt: cast_str(dt, '%Y%m')))
+    df = pd.DataFrame(
+        list(range(100)),
+        index=pd.date_range(cast_dt("2020.01.01"), periods=100, freq="1d"),
+    )
+
+    etl = PandasSplitCombineETL(
+        path="data/",
+        extension=".parquet",
+        key_func=lambda df: pd.Series(df.index, index=df.index).apply(
+            lambda dt: cast_str(dt, "%Y%m")
+        ),
+    )
     etl.split_and_load(df)
     print(etl.extract_and_combine())
 
@@ -90,5 +101,5 @@ def test_pandas_split_combine_etl():
         remove_path(etl._fn(key))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     test_pandas_split_combine_etl()

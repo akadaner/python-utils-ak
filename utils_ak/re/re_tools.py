@@ -2,11 +2,11 @@ import re
 
 
 def def_group(name, pat):
-    return r'(?P<{}>{})'.format(name, pat)
+    return r"(?P<{}>{})".format(name, pat)
 
 
 def ref_group(name):
-    return r'(?P={})'.format(name)
+    return r"(?P={})".format(name)
 
 
 def replace_with_pattern(s, key, rep_name, rep_pat):
@@ -19,14 +19,14 @@ def replace_with_pattern(s, key, rep_name, rep_pat):
 
 
 def non_capturing(pat):
-    return r'(?:{})'.format(pat)
+    return r"(?:{})".format(pat)
 
 
 def or_op(pat1, pat2, capturing=True):
     if capturing:
-        return '({}|{})'.format(pat1, pat2)
+        return "({}|{})".format(pat1, pat2)
     else:
-        return non_capturing('{}|{}'.format(pat1, pat2))
+        return non_capturing("{}|{}".format(pat1, pat2))
 
 
 def search_many(pattern, s):
@@ -44,13 +44,13 @@ def search_one(pattern, s):
 
 
 def test_replace_with_pattern():
-    pat = replace_with_pattern('<pat> a <pat> b <pat> c', '<pat>', 'foo', '.+')
+    pat = replace_with_pattern("<pat> a <pat> b <pat> c", "<pat>", "foo", ".+")
     print(pat)
-    print(re.search(pat, 'aaa a aaa b aaa c').groupdict())
-    print(re.search(pat, 'aaa a aaa b aaa c').groups())
-    print(re.search(pat, 'asdf a asdf b asdf c').groupdict())
-    print(re.search(pat, 'asdf1 a asdf2 b asdf3 c') is None)
+    print(re.search(pat, "aaa a aaa b aaa c").groupdict())
+    print(re.search(pat, "aaa a aaa b aaa c").groups())
+    print(re.search(pat, "asdf a asdf b asdf c").groupdict())
+    print(re.search(pat, "asdf1 a asdf2 b asdf3 c") is None)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     test_replace_with_pattern()

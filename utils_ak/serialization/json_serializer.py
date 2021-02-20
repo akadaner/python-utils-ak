@@ -3,7 +3,7 @@ from .serializer import Serializer
 
 
 class JsonSerializer(Serializer):
-    def __init__(self, encoding='utf-8', indent=None):
+    def __init__(self, encoding="utf-8", indent=None):
         self.encoding = encoding
         self.indent = indent
 

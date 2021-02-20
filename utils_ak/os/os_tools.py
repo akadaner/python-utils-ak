@@ -20,7 +20,9 @@ def make_directories(path):
     if not os.path.exists(dirname):
         os.makedirs(dirname)
 
+
 makedirs = make_directories
+
 
 def remove_path(path):
     if not os.path.exists(path):
@@ -30,7 +32,7 @@ def remove_path(path):
     elif os.path.isdir(path):
         shutil.rmtree(path, ignore_errors=True)
     else:
-        raise Exception('Path {} is not a file or a dir'.format(path))
+        raise Exception("Path {} is not a file or a dir".format(path))
 
 
 def rename_path(path1, path2):
@@ -42,12 +44,12 @@ def copy_path(path_from, path_to):
 
 
 def touch_file(fn):
-    with open(fn, 'w') as f:
+    with open(fn, "w") as f:
         pass
 
 
 def remove_empty_directories(path, remove_root=True):
-    '''Function to remove empty folders'''
+    """Function to remove empty folders"""
     if not os.path.isdir(path):
         return
 
@@ -87,8 +89,8 @@ def gen_fn_hash(s):
 def gen_tmp_fn(s=None, extension=None):
     if not s:
         s = uuid4().hex
-    s = cast_bytes(s, encoding='utf-8')
-    res = os.path.join('/tmp/', gen_fn_hash(s))
+    s = cast_bytes(s, encoding="utf-8")
+    res = os.path.join("/tmp/", gen_fn_hash(s))
     if extension:
         res = res + extension
     return res
@@ -96,7 +98,7 @@ def gen_tmp_fn(s=None, extension=None):
 
 @contextmanager
 def tempfile(*args, **kwargs):
-    """ Context for temporary file.
+    """Context for temporary file.
 
     Will find a free temporary filename upon entering
     and will try to delete the file on leaving, even in case of an exception.
@@ -125,7 +127,7 @@ def tempfile(*args, **kwargs):
 
 @contextmanager
 def open_atomic(filepath, *args, **kwargs):
-    """ Open temporary file object that atomically moves to destination upon
+    """Open temporary file object that atomically moves to destination upon
     exiting.
 
     Allows reading and writing to and from the same filename.
@@ -143,7 +145,7 @@ def open_atomic(filepath, *args, **kwargs):
     **kwargs : mixed
         Any valid keyword arguments for :code:`open`
     """
-    fsync = kwargs.pop('fsync', False)
+    fsync = kwargs.pop("fsync", False)
 
     with tempfile(dir=os.path.dirname(os.path.abspath(filepath))) as tmppath:
         with open(tmppath, *args, **kwargs) as file:
@@ -160,19 +162,19 @@ def getenv_boolean(var_name, default_value=False):
     result = default_value
     env_value = os.getenv(var_name)
     if env_value is not None:
-        result = env_value.upper() in ('TRUE', '1')
+        result = env_value.upper() in ("TRUE", "1")
     return result
 
 
 def open_file_in_os(fn):
     fn = os.path.abspath(fn)
-    if platform.system() == 'Darwin':  # macOS
-        subprocess.call(('open', fn))
-    elif platform.system() == 'Windows':  # Windows
+    if platform.system() == "Darwin":  # macOS
+        subprocess.call(("open", fn))
+    elif platform.system() == "Windows":  # Windows
         os.startfile(fn)
     else:  # linux variants
-        subprocess.call(('xdg-open', fn))
+        subprocess.call(("xdg-open", fn))
 
 
-if __name__ == '__main__':
-    print(gen_tmp_fn(extension='.operation.canary'))
+if __name__ == "__main__":
+    print(gen_tmp_fn(extension=".operation.canary"))

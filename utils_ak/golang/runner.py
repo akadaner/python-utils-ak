@@ -14,10 +14,12 @@ def go_run(path, verbatim=True, **kwargs):
     filename = os.path.splitext(path)[0]
     command = f"{filename}"
     for k, v in kwargs.items():
-        arg = f" -{k}=\"{v}\""
+        arg = f' -{k}="{v}"'
         command += arg
     print(command)
-    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    process = subprocess.Popen(
+        command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
+    )
     if verbatim:
         while True:
             line = process.stdout.readline().rstrip()

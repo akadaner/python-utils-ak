@@ -10,15 +10,14 @@ import inspect
 def is_aio(func):
     if inspect.iscoroutinefunction(func):
         return True
-    elif hasattr(func, 'is_aio') and getattr(func, 'is_aio'):
+    elif hasattr(func, "is_aio") and getattr(func, "is_aio"):
         return True
     else:
         return False
 
 
 class Handler(object):
-    """ Complex func wrapper. Computational graph with multiple filters, multiple formatters and multiple callbacks.
-    """
+    """Complex func wrapper. Computational graph with multiple filters, multiple formatters and multiple callbacks."""
 
     def __init__(self, callback=None, formatter=None, filter=None, reducer=None):
         """
@@ -55,7 +54,7 @@ class Handler(object):
         if filter:
             if rule:
                 if isinstance(filter, list):
-                    raise Exception('Filter should be callable if rule is specified. ')
+                    raise Exception("Filter should be callable if rule is specified. ")
                 _filter = lambda *args, **kwargs: rule(filter(*args, **kwargs))
             else:
                 _filter = filter
@@ -69,7 +68,9 @@ class Handler(object):
         for formatter in self.formatters:
             args, kwargs = formatter(*args, **kwargs)
         if all(_filter(*args, **kwargs) for _filter in self.filters):
-            return self.reducer([callback(*args, **kwargs) for callback in self.callbacks])
+            return self.reducer(
+                [callback(*args, **kwargs) for callback in self.callbacks]
+            )
 
     def call(self, *args, **kwargs):
         return self.__call__(*args, **kwargs)
@@ -81,7 +82,7 @@ class Handler(object):
             res = []
             for callback in self.callbacks:
                 if is_aio(callback):
-                    if hasattr(callback, 'aiocall'):
+                    if hasattr(callback, "aiocall"):
                         res.append(await callback.aiocall(*args, **kwargs))
                     else:
                         res.append(await callback(*args, **kwargs))
@@ -94,10 +95,10 @@ class Handler(object):
 
     def __repr__(self):
         vals = []
-        vals += [f'Formatter: {formatter}' for formatter in self.formatters]
-        vals += [f'Filter: {filter}' for filter in self.filters]
-        vals += [f'Callback: {callback}' for callback in self.callbacks]
-        return '\n'.join(vals)
+        vals += [f"Formatter: {formatter}" for formatter in self.formatters]
+        vals += [f"Filter: {filter}" for filter in self.filters]
+        vals += [f"Callback: {callback}" for callback in self.callbacks]
+        return "\n".join(vals)
 
     def __str__(self):
         return self.__repr__()

@@ -14,6 +14,8 @@ class SimpleCustomFieldFormatter(logging.Formatter):
         super().__init__(fmt)
 
     def format(self, record):
-        custom = getattr(record, 'custom', {})
-        record.msg = self.msg_fmt.format(**{'msg': record.msg, 'custom': self.encoder.encode(custom)})
+        custom = getattr(record, "custom", {})
+        record.msg = self.msg_fmt.format(
+            **{"msg": record.msg, "custom": self.encoder.encode(custom)}
+        )
         return super().format(record)

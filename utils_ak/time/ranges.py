@@ -12,7 +12,9 @@ def add_months(dt, n):
 
 def iter_range_by_months(beg, end):
     while True:
-        next_end = add_months(datetime(beg.year, beg.month, 1), 1)  # first day of next month
+        next_end = add_months(
+            datetime(beg.year, beg.month, 1), 1
+        )  # first day of next month
         next_end = min(next_end, end)
         yield beg, next_end
         beg = next_end
@@ -23,13 +25,13 @@ def iter_range_by_months(beg, end):
 
 def _get_quarter_by_month(month_name):
     if month_name in range(1, 4):
-        return 'Q1'
+        return "Q1"
     elif month_name in range(4, 7):
-        return 'Q2'
+        return "Q2"
     elif month_name in range(7, 10):
-        return 'Q3'
+        return "Q3"
     elif month_name in range(10, 13):
-        return 'Q4'
+        return "Q4"
 
 
 def iter_quarters(beg, end):
@@ -62,19 +64,39 @@ def test_ranges():
     from utils_ak.time import cast_datetime, cast_timedelta
 
     # add months
-    dt = cast_datetime('2020.01.30')
+    dt = cast_datetime("2020.01.30")
     for i in range(12):
         print(add_months(dt, i))
 
     # iter range by months
-    print(list(iter_range_by_months(cast_datetime('2020.01.15'),cast_datetime('2020.02.16'))))
-    print(list(iter_range_by_months(cast_datetime('2020.01.01'),cast_datetime('2020.06.01'))))
+    print(
+        list(
+            iter_range_by_months(
+                cast_datetime("2020.01.15"), cast_datetime("2020.02.16")
+            )
+        )
+    )
+    print(
+        list(
+            iter_range_by_months(
+                cast_datetime("2020.01.01"), cast_datetime("2020.06.01")
+            )
+        )
+    )
 
     # iter range
-    print(list(iter_range(cast_datetime('2020.01.01 12:00:00'), cast_datetime('2020.01.01 12:16:00'), cast_timedelta('5m'))))
+    print(
+        list(
+            iter_range(
+                cast_datetime("2020.01.01 12:00:00"),
+                cast_datetime("2020.01.01 12:16:00"),
+                cast_timedelta("5m"),
+            )
+        )
+    )
 
-    print(list(iter_quarters(cast_datetime('2020.02.15'), cast_datetime('2020.07.15'))))
+    print(list(iter_quarters(cast_datetime("2020.02.15"), cast_datetime("2020.07.15"))))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     test_ranges()

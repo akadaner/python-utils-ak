@@ -11,39 +11,41 @@ logger = logging.getLogger(__name__)
 
 
 def endpoint(host, port):
-    return f'tcp://{host}:{port}'
+    return f"tcp://{host}:{port}"
 
 
 def split_endpoint(endpoint):
-    protocol, host, port = endpoint.split(':')
+    protocol, host, port = endpoint.split(":")
     return protocol, host[2:], port
 
 
 def cast_connection(address, conn_type):
     protocol, host, port = split_endpoint(address)
-    if conn_type == 'auto':
-        conn_type = 'bind' if '*' in address else 'connect'
-    elif conn_type == 'bind':
-        address = f'tcp://*:{port}'
-    elif conn_type == 'connect':
-        if host == '*':
-            raise Exception(f'Cannot connect to specified address: {address}')
+    if conn_type == "auto":
+        conn_type = "bind" if "*" in address else "connect"
+    elif conn_type == "bind":
+        address = f"tcp://*:{port}"
+    elif conn_type == "connect":
+        if host == "*":
+            raise Exception(f"Cannot connect to specified address: {address}")
     return address, conn_type
 
 
 def connect_socket(socket, address, conn_type):
     address, conn_type = cast_connection(address, conn_type)
     # "tcp://*:5563"
-    if conn_type == 'bind':
+    if conn_type == "bind":
         socket.bind(address)
-    elif conn_type == 'connect':
+    elif conn_type == "connect":
         socket.connect(address)
     else:
-        raise Exception(f'Connection type {conn_type} not recognized')
+        raise Exception(f"Connection type {conn_type} not recognized")
 
 
 class Publisher(object):
-    def __init__(self, address, sndhwm=0, init_timeout=0.1, context=CONTEXT, conn_type='auto'):
+    def __init__(
+        self, address, sndhwm=0, init_timeout=0.1, context=CONTEXT, conn_type="auto"
+    ):
         self.context = context
         self.socket = context.socket(zmq.PUB)
         self.address = address
@@ -66,7 +68,7 @@ class Publisher(object):
 
 
 class Subscriber(object):
-    def __init__(self, address, rcvhwm=None, context=CONTEXT, conn_type='auto'):
+    def __init__(self, address, rcvhwm=None, context=CONTEXT, conn_type="auto"):
         # Prepare our context and publisher
         self.context = context
         self.socket = context.socket(zmq.SUB)
@@ -83,7 +85,7 @@ class Subscriber(object):
         topic = b(topic)
 
         if topic in self.topics:
-            logger.warning(f'Already subscribed for topic {u(topic)}')
+            logger.warning(f"Already subscribed for topic {u(topic)}")
             return
 
         self.socket.setsockopt(zmq.SUBSCRIBE, topic)
@@ -109,15 +111,17 @@ class Forwarder(object):
     def run(self):
         try:
             # Socket facing clients
-            logging.info(f'Forwarder. Frontend (IN): {self.endpoint_in} Backend (OUT): {self.endpoint_out}')
+            logging.info(
+                f"Forwarder. Frontend (IN): {self.endpoint_in} Backend (OUT): {self.endpoint_out}"
+            )
             self.frontend_socket = self.context.socket(zmq.SUB)
-            connect_socket(self.frontend_socket, self.endpoint_in, 'bind')
+            connect_socket(self.frontend_socket, self.endpoint_in, "bind")
             self.frontend_socket.setsockopt(zmq.SUBSCRIBE, b(""))
             self.backend_socket = self.context.socket(zmq.PUB)
-            connect_socket(self.backend_socket, self.endpoint_out, 'bind')
+            connect_socket(self.backend_socket, self.endpoint_out, "bind")
             zmq.device(zmq.FORWARDER, self.frontend_socket, self.backend_socket)
         except Exception as e:
-            logger.error('Exception occured. Bringing down forwarder device')
+            logger.error("Exception occured. Bringing down forwarder device")
         finally:
             self.frontend_socket.close()
             self.backend_socket.close()
@@ -134,16 +138,18 @@ class Streamer(object):
     def run(self):
         try:
             # Socket facing clients
-            logging.info(f'Streamer. Frontend (IN): {self.endpoint_in} Backend (OUT): {self.endpoint_out}')
+            logging.info(
+                f"Streamer. Frontend (IN): {self.endpoint_in} Backend (OUT): {self.endpoint_out}"
+            )
 
             self.frontend_socket = self.context.socket(zmq.PULL)
-            connect_socket(self.frontend_socket, self.endpoint_in, 'bind')
+            connect_socket(self.frontend_socket, self.endpoint_in, "bind")
 
             self.backend_socket = self.context.socket(zmq.PUSH)
-            connect_socket(self.backend_socket, self.endpoint_out, 'bind')
+            connect_socket(self.backend_socket, self.endpoint_out, "bind")
             zmq.device(zmq.STREAMER, self.frontend_socket, self.backend_socket)
         except Exception as e:
-            logger.error('Exception occured. Bringing down streamer device')
+            logger.error("Exception occured. Bringing down streamer device")
         finally:
             self.frontend_socket.close()
             self.backend_socket.close()

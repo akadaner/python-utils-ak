@@ -41,10 +41,10 @@ def repeat(f, obj, n):
     return res
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
+
     def go(left=1, right=100):
         return left, right
-
 
     ranges = shatter_range(go, split=["left", "right"], params=(1, 100, 5))
     assert ranges[1]() == (6, 11)

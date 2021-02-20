@@ -3,14 +3,27 @@ from utils_ak.architecture import delistify
 
 
 class Block:
-    def __init__(self, block_class=None, default_block_class='block', props_formatters=None, props_accumulators=None, props_required_keys=None, **props):
+    def __init__(
+        self,
+        block_class=None,
+        default_block_class="block",
+        props_formatters=None,
+        props_accumulators=None,
+        props_required_keys=None,
+        **props,
+    ):
         block_class = block_class or default_block_class
-        props['cls'] = block_class
+        props["cls"] = block_class
 
         self.parent = None
         self.children = []
 
-        self.props = DynamicProps(props=props, formatters=props_formatters, accumulators=props_accumulators, required_keys=props_required_keys)
+        self.props = DynamicProps(
+            props=props,
+            formatters=props_formatters,
+            accumulators=props_accumulators,
+            required_keys=props_required_keys,
+        )
 
     def __getitem__(self, item):
         res = self.get(item)
@@ -20,29 +33,29 @@ class Block:
             elif isinstance(res, int):
                 return IndexError(item)
             else:
-                raise Exception(f'Not found: {item}')
+                raise Exception(f"Not found: {item}")
         return res
 
     def get(self, item):
         if isinstance(item, str):
-            res = [b for b in self.children if b.props['cls'] == item]
+            res = [b for b in self.children if b.props["cls"] == item]
         elif isinstance(item, int):
             res = self.children[item]
         elif isinstance(item, slice):
             # Get the start, stop, and step from the slice
             res = [self[ii] for ii in range(*item.indices(len(self)))]
         else:
-            raise TypeError('Item type not supported')
+            raise TypeError("Item type not supported")
         return delistify(res)
 
     def __str__(self):
         res = f'{self.props["cls"]}\n'
 
         for child in self.children:
-            for line in str(child).split('\n'):
+            for line in str(child).split("\n"):
                 if not line:
                     continue
-                res += '  ' + line + '\n'
+                res += "  " + line + "\n"
         return res
 
     def __repr__(self):
@@ -95,31 +108,38 @@ class Block:
         self.props.parent = None
 
 
-
 def test_block():
     def cast_block(block_class, **kwargs):
-        return Block(block_class, props_accumulators={'t': lambda parent, child, key: cumsum_acc(parent, child, key, default=0, formatter=int)}, **kwargs)
+        return Block(
+            block_class,
+            props_accumulators={
+                "t": lambda parent, child, key: cumsum_acc(
+                    parent, child, key, default=0, formatter=int
+                )
+            },
+            **kwargs,
+        )
 
-    a = cast_block('a', t=5)
-    b = cast_block('b')
-    c = cast_block('c', t=3)
+    a = cast_block("a", t=5)
+    b = cast_block("b")
+    c = cast_block("c", t=3)
     a.add_child(b)
     b.add_child(c)
 
     print(a)
     print(b)
     print(c)
-    print(a.props['t'])
-    print(b.props['t'])
-    print(c.props['t'])
+    print(a.props["t"])
+    print(b.props["t"])
+    print(c.props["t"])
 
     print()
-    print(a['b']['c'])
+    print(a["b"]["c"])
 
-    print('Test query')
+    print("Test query")
     for b in a.iter(cls=c):
         print(b)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     test_block()

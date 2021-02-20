@@ -13,14 +13,15 @@ from functools import wraps
 def switch(f):
     @wraps(f)
     def inner(self, *args, **kwargs):
-        pipe_switch(self, self.io_containers['in'], 'in')
-        pipe_switch(self, self.io_containers['out'], 'out')
+        pipe_switch(self, self.io_containers["in"], "in")
+        pipe_switch(self, self.io_containers["out"], "out")
 
         res = f(self, *args, **kwargs)
 
-        pipe_switch(self, self.io_containers['in'], 'in')
-        pipe_switch(self, self.io_containers['out'], 'out')
+        pipe_switch(self, self.io_containers["in"], "in")
+        pipe_switch(self, self.io_containers["out"], "out")
         return res
+
     return inner
 
 
@@ -29,7 +30,7 @@ class Sequence(Actor, PipeMixin):
         super().__init__(name)
         assert len(containers) >= 2
         self.containers = containers
-        self.io_containers = {'in': containers[0], 'out': containers[-1]}
+        self.io_containers = {"in": containers[0], "out": containers[-1]}
 
         self.nodes = [self.containers[0]]
         for c1, c2 in SimpleIterator(self.containers).iter_sequences(2):
@@ -64,7 +65,7 @@ class Sequence(Actor, PipeMixin):
             node.update_triggers(ts)
 
     def __str__(self):
-        return f'Sequence: {self.name}'
+        return f"Sequence: {self.name}"
 
     def stats(self):
         return {node.name: node.stats() for node in self.nodes}
@@ -72,5 +73,5 @@ class Sequence(Actor, PipeMixin):
     def display_stats(self):
         return [node.display_stats() for node in self.containers]
 
-    def active_periods(self, orient='in'):
+    def active_periods(self, orient="in"):
         return self.io_containers[orient].active_periods(orient=orient)

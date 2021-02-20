@@ -20,12 +20,14 @@ from slacker import API_BASE_URL
 @retry.decorate(requests.exceptions.RequestException, times=7, wait=lambda n: 2 ** n)
 def _request(self, method, api, **kwargs):
     if self.token:
-        kwargs.setdefault('params', {})['token'] = self.token
+        kwargs.setdefault("params", {})["token"] = self.token
 
-    response = method(API_BASE_URL.format(api=api),
-                      timeout=self.timeout,
-                      proxies=self.proxies,
-                      **kwargs)
+    response = method(
+        API_BASE_URL.format(api=api),
+        timeout=self.timeout,
+        proxies=self.proxies,
+        **kwargs
+    )
 
     response.raise_for_status()
 
@@ -59,7 +61,7 @@ class Attachment(object):
             setattr(self, k, v)
 
     def add_field(self, title, value, short=True):
-        self.fields.append({'title': title, 'value': value, 'short': short})
+        self.fields.append({"title": title, "value": value, "short": short})
 
     def to_json(self):
         return {
@@ -74,7 +76,7 @@ class Attachment(object):
             "footer": self.footer,
             "pretext": self.pretext,
             "text": self.attachment_text,
-            'ts': self.ts
+            "ts": self.ts,
         }
 
 
@@ -90,7 +92,9 @@ class SlackMessage(object):
             self.attachments = []
 
         if self.attachments:
-            self.attachments = [self._cast_attachment(attachment) for attachment in self.attachments]
+            self.attachments = [
+                self._cast_attachment(attachment) for attachment in self.attachments
+            ]
 
     def _cast_attachment(self, attachment):
         if isinstance(attachment, Attachment):
@@ -98,7 +102,7 @@ class SlackMessage(object):
         elif isinstance(attachment, dict):
             return Attachment(**attachment)
         else:
-            raise Exception('Unknown attachment type')
+            raise Exception("Unknown attachment type")
 
     def add_attachment(self, **kwargs):
         self.attachments.append(Attachment(**kwargs))
@@ -106,16 +110,21 @@ class SlackMessage(object):
     def to_json(self):
         res = {
             "text": self.text,
-            "attachments": [attachment.to_json() for attachment in self.attachments]
+            "attachments": [attachment.to_json() for attachment in self.attachments],
         }
 
         # clear unused fields
         if not self.text:
-            res.pop('text')
-        res['attachments'] = [{k: v for k, v in attachment.items() if v is not None} for attachment in res['attachments']]
-        res['attachments'] = [attachment for attachment in res['attachments'] if attachment]
-        if not res['attachments']:
-            res.pop('attachments')
+            res.pop("text")
+        res["attachments"] = [
+            {k: v for k, v in attachment.items() if v is not None}
+            for attachment in res["attachments"]
+        ]
+        res["attachments"] = [
+            attachment for attachment in res["attachments"] if attachment
+        ]
+        if not res["attachments"]:
+            res.pop("attachments")
 
         return res
 
@@ -130,7 +139,7 @@ class SimpleMessage(SlackMessage):
     """ Message with one attachment. """
 
     def __init__(self, **kwargs):
-        super().__init__(text=kwargs.pop('text', None), attachments=None)
+        super().__init__(text=kwargs.pop("text", None), attachments=None)
         self.add_attachment(**kwargs)
 
     def add_field(self, *args, **kwargs):
@@ -145,29 +154,29 @@ class SlackMessenger(Slacker):
         self.message_timestamps = {}
         self.channel_ids = {}
 
-        self.cache_fn = 'slack_messenger_cache.json'
+        self.cache_fn = "slack_messenger_cache.json"
         self.load_cache()
 
     def load_cache(self):
         if os.path.exists(self.cache_fn):
-            with open(self.cache_fn, 'r') as f:
+            with open(self.cache_fn, "r") as f:
                 self.cache = json.load(f)
 
-            if self.token != self.cache.get('token'):
+            if self.token != self.cache.get("token"):
                 # reset cache when slack changes
                 self.cache = {}
             else:
-                self.message_timestamps = self.cache['message_timestamps']
-                self.channel_ids = self.cache['channel_ids']
+                self.message_timestamps = self.cache["message_timestamps"]
+                self.channel_ids = self.cache["channel_ids"]
         else:
             self.cache = {}
 
     def dump_cache(self):
-        self.cache['message_timestamps'] = self.message_timestamps
-        self.cache['channel_ids'] = self.channel_ids
-        self.cache['token'] = self.token
+        self.cache["message_timestamps"] = self.message_timestamps
+        self.cache["channel_ids"] = self.channel_ids
+        self.cache["token"] = self.token
 
-        with open(self.cache_fn, 'w') as f:
+        with open(self.cache_fn, "w") as f:
             json.dump(self.cache, f, indent=1)
 
     def upd_message(self, slack_message, channel, message_id=None):
@@ -202,32 +211,45 @@ class SlackMessenger(Slacker):
         elif isinstance(slack_message, str):
             message_js = SlackMessage(text=slack_message).to_json()
         else:
-            raise Exception('Slack message should be one of: SlackMessage, dict, str')
+            raise Exception("Slack message should be one of: SlackMessage, dict, str")
 
         message_ts = self.message_timestamps.get(full_id)
 
         if not message_ts:
-            res = self.chat.post_message(text=message_js.get('text'), channel=channel_id, attachments=message_js.get('attachments'))
-            self.message_timestamps[full_id] = res.body['ts']
+            res = self.chat.post_message(
+                text=message_js.get("text"),
+                channel=channel_id,
+                attachments=message_js.get("attachments"),
+            )
+            self.message_timestamps[full_id] = res.body["ts"]
             self.dump_cache()
         else:
             try:
-                self.chat.update(text=message_js.get('text'), channel=channel_id, attachments=message_js.get('attachments'), ts=message_ts)
+                self.chat.update(
+                    text=message_js.get("text"),
+                    channel=channel_id,
+                    attachments=message_js.get("attachments"),
+                    ts=message_ts,
+                )
             except Exception as e:
-                if str(e) == 'message_not_found':
-                    res = self.chat.post_message(text=message_js.get('text'), channel=channel_id, attachments=message_js.get('attachments'))
-                    self.message_timestamps[full_id] = res.body['ts']
+                if str(e) == "message_not_found":
+                    res = self.chat.post_message(
+                        text=message_js.get("text"),
+                        channel=channel_id,
+                        attachments=message_js.get("attachments"),
+                    )
+                    self.message_timestamps[full_id] = res.body["ts"]
                     self.dump_cache()
                 else:
                     # todo: handle properly
                     print("Unknown error    !", e)
 
     def get_channels(self):
-        return self.channels.list().body['channels']
+        return self.channels.list().body["channels"]
 
     def get_channel_id_by_name(self, channel_name):
-        if channel_name[0] == '#':
+        if channel_name[0] == "#":
             channel_name = channel_name[1:]
         channels = self.get_channels()
-        channel = [ch for ch in channels if ch['name_normalized'] == channel_name][0]
-        return channel['id']
+        channel = [ch for ch in channels if ch["name_normalized"] == channel_name][0]
+        return channel["id"]

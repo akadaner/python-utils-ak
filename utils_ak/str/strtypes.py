@@ -19,7 +19,7 @@ else:
     basestring = basestring
 
 
-def cast_bytes(s, encoding='utf8', errors='strict'):
+def cast_bytes(s, encoding="utf8", errors="strict"):
     """cast unicode or bytes to bytes"""
     if isinstance(s, bytes):
         return s
@@ -29,7 +29,7 @@ def cast_bytes(s, encoding='utf8', errors='strict'):
         raise TypeError("Expected unicode or bytes, got %r" % s)
 
 
-def cast_unicode(s, encoding='utf8', errors='strict'):
+def cast_unicode(s, encoding="utf8", errors="strict"):
     """cast bytes or unicode to unicode"""
     if isinstance(s, bytes):
         return s.decode(encoding, errors)
@@ -44,4 +44,13 @@ def cast_unicode(s, encoding='utf8', errors='strict'):
 b = asbytes = cast_bytes
 u = cast_unicode
 
-__all__ = ['asbytes', 'bytes', 'unicode', 'basestring', 'b', 'u', 'cast_bytes', 'cast_unicode']
+__all__ = [
+    "asbytes",
+    "bytes",
+    "unicode",
+    "basestring",
+    "b",
+    "u",
+    "cast_bytes",
+    "cast_unicode",
+]

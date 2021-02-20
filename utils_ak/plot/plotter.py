@@ -17,7 +17,7 @@ def plot_heatmap(df, ax=None, **kwargs):
 def plot_scatter(df, labeled=True, ax=None):
     """ Simple scatter plot. """
     ax = ax or plt.gca()
-    df.plot(kind='scatter', x='x', y='y', ax=ax)
+    df.plot(kind="scatter", x="x", y="y", ax=ax)
 
     if labeled:
         for k, v in df.iterrows():

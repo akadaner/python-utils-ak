@@ -42,7 +42,7 @@ class SimpleMicroservice(object):
         self.logger = self.logger.bind(inner_source=str(id))
         self.logger = self.logger.patch(patch_trace)
 
-        self.default_exception_timeout = 10.
+        self.default_exception_timeout = 10.0
         self.max_exception_timeout = 3600
         self.fail_count = 0
 
@@ -76,15 +76,32 @@ class SimpleMicroservice(object):
     def subscribe(self, collection, topic):
         self.broker.subscribe(collection, topic)
 
-    def add_callback(self, collection, topic, callback=None, formatter='default', filter=None, topic_formatter=cast_unicode):
+    def add_callback(
+        self,
+        collection,
+        topic,
+        callback=None,
+        formatter="default",
+        filter=None,
+        topic_formatter=cast_unicode,
+    ):
         self.broker.subscribe(collection, topic)
-        self._add_callback(collection, topic, callback, formatter, filter, topic_formatter)
+        self._add_callback(
+            collection, topic, callback, formatter, filter, topic_formatter
+        )
 
-    def _add_callback(self, collection, topic, callback=None,
-                      formatter='default', filter=None, topic_formatter=cast_unicode):
-        assert type(topic) == str, 'Topic must be str'
+    def _add_callback(
+        self,
+        collection,
+        topic,
+        callback=None,
+        formatter="default",
+        filter=None,
+        topic_formatter=cast_unicode,
+    ):
+        assert type(topic) == str, "Topic must be str"
 
-        if formatter == 'default':
+        if formatter == "default":
             formatter = self._args_formatter
 
         handler = self.callbacks.setdefault(collection, PrefixHandler())
@@ -105,11 +122,11 @@ class SimpleMicroservice(object):
                     has_ran = await timer.run_if_possible_aio()
 
                     if has_ran and self.fail_count != 0:
-                        self.logger.debug('Success. Resetting the failure counter')
+                        self.logger.debug("Success. Resetting the failure counter")
                         self.fail_count = 0
 
                 except Exception as e:
-                    self.on_exception(e, 'Exception occurred at the timer callback')
+                    self.on_exception(e, "Exception occurred at the timer callback")
 
                 if not self.is_active:
                     return
@@ -125,24 +142,29 @@ class SimpleMicroservice(object):
             while True:
                 try:
                     if async_supported:
-                        received = await self.broker.aiopoll(timeout=1.)
+                        received = await self.broker.aiopoll(timeout=1.0)
                     else:
                         received = self.broker.poll(timeout)
 
                     if received:
                         collection, topic, msg = received
                         try:
-                            self.logger.info(f'Received new message', custom={'topic': str(topic), 'msg': str(msg)})
+                            self.logger.info(
+                                f"Received new message",
+                                custom={"topic": str(topic), "msg": str(msg)},
+                            )
                             await self.callbacks[collection].aiocall(topic, msg)
 
                             if self.fail_count != 0:
-                                self.logger.info('Success. Resetting the failure counter')
+                                self.logger.info(
+                                    "Success. Resetting the failure counter"
+                                )
                                 self.fail_count = 0
 
                         except Exception as e:
                             self.on_exception(e, f"Exception occurred at the callback")
                 except Exception as e:
-                    self.on_exception(e, f'Failed to receive the message')
+                    self.on_exception(e, f"Failed to receive the message")
 
                 if not self.is_active:
                     return
@@ -154,7 +176,7 @@ class SimpleMicroservice(object):
     def _aiorun(self):
         self.loop = asyncio.get_event_loop()
         # self.loop.set_debug(True)
-        self.logger.info('Microservice started')
+        self.logger.info("Microservice started")
 
         for timer in self.timers:
             self.tasks.append(self.wrap_coroutine_timer(timer))
@@ -165,7 +187,7 @@ class SimpleMicroservice(object):
         self.loop.run_until_complete(asyncio.wait(self.tasks))
 
     def _run(self, timeout=0.01):
-        self.logger.info('Microservice started')
+        self.logger.info("Microservice started")
 
         self.callback_timers = CallbackTimers()
         for timer in self.timers:
@@ -181,7 +203,9 @@ class SimpleMicroservice(object):
                             try:
                                 timer.run_if_possible()
                             except Exception as e:
-                                self.on_exception(e, 'Exception occurred at the timer callback')
+                                self.on_exception(
+                                    e, "Exception occurred at the timer callback"
+                                )
                             else:
                                 success = True
 
@@ -191,7 +215,7 @@ class SimpleMicroservice(object):
                         continue
                     collection, topic, msg = received
                     try:
-                        self.logger.debug(f'Received new message', topic=topic, msg=msg)
+                        self.logger.debug(f"Received new message", topic=topic, msg=msg)
                         self.callbacks[collection].call(topic, msg)
                     except Exception as e:
                         self.on_exception(e, f"Exception occurred")
@@ -199,17 +223,17 @@ class SimpleMicroservice(object):
                         success = True
 
                 except Exception as e:
-                    self.on_exception(e, 'Failed to receive the message')
+                    self.on_exception(e, "Failed to receive the message")
 
                 if not self.is_active:
-                    self.logger.info('Microservice not active. Stopping')
+                    self.logger.info("Microservice not active. Stopping")
                     break
 
             except Exception as e:
-                self.on_exception(e, 'Global exception occurred')
+                self.on_exception(e, "Global exception occurred")
 
             if success and self.fail_count != 0:
-                self.logger.info('Success. Resetting the failure counter')
+                self.logger.info("Success. Resetting the failure counter")
                 self.fail_count = 0
 
     def run(self, asyncio=True):
@@ -219,7 +243,10 @@ class SimpleMicroservice(object):
             return self._run()
 
     def on_exception(self, e, msg):
-        self.logger.error('Generic microservice error')
-        to_sleep = min(self.default_exception_timeout * 2 ** (self.fail_count - 1), self.max_exception_timeout)
+        self.logger.error("Generic microservice error")
+        to_sleep = min(
+            self.default_exception_timeout * 2 ** (self.fail_count - 1),
+            self.max_exception_timeout,
+        )
         time.sleep(to_sleep)
         self.fail_count += 1

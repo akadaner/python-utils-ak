@@ -3,7 +3,7 @@ import zmq
 
 from multiprocessing import Process
 
-URL = 'tcp://127.0.0.1:5555'
+URL = "tcp://127.0.0.1:5555"
 POLL = False
 # copy=True is much faster
 COPY = True
@@ -21,6 +21,7 @@ zmq.COPY_THRESHOLD = 0
 # docs
 # socket types: http://api.zeromq.org/4-1:zmq-socket
 # some options dock. http://api.zeromq.org/2-1:zmq-setsockopt
+
 
 def latency_echo():
     """echo messages on a REP socket. Should be started before `latency` """
@@ -46,7 +47,7 @@ def latency_echo():
         socket.send(msg, block, copy=COPY)
 
     msg = socket.recv()
-    assert msg == b'done'
+    assert msg == b"done"
 
     socket.close()
     context.term()
@@ -64,7 +65,7 @@ def get_latency():
         poller = zmq.Poller()
         poller.register(s)
 
-    msg = b' ' * SIZE
+    msg = b" " * SIZE
 
     block = zmq.NOBLOCK if POLL else 0
     # trigger one roundtrip before starting the timer
@@ -75,27 +76,27 @@ def get_latency():
     for i in range(COUNT):
         if POLL:
             res = poller.poll()
-            assert (res[0][1] & zmq.POLLOUT)
+            assert res[0][1] & zmq.POLLOUT
         s.send(msg, block, copy=COPY)
 
         if POLL:
             res = poller.poll()
-            assert (res[0][1] & zmq.POLLIN)
+            assert res[0][1] & zmq.POLLIN
         msg = s.recv(block, copy=COPY)
 
         assert len(msg) == SIZE
 
     elapsed = now() - start
 
-    s.send(b'done')
+    s.send(b"done")
 
-    latency = 1e6 * elapsed / (COUNT * 2.)
+    latency = 1e6 * elapsed / (COUNT * 2.0)
 
-    print('Latency')
-    print(f'Message size   : {SIZE}     [B]')
-    print(f'Roundtrip count: {COUNT}     [msgs]')
-    print(f'Mean latency   : {latency} [µs]')
-    print(f'Test time      : {elapsed} [s]')
+    print("Latency")
+    print(f"Message size   : {SIZE}     [B]")
+    print(f"Roundtrip count: {COUNT}     [msgs]")
+    print(f"Mean latency   : {latency} [µs]")
+    print(f"Test time      : {elapsed} [s]")
     print()
 
     context.destroy()
@@ -118,8 +119,8 @@ def throughput_sink():
 
     socket.bind(URL)
     msg = socket.recv_multipart()
-    assert msg[1] == b'BEGIN', msg
-    count = int(msg[2].decode('ascii'))
+    assert msg[1] == b"BEGIN", msg
+    count = int(msg[2].decode("ascii"))
     socket.send_multipart(msg)
 
     flags = zmq.NOBLOCK if POLL else 0
@@ -127,11 +128,11 @@ def throughput_sink():
     for i in range(count):
         if POLL:
             res = poller.poll()
-            assert (res[0][1] & zmq.POLLIN)
+            assert res[0][1] & zmq.POLLIN
         msg = socket.recv_multipart(flags=flags, copy=COPY)
 
     # msg[0] - instance to which we send message!
-    socket.send_multipart([msg[0], b'DONE'])
+    socket.send_multipart([msg[0], b"DONE"])
 
     socket.close()
     context.term()
@@ -152,37 +153,37 @@ def get_throughput():
         poller.register(socket, zmq.POLLOUT)
 
     socket.connect(URL)
-    data = b' ' * SIZE
+    data = b" " * SIZE
 
     flags = zmq.NOBLOCK if POLL else 0
-    socket.send_multipart([b'BEGIN', str(COUNT).encode('ascii')])
+    socket.send_multipart([b"BEGIN", str(COUNT).encode("ascii")])
     # Wait for the other side to connect.
     msg = socket.recv_multipart()
-    assert msg[0] == b'BEGIN'
+    assert msg[0] == b"BEGIN"
     start = now()
     for i in range(COUNT):
         if POLL:
             res = poller.poll()
-            assert (res[0][1] & zmq.POLLOUT)
+            assert res[0][1] & zmq.POLLOUT
         socket.send(data, flags=flags, copy=COPY)
     sent = now()
     # wait for receiver
     reply = socket.recv_multipart()
     elapsed = now() - start
-    assert reply[0] == b'DONE'
+    assert reply[0] == b"DONE"
     send_only = sent - start
 
     send_throughput = COUNT / send_only
     throughput = COUNT / elapsed
     megabits = throughput * SIZE * 8 / 1e6
 
-    print('Throughput')
-    print(f'Message size   : {SIZE}     [B]')
-    print(f'Message count  : {COUNT}     [msgs]')
-    print(f'Send only      : {send_throughput}     [msg/s]')
-    print(f'Mean throughput: {throughput}     [msg/s]')
-    print(f'Mean throughput: {megabits} [Mb/s]')
-    print(f'Test time      : {elapsed} [s]')
+    print("Throughput")
+    print(f"Message size   : {SIZE}     [B]")
+    print(f"Message count  : {COUNT}     [msgs]")
+    print(f"Send only      : {send_throughput}     [msg/s]")
+    print(f"Mean throughput: {throughput}     [msg/s]")
+    print(f"Mean throughput: {megabits} [Mb/s]")
+    print(f"Test time      : {elapsed} [s]")
     print()
     context.destroy()
     return (send_throughput, throughput)
@@ -202,6 +203,6 @@ def benchmark_latency():
     p.join()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     benchmark_throughput()
     benchmark_latency()

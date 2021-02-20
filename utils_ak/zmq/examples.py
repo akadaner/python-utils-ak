@@ -5,11 +5,11 @@ client = ZMQClient()
 
 def publisher():
     for i in range(10):
-        client.publish(endpoint('*', 5555), 'topic', b'msg')
+        client.publish(endpoint("*", 5555), "topic", b"msg")
 
 
 def subscriber():
-    client.subscribe(endpoint('localhost', 5555))
+    client.subscribe(endpoint("localhost", 5555))
     for i in range(10):
         received = None
         while not received:
@@ -17,7 +17,7 @@ def subscriber():
         print(received)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import multiprocessing
     import time
 

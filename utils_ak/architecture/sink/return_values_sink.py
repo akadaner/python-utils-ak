@@ -14,7 +14,9 @@ class ReturnValuesSink:
     def store(self, mark, result):
         self.results[mark] = result
 
-    def get_pipeline(self, mark):  # I give the pipeline. Run it like pipeline("value") to store the value
+    def get_pipeline(
+        self, mark
+    ):  # I give the pipeline. Run it like pipeline("value") to store the value
         def collector(result):
             self.store(mark, result)
 
@@ -25,12 +27,14 @@ class ReturnValuesSink:
 
 
 if __name__ == "__main__":
+
     def go():
         return "kek"
 
-
     sink = ReturnValuesSink()
-    pipeline = sink.get_pipeline("for_example_i_store_the_go_return_value_as_this_string")
+    pipeline = sink.get_pipeline(
+        "for_example_i_store_the_go_return_value_as_this_string"
+    )
 
     pipeline(go())
 

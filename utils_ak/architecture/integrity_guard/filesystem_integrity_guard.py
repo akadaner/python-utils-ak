@@ -17,17 +17,17 @@ class FilesystemIntegrityGuard(IntegrityGuard):
 
     @property
     def canary_path(self):
-        return gen_tmp_fn(self.uuid, extension='.operation.canary')
+        return gen_tmp_fn(self.uuid, extension=".operation.canary")
 
     def is_integral(self):
         return not os.path.isfile(self.canary_path)
 
     def enter_unstable_state(self):  # Call me if you think that operation started
-        logger.debug('Entering unstable state')
+        logger.debug("Entering unstable state")
         open(self.canary_path, "w").close()  # Create a canary
 
     def leave_unstable_state(self):  # Call me if you think that operation ended
-        logger.debug('Leaving unstable state')
+        logger.debug("Leaving unstable state")
         remove_path(self.canary_path)
 
 

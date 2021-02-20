@@ -7,21 +7,19 @@ from copy import deepcopy
 # todo: make group_id properly
 
 DEFAULT_CONSUMER_CONFIG = {
-    'bootstrap.servers': 'localhost:9092',
-    'group.id': str(uuid.uuid4()),
-    'default.topic.config': {
-        'auto.offset.reset': 'largest'
-    },
-    'enable.auto.commit': False,
-    'enable.partition.eof': False,
+    "bootstrap.servers": "localhost:9092",
+    "group.id": str(uuid.uuid4()),
+    "default.topic.config": {"auto.offset.reset": "largest"},
+    "enable.auto.commit": False,
+    "enable.partition.eof": False,
 }
 
 DEFAULT_PRODUCER_CONFIG = {
-    'bootstrap.servers': 'localhost:9092',
-    'queue.buffering.max.ms': 1,
-    'queue.buffering.max.messages': 1000000,
-    'max.in.flight.requests.per.connection': 1,
-    'default.topic.config': {'acks': 'all'}
+    "bootstrap.servers": "localhost:9092",
+    "queue.buffering.max.ms": 1,
+    "queue.buffering.max.messages": 1000000,
+    "max.in.flight.requests.per.connection": 1,
+    "default.topic.config": {"acks": "all"},
 }
 
 
@@ -50,7 +48,7 @@ class KafkaClient:
         self.producer.produce(topic, msg)
         self.producer.poll(0)
 
-    def poll(self, timeout=0.):
+    def poll(self, timeout=0.0):
         self.start_listening()
         return self.consumer.poll(timeout)
 
@@ -60,11 +58,11 @@ class KafkaClient:
             self.init_subscriptions = True
 
 
-if __name__ == '__main__':
-    cli = KafkaClient(consumer_config={'default.topic.config': {
-        'auto.offset.reset': 'smallest'
-    }})
-    cli.subscribe('binance_trades')
+if __name__ == "__main__":
+    cli = KafkaClient(
+        consumer_config={"default.topic.config": {"auto.offset.reset": "smallest"}}
+    )
+    cli.subscribe("binance_trades")
 
     i = 0
     while True:

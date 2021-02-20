@@ -13,7 +13,7 @@ def cast_simple_vector(obj):
     elif isinstance(obj, int):
         return SimpleVector([0] * obj)
     else:
-        raise Exception('Unknown object type')
+        raise Exception("Unknown object type")
 
 
 def cast_vector_values(obj):
@@ -26,7 +26,7 @@ def cast_vector_values(obj):
     elif isinstance(obj, int):
         return [0] * obj
     else:
-        raise Exception('Unkown object type')
+        raise Exception("Unkown object type")
 
 
 class SimpleVector:
@@ -44,10 +44,10 @@ class SimpleVector:
         return self.values[item]
 
     def __repr__(self):
-        return 'SimpleVector({})'.format(self.values)
+        return "SimpleVector({})".format(self.values)
 
     def __str__(self):
-        return 'SimpleVector({})'.format(self.values)
+        return "SimpleVector({})".format(self.values)
 
     def __setitem__(self, index, value):
         self.values[index] = value
@@ -67,5 +67,5 @@ def test_simple_vector():
     print(v1 + v2, v1 - v2)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     test_simple_vector()

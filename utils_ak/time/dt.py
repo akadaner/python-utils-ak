@@ -8,27 +8,27 @@ from utils_ak.numeric import custom_round
 
 
 # NOTE: slow
-def parse_human_timestamp_re(hts, min_date_str='2000'):
+def parse_human_timestamp_re(hts, min_date_str="2000"):
     """
     :param hts: Human timestamp: 20180101/2018010112/201801011200/20180101120000/20180101120000123...
     :return:
     """
-    ts_PATTERN = re.compile(r'(\d{4})(\d{2})(\d{2})(\d{2})?(\d{2})?(\d{2})?(\d+)?')
+    ts_PATTERN = re.compile(r"(\d{4})(\d{2})(\d{2})(\d{2})?(\d{2})?(\d{2})?(\d+)?")
     hts = str(hts)
 
     if hts < min_date_str:
-        raise Exception('Min date test failed')
+        raise Exception("Min date test failed")
 
-    split = list(ts_PATTERN.match(hts).groups()[:int((len(hts) - 2) / 2)])
+    split = list(ts_PATTERN.match(hts).groups()[: int((len(hts) - 2) / 2)])
 
     # adjust microseconds
     if len(split) == 7:
-        split[-1] = split[-1].ljust(6, '0')[:6]
+        split[-1] = split[-1].ljust(6, "0")[:6]
 
     return datetime(*map(int, split))
 
 
-def parse_human_timestamp(hts, min_date_str='2000'):
+def parse_human_timestamp(hts, min_date_str="2000"):
     """
     :param hts: Human timestamp: 20180101/2018010112/201801011200/20180101120000/20180101120000123...
     :return:
@@ -36,23 +36,30 @@ def parse_human_timestamp(hts, min_date_str='2000'):
     hts = str(hts)
 
     if hts < min_date_str:
-        raise Exception('Min date test failed')
+        raise Exception("Min date test failed")
 
-    slices = [slice(0, 4), slice(4, 6), slice(6, 8), slice(8, 10), slice(10, 12), slice(12, 14), slice(14, None)][
-             :int((len(hts) - 2) / 2)]
+    slices = [
+        slice(0, 4),
+        slice(4, 6),
+        slice(6, 8),
+        slice(8, 10),
+        slice(10, 12),
+        slice(12, 14),
+        slice(14, None),
+    ][: int((len(hts) - 2) / 2)]
 
     split = [hts[sl] for sl in slices]
 
     # adjust microseconds
     if len(split) == 7:
-        split[-1] = split[-1].ljust(6, '0')[:6]
+        split[-1] = split[-1].ljust(6, "0")[:6]
 
     return datetime(*map(int, split))
 
 
 def cast_hts(dt_obj):
     dt_obj = cast_datetime(dt_obj)
-    return int(dt_obj.strftime('%Y%m%d%H%M%S%f')[:-3])
+    return int(dt_obj.strftime("%Y%m%d%H%M%S%f")[:-3])
 
 
 def cast_datetime(dt_obj, none_invariant=True):
@@ -72,16 +79,18 @@ def cast_datetime(dt_obj, none_invariant=True):
             pass
 
         # '01.08.2019' type
-        search = re.search(r'(\d\d)\.(\d\d)\.(\d\d\d\d)', dt_obj)
+        search = re.search(r"(\d\d)\.(\d\d)\.(\d\d\d\d)", dt_obj)
         if search:
             d, m, y = search.groups()
             return datetime(int(y), int(m), int(d))
 
         # '01.08.20' type
-        for pat in [r'^(\d\d)\.(\d\d)\.(\d\d)$',
-                    r'^\d(\d\d)\.(\d\d)\.(\d\d)$',
-                    r'^\d(\d\d)\.(\d\d)\.(\d\d)^\d',
-                    r'^(\d\d)\.(\d\d)\.(\d\d)\d']:
+        for pat in [
+            r"^(\d\d)\.(\d\d)\.(\d\d)$",
+            r"^\d(\d\d)\.(\d\d)\.(\d\d)$",
+            r"^\d(\d\d)\.(\d\d)\.(\d\d)^\d",
+            r"^(\d\d)\.(\d\d)\.(\d\d)\d",
+        ]:
             search = re.search(pat, dt_obj)
             if search:
                 d, m, y = search.groups()
@@ -110,9 +119,11 @@ def cast_datetime(dt_obj, none_invariant=True):
         except:
             pass
 
-        return datetime.fromtimestamp(dt_obj / 1000, tz=timezone.utc).replace(tzinfo=None)
+        return datetime.fromtimestamp(dt_obj / 1000, tz=timezone.utc).replace(
+            tzinfo=None
+        )
     else:
-        raise Exception('Unknown datetime-like object type')
+        raise Exception("Unknown datetime-like object type")
 
 
 cast_dt = cast_datetime
@@ -143,7 +154,7 @@ def cast_str(dt, format=None):
             return str(dt)
         return dt.strftime(format)
     else:
-        raise Exception('Unsupported type')
+        raise Exception("Unsupported type")
 
 
 def get_strptime_pattern(s):
@@ -154,9 +165,9 @@ def get_strptime_pattern(s):
     NOTE: be careful with microseconds. It is not handled properly
     """
     if len(s) > 20:
-        raise Exception('Too big string')
+        raise Exception("Too big string")
 
-    return '%Y%m%d%H%M%S%f'[:int(len(s) - 2)]
+    return "%Y%m%d%H%M%S%f"[: int(len(s) - 2)]
 
 
 def cast_datetime_series(s):
@@ -182,28 +193,28 @@ def cast_datetime_series(s):
             s = s[:20]
         elif len(sample) >= 17:
             # add zeros for microseconds
-            s = s + '0' * (20 - len(sample))
+            s = s + "0" * (20 - len(sample))
         return pd.to_datetime(s, format=pattern)
 
     if isinstance(sample, (int, np.integer)):
         # considered as timestamp: 1521193807
-        int_part = str(sample).split('.')[0]
+        int_part = str(sample).split(".")[0]
         # '1521193807'
         if len(int_part) == 10:
-            return pd.to_datetime(s, unit='s')
+            return pd.to_datetime(s, unit="s")
         # '1521193807000'
         elif len(int_part) == 13:
-            return pd.to_datetime(s, unit='ms')
+            return pd.to_datetime(s, unit="ms")
         # '1521193807000000'
         elif len(int_part) == 16:
-            return pd.to_datetime(s, unit='us')
+            return pd.to_datetime(s, unit="us")
         # '1521193807000000000'
         elif len(int_part) == 19:
-            return pd.to_datetime(s, unit='ns')
+            return pd.to_datetime(s, unit="ns")
 
     elif isinstance(sample, (float, np.float)):
         # considered as timestamp: 1521193807
-        int_part = str(sample).split('.')[0]
+        int_part = str(sample).split(".")[0]
         # '1521193807'
         if len(int_part) == 10:
             return s.apply(datetime.utcfromtimestamp)
@@ -227,34 +238,34 @@ def cast_freq(td_obj, keys=None):
     :return: string of {}D{}H{}T{}S format for `pandas.Grouper`
     """
     td = cast_timedelta(td_obj)
-    keys = keys or ['d', 'h', 'm', 's']
+    keys = keys or ["d", "h", "m", "s"]
     d = td.days
     h = td.seconds // 3600
     m = (td.seconds // 60) % 60
     s = td.seconds - (3600 * h + 60 * m)
     vals = [d, h, m, s]
 
-    res = ''
+    res = ""
     for i in range(4):
         if vals[i] != 0:
-            res += f'{vals[i]}{keys[i]}'
+            res += f"{vals[i]}{keys[i]}"
     return res
 
 
 def parse_freq(freq_str, keys=None):
-    keys = keys or ['d', 'h', 'm', 's']
-    ts_PATTERN = re.compile(r'^((\d+){})?((\d+){})?((\d+){})?((\d+){})?$'.format(*keys))
+    keys = keys or ["d", "h", "m", "s"]
+    ts_PATTERN = re.compile(r"^((\d+){})?((\d+){})?((\d+){})?((\d+){})?$".format(*keys))
     groups = ts_PATTERN.match(freq_str).groups()
 
     if len(groups) % 2 != 0:
-        raise Exception('Bad input str')
+        raise Exception("Bad input str")
     groups = groups[::2]
 
     period_secs = [3600 * 24, 3600, 60, 1]
     secs_dict = dict(zip(keys, period_secs))
 
     if not any(groups):
-        raise Exception('Bad input str')
+        raise Exception("Bad input str")
 
     secs = 0
     for group in groups:
@@ -263,7 +274,7 @@ def parse_freq(freq_str, keys=None):
         key = group[-1]
         val = int(group[:-1])
         if key not in secs_dict:
-            raise Exception('Bad input str')
+            raise Exception("Bad input str")
         secs += val * secs_dict[key]
     return timedelta(seconds=secs)
 
@@ -288,7 +299,7 @@ def cast_timedelta(td_obj):
             pass
         return parse_freq(td_obj)
     else:
-        raise Exception('Unknown td_obj format')
+        raise Exception("Unknown td_obj format")
 
 
 cast_td = cast_timedelta
@@ -300,13 +311,12 @@ def cast_sec(td_obj):
     return cast_timedelta(td_obj).total_seconds()
 
 
-
 def cast_dateoffset(td_obj):
     # https://pandas.pydata.org/pandas-docs/stable/timeseries.html
-    return cast_freq(td_obj, keys=['D', 'H', 'T', 'S'])
+    return cast_freq(td_obj, keys=["D", "H", "T", "S"])
 
 
-def round_datetime(dt_obj, td_obj, rounding='nearest_half_even'):
+def round_datetime(dt_obj, td_obj, rounding="nearest_half_even"):
     ts = cast_timestamp(dt_obj)
     ts = custom_round(ts, cast_sec(td_obj), rounding)
     return cast_datetime(ts)
@@ -314,7 +324,7 @@ def round_datetime(dt_obj, td_obj, rounding='nearest_half_even'):
 
 def test():
     print(cast_datetime(datetime.now()))
-    print(cast_datetime('20180101'))
+    print(cast_datetime("20180101"))
     print(cast_datetime(20180101))
 
     import time
@@ -322,7 +332,7 @@ def test():
     print(time.time(), cast_datetime(time.time()))
     print(cast_datetime(str(datetime.now())))
 
-    dt1 = cast_datetime('2018-01-01 12:00:00')
+    dt1 = cast_datetime("2018-01-01 12:00:00")
     ts = cast_timestamp(dt1)
     dt2 = cast_datetime(ts)
     dt3 = cast_datetime(ts)
@@ -330,7 +340,7 @@ def test():
     print(parse_human_timestamp(20180101120000123123123))
     print(parse_human_timestamp(20180101120000123))
 
-    print(datetime.now().strftime('%f'))
+    print(datetime.now().strftime("%f"))
     print(cast_hts(datetime.now()))
     print(datetime.fromtimestamp(1500021000))
     print(datetime.utcfromtimestamp(1500021000))
@@ -338,21 +348,21 @@ def test():
     print(cast_datetime(20170720000000000))
 
     print(cast_datetime(1))
-    print(parse_freq('4d1s'))
-    print(cast_timedelta('4d5m'))
+    print(parse_freq("4d1s"))
+    print(cast_timedelta("4d5m"))
     print(cast_timedelta(300))
     print(cast_freq(300))
-    print(cast_timedelta('5m'))
+    print(cast_timedelta("5m"))
 
     print(cast_dt(1522783575000))
 
-    print(cast_datetime('Thu May 31 19:34:16 2018 +0000'))
-    print(cast_datetime('Thu May 31 19:34:16 2018 +0300'))
+    print(cast_datetime("Thu May 31 19:34:16 2018 +0000"))
+    print(cast_datetime("Thu May 31 19:34:16 2018 +0300"))
 
-    print(round_datetime(cast_datetime('2018-01-01 12:00:05'), 300))
-    print(round_datetime(cast_datetime('2018-01-01 12:00:05'), 300, 'ceil'))
-    print(round_datetime(cast_datetime('2018-01-01 12:00:05'), 300, 'floor'))
+    print(round_datetime(cast_datetime("2018-01-01 12:00:05"), 300))
+    print(round_datetime(cast_datetime("2018-01-01 12:00:05"), 300, "ceil"))
+    print(round_datetime(cast_datetime("2018-01-01 12:00:05"), 300, "floor"))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     test()

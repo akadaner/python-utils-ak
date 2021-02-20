@@ -14,9 +14,15 @@ class NoProxyAvailableException(Exception):
 
 
 class AvailabilityProxyGuard:
-    def __init__(self, proxy_config,
-                 check_proxy_availability=True, check_proxy_url=None, check_proxy_params=None,
-                 timeout=10, proxy_lives=3):
+    def __init__(
+        self,
+        proxy_config,
+        check_proxy_availability=True,
+        check_proxy_url=None,
+        check_proxy_params=None,
+        timeout=10,
+        proxy_lives=3,
+    ):
         # {proxy: max_usages_at_once}
         self.proxy_config = dict(proxy_config)
 
@@ -28,7 +34,7 @@ class AvailabilityProxyGuard:
         # test proxies
         for proxy in self.proxy_config:
             if not self._is_proxy_valid(proxy):
-                raise Exception(f'Proxy {proxy} is not valid')
+                raise Exception(f"Proxy {proxy} is not valid")
 
         self.lock = multiprocessing.Lock()
         self.available_proxies = set(self.proxy_config.keys())
@@ -56,7 +62,11 @@ class AvailabilityProxyGuard:
 
     @property
     def available_counter(self):
-        return {proxy: available for proxy, available in self.counter.items() if proxy in self.available_proxies}
+        return {
+            proxy: available
+            for proxy, available in self.counter.items()
+            if proxy in self.available_proxies
+        }
 
     @property
     def proxies(self):
@@ -77,7 +87,9 @@ class AvailabilityProxyGuard:
 
             self.timer.run_if_possible()
 
-            if any(available > 0 for proxy, available in self.available_counter.items()):
+            if any(
+                available > 0 for proxy, available in self.available_counter.items()
+            ):
                 # found some available proxy. Note: lock is still acquired
                 break
 
@@ -85,40 +97,44 @@ class AvailabilityProxyGuard:
             self.lock.release()
 
             if timeout and time.time() - started > timeout:
-                raise NoProxyAvailableException('No proxy available at the moment')
+                raise NoProxyAvailableException("No proxy available at the moment")
 
             time.sleep(sleep_timeout)
 
         proxy = max(self.available_counter.items(), key=lambda x: x[1])[0]
-        logger.debug(f'Acquiring proxy {proxy}')
+        logger.debug(f"Acquiring proxy {proxy}")
         self.counter[proxy] -= 1
         self.on_acquire_proxy_callback(proxy)
         self.lock.release()
         return proxy
 
     def release_proxy(self, proxy, success=True):
-        logger.debug(f'Releasing proxy {proxy}')
+        logger.debug(f"Releasing proxy {proxy}")
         with self.lock:
             self.counter[proxy] += 1
             self.update_proxy_lives(proxy, success)
 
-            if not success and self.proxy_lives[proxy] <= 0 and proxy in self.available_proxies:
-                logger.debug(f'Proxy {proxy} is not available')
+            if (
+                not success
+                and self.proxy_lives[proxy] <= 0
+                and proxy in self.available_proxies
+            ):
+                logger.debug(f"Proxy {proxy} is not available")
                 self.available_proxies.remove(proxy)
 
     def upd_availability(self, failed_only=True):
-        logger.debug(f'Start updating proxy availability. failed_only: {failed_only}')
+        logger.debug(f"Start updating proxy availability. failed_only: {failed_only}")
 
         if not self.check_proxy_availability:
             return True
 
         if not self.check_proxy_url:
-            raise Exception('Availability can be checked only with specified url')
+            raise Exception("Availability can be checked only with specified url")
 
         proxies = self.proxies if not failed_only else self.non_available_proxies
 
         if not proxies:
-            logger.debug('No proxies to update')
+            logger.debug("No proxies to update")
             return
 
         session = FuturesSession(max_workers=300)
@@ -129,7 +145,8 @@ class AvailabilityProxyGuard:
                 self.check_proxy_url,
                 params=self.check_proxy_params,
                 proxies=cast_requests_proxies(proxy),
-                timeout=self.timeout)
+                timeout=self.timeout,
+            )
             responses.append((proxy, response))
 
         for proxy, response in responses:
@@ -139,15 +156,15 @@ class AvailabilityProxyGuard:
             if success:
                 # succeed
                 if proxy not in self.available_proxies:
-                    logger.debug(f'Proxy {proxy} is available')
+                    logger.debug(f"Proxy {proxy} is available")
                     self.available_proxies.add(proxy)
             else:
                 # fail
                 if proxy in self.available_proxies:
-                    logger.debug(f'Proxy {proxy} is not available')
+                    logger.debug(f"Proxy {proxy} is not available")
                     self.available_proxies.remove(proxy)
 
-        logger.debug('Stop updating proxy availability')
+        logger.debug("Stop updating proxy availability")
 
     @staticmethod
     def _is_availability_response_ok(response):
@@ -160,14 +177,17 @@ class AvailabilityProxyGuard:
             return True
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     from utils_ak.log import configure_stream_logging
 
     configure_stream_logging(level=logging.DEBUG)
     import random
 
-    proxy_guard = AvailabilityProxyGuard({None: 5}, check_proxy_url='https://api.binance.com/api/v1/depth',
-                                         check_proxy_params={'symbol': 'ETHBTC', 'limit': 100})
+    proxy_guard = AvailabilityProxyGuard(
+        {None: 5},
+        check_proxy_url="https://api.binance.com/api/v1/depth",
+        check_proxy_params={"symbol": "ETHBTC", "limit": 100},
+    )
     proxy_guard.upd_availability(failed_only=False)
 
     for i in range(10):

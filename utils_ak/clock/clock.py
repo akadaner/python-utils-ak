@@ -11,7 +11,16 @@ import json
 
 class Clock(object):
     """ Time measurement of any code piece. """
-    def __init__(self, checkpoints=None, laps=None, auto_close=False, sep='/', max_observations=10000, enabled=True):
+
+    def __init__(
+        self,
+        checkpoints=None,
+        laps=None,
+        auto_close=False,
+        sep="/",
+        max_observations=10000,
+        enabled=True,
+    ):
         self.checkpoints = checkpoints or {}
         self.laps = laps or {}
 
@@ -41,9 +50,9 @@ class Clock(object):
     def add_lap(self, key, lap):
         self.laps.setdefault(key, []).append(lap)
         if len(self.laps[key]) > self.max_observations:
-            self.laps[key] = self.laps[key][-self.max_observations:]
+            self.laps[key] = self.laps[key][-self.max_observations :]
 
-    def clock(self, key='clock', reset=False):
+    def clock(self, key="clock", reset=False):
         if not self.enabled:
             return
 
@@ -86,7 +95,7 @@ class Clock(object):
             if key in self.checkpoints:
                 self.add_lap(key, t - self.checkpoints.pop(key))
             elif raise_if_not_started:
-                raise Exception('Key {} is not started'.format(key))
+                raise Exception("Key {} is not started".format(key))
 
     def start(self, key, raise_if_already_started=True):
         """
@@ -100,15 +109,17 @@ class Clock(object):
         if key not in self.checkpoints:
             return self.clock(key)
         elif raise_if_already_started:
-            raise Exception('Key {} has already started'.format(key))
+            raise Exception("Key {} has already started".format(key))
 
     def stats(self):
         keys = list(self.laps.keys())
         if not keys:
-            return pd.DataFrame(index=['count', 'mean', 'sum', 'max', 'min'])
-        df = pd.concat([pd.DataFrame({k: self.laps[k]}) for k in keys], ignore_index=True, axis=1)
+            return pd.DataFrame(index=["count", "mean", "sum", "max", "min"])
+        df = pd.concat(
+            [pd.DataFrame({k: self.laps[k]}) for k in keys], ignore_index=True, axis=1
+        )
         df.columns = keys
-        stats_df = df.agg(['count', 'mean', 'sum', 'max', 'min'])
+        stats_df = df.agg(["count", "mean", "sum", "max", "min"])
         return stats_df
 
     def pop(self, key):
@@ -119,10 +130,11 @@ class Clock(object):
         self.checkpoints = {}
         self.laps = {}
 
-    def print_trie(self, by='sum', sep=None, precision=3):
+    def print_trie(self, by="sum", sep=None, precision=3):
         sep = sep or self.sep
 
         import pygtrie
+
         t = pygtrie.StringTrie(separator=sep)
 
         stats = self.stats().T[[by]]
@@ -133,7 +145,7 @@ class Clock(object):
             return not t.has_subtrie(key)
 
         def depth_print(s, depth=0):
-            print('\t' * depth + s)
+            print("\t" * depth + s)
 
         def print_trie(path_conv, path, children, value=None):
             path = path_conv(path)
@@ -141,12 +153,12 @@ class Clock(object):
 
             if t.has_key(path):
                 value_repr = value if not precision else round(value, precision)
-                path_repr = path.split('/')[-1]
+                path_repr = path.split("/")[-1]
                 if is_child(path):
                     # child
-                    depth_print('{}: {}'.format(path_repr, value_repr), depth)
+                    depth_print("{}: {}".format(path_repr, value_repr), depth)
                 else:
-                    depth_print('{}: {}'.format(path_repr, value_repr), depth)
+                    depth_print("{}: {}".format(path_repr, value_repr), depth)
             for child in children:
                 pass
             return value
@@ -154,7 +166,7 @@ class Clock(object):
         def add_other(path_conv, path, children, value=None):
             path = path_conv(path)
             if value and not is_child(path):
-                other_key = '/'.join([path, 'other'])
+                other_key = "/".join([path, "other"])
                 if not t.has_key(other_key):
                     t[other_key] = value - sum(child for child in children)
             else:
@@ -162,7 +174,7 @@ class Clock(object):
                     pass
             return value
 
-        if by == 'sum':
+        if by == "sum":
             t.traverse(add_other)
         t.traverse(print_trie)
 
@@ -170,20 +182,20 @@ class Clock(object):
         return self.clock(*args, **kwargs)
 
     def __getitem__(self, item):
-        return self.stats().T['sum'][item]
+        return self.stats().T["sum"][item]
 
     @property
     def state(self):
-        return {'laps': self.laps}
+        return {"laps": self.laps}
 
     def save(self, fn):
-        with open(fn, 'w') as f:
+        with open(fn, "w") as f:
             json.dump(self.state, f, indent=1)
 
     def load(self, fn):
-        with open(fn, 'r') as f:
+        with open(fn, "r") as f:
             js = json.load(f)
-            self.laps = js['laps']
+            self.laps = js["laps"]
 
 
 clock = Clock(enabled=False)
@@ -223,15 +235,16 @@ def clockify(key=None):
     return _clockify
 
 
-@clockify('time')
+@clockify("time")
 def test_time():
     time.sleep(1)
 
 
-@clockify('time_with_exception')
+@clockify("time_with_exception")
 def test_time_with_exception():
     time.sleep(1)
-    raise Exception('test')
+    raise Exception("test")
+
 
 # todo: make a reproducible test
 def test():
@@ -247,75 +260,75 @@ def test():
     clock.reset()
 
     # start clock
-    clock.clock('first')
+    clock.clock("first")
     time.sleep(0.1)
     # stop clock
-    clock.clock('first')
+    clock.clock("first")
 
-    clock.clock('second')
+    clock.clock("second")
     time.sleep(0.2)
-    clock.clock('second')
+    clock.clock("second")
 
     # this will add statistics to the 'first' key
-    clock.clock('first')
+    clock.clock("first")
     time.sleep(0.1)
-    clock.clock('first')
+    clock.clock("first")
 
     print(clock.stats())
 
     # usage 2
     clock = Clock(auto_close=True)
-    clock.clock('first')
+    clock.clock("first")
     time.sleep(0.1)
     # this will auto-close 'first' clock
-    clock.clock('second')
+    clock.clock("second")
     time.sleep(0.2)
 
     # this stops all clocks
     clock.stop()
-    print('Auto close')
+    print("Auto close")
     print(clock.stats())
 
     clock = Clock()
     # trie example
     clock.reset()
-    clock.clock('a')
+    clock.clock("a")
 
     for i in range(10):
-        clock.clock('a/b')
+        clock.clock("a/b")
         time.sleep(0.1)
-        clock.clock('a/b')
-    clock.clock('a')
+        clock.clock("a/b")
+    clock.clock("a")
     print(clock.stats())
 
     try:
         clock.print_trie()
-        clock.print_trie(by='count')
+        clock.print_trie(by="count")
     except:
         pass
 
-    print(clock['a'])
+    print(clock["a"])
 
-    clock.save('clock.json')
+    clock.save("clock.json")
 
     clock.reset()
     print(clock.stats())
-    clock.load('clock.json')
+    clock.load("clock.json")
     print(clock.stats())
 
     # check max observations
     clock = Clock(max_observations=3)
     for i in range(10):
-        print(clock.laps.get('a'))
-        clock.start('a')
+        print(clock.laps.get("a"))
+        clock.start("a")
         time.sleep(0.01 * i)
-        clock.stop('a')
+        clock.stop("a")
 
-    with clock('asdf'):
+    with clock("asdf"):
         time.sleep(1)
 
     print(clock.stats())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     test()

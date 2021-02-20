@@ -5,6 +5,7 @@ import traceback
 
 # https://stackoverflow.com/questions/13210436/get-full-traceback
 
+
 class FauxTb(object):
     def __init__(self, tb_frame, tb_lineno, tb_next):
         self.tb_frame = tb_frame
@@ -44,7 +45,7 @@ def full_exc_info():
 def test():
     def func():
         try:
-            raise Exception('Dummy')
+            raise Exception("Dummy")
         except Exception as e:
             t, v, full_tb = full_exc_info()
             print(t)
@@ -54,8 +55,9 @@ def test():
 
     def func2():
         func()
+
     func2()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     test()

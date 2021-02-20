@@ -5,12 +5,12 @@ from utils_ak.log import configure_stream_logging
 
 configure_stream_logging(level=logging.INFO)
 
-BROKER = 'kafka'
+BROKER = "kafka"
 
 
 class KafkaTopicLiveDumper(object):
     """
-        Live kafka topic backup-er, stores all received messages to a given storage
+    Live kafka topic backup-er, stores all received messages to a given storage
     """
 
     def __init__(self, topic, table, timestamp_resolver):
@@ -28,12 +28,16 @@ class KafkaTopicLiveDumper(object):
             self.table.store(timestamp, "", msg)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     topic = "binance_trades"
 
-    dumper = KafkaTopicLiveDumper(topic=topic,
-                                  table=MsgPackGranularStorage("/tmp/storage")["binance"].get_table("binance_trades"),
-                                  timestamp_resolver=lambda msg: msg["T"])
+    dumper = KafkaTopicLiveDumper(
+        topic=topic,
+        table=MsgPackGranularStorage("/tmp/storage")["binance"].get_table(
+            "binance_trades"
+        ),
+        timestamp_resolver=lambda msg: msg["T"],
+    )
 
     msg = {"value": "hi", "T": 228}
 

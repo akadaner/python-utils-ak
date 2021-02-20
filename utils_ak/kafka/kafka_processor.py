@@ -9,5 +9,5 @@ from .kafka_client import KafkaClient
 
 
 class KafkaProcessor:
-    def __init__(self, topic, bootstrap_servers='localhost:9092'):
+    def __init__(self, topic, bootstrap_servers="localhost:9092"):
         pass

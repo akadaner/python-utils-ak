@@ -12,7 +12,9 @@ class TopicHandler(object):
     def __init__(self, topic_formatter=None, topic_filter=None, reducer=None):
         self.handlers = OrderedDict()  # {topic: handler}
         self.topic_formatter = topic_formatter
-        self.topic_filter = topic_filter or (lambda topic, received_ropic: topic == received_ropic)
+        self.topic_filter = topic_filter or (
+            lambda topic, received_ropic: topic == received_ropic
+        )
         self.reducer = reducer or delistify
 
     def add(self, topic, callback=None, formatter=None, filter=None, reducer=None):
@@ -60,6 +62,8 @@ class TopicHandler(object):
 
 class PrefixHandler(TopicHandler):
     def __init__(self, topic_formatter=None, reducer=None):
-        super().__init__(topic_formatter=topic_formatter,
-                         topic_filter=lambda topic, received_topic: received_topic.startswith(topic),
-                         reducer=reducer)
+        super().__init__(
+            topic_formatter=topic_formatter,
+            topic_filter=lambda topic, received_topic: received_topic.startswith(topic),
+            reducer=reducer,
+        )

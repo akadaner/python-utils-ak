@@ -25,9 +25,13 @@ class PandasCSVWriter:
         sf = SplitFile(self.fn)
         fn = sf.get_current(max_size=self.max_file_size)
         if os.path.exists(fn):
-            pd.DataFrame(self.buffer_values, columns=self.header).to_csv(fn, mode='a', index=False, header=False)
+            pd.DataFrame(self.buffer_values, columns=self.header).to_csv(
+                fn, mode="a", index=False, header=False
+            )
         else:
-            pd.DataFrame(self.buffer_values, columns=self.header).to_csv(fn, mode='a', index=False)
+            pd.DataFrame(self.buffer_values, columns=self.header).to_csv(
+                fn, mode="a", index=False
+            )
         self.reset_buffer()
 
     def reset_buffer(self):

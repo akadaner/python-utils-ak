@@ -4,4 +4,3 @@ class Controller:
 
     def stop(self, deployment):
         raise NotImplemented
-

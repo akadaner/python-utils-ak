@@ -37,7 +37,11 @@ class SimpleEventManager:
                 if increment == -1 and cur_event[1] < ts - ts_error:
                     break
 
-                if cur_event[0] == topic and abs(cur_event[1] - ts) < ts_error and cur_event[2] == event:
+                if (
+                    cur_event[0] == topic
+                    and abs(cur_event[1] - ts) < ts_error
+                    and cur_event[2] == event
+                ):
                     return True
 
                 cur_ind += increment
@@ -51,7 +55,7 @@ class SimpleEventManager:
             topic, ts, event = self.events.pop(0)
 
             if self.last_ts is not None and ts < self.last_ts:
-                logging.warning('Old event was added to the events timeline')
+                logging.warning("Old event was added to the events timeline")
             self.prefix_handler(topic, ts, event)
             self.last_ts = max(ts, self.last_ts or 0)
 
@@ -64,33 +68,35 @@ def test_simple_event_manager():
             self.counter = 0
 
         def on_count(self, topic, ts, event):
-            self.counter += event['num']
-            print('Current counter', topic, ts, event, self.counter)
+            self.counter += event["num"]
+            print("Current counter", topic, ts, event, self.counter)
+
     counter = Counter()
 
-    em.subscribe('count', counter.on_count)
+    em.subscribe("count", counter.on_count)
 
     from utils_ak.time import cast_ts
     from datetime import datetime
+
     now_ts = cast_ts(datetime.now())
-    em.add_event('count.up', now_ts, {'num': 3})
-    em.add_event('count.down', now_ts + 2, {'num': -11})
+    em.add_event("count.up", now_ts, {"num": 3})
+    em.add_event("count.down", now_ts + 2, {"num": -11})
 
     # test is_event_prent
-    assert em.is_event_present('count.up', now_ts, {'num': 3})
-    assert em.is_event_present('count.up', now_ts + 1e-10, {'num': 3})
-    assert em.is_event_present('count.up', now_ts - 1e-10, {'num': 3})
-    assert not em.is_event_present('count.up', now_ts + 1, {'num': 3})
-    assert not em.is_event_present('different topic', now_ts + 1e-10, {'num': 3})
-    assert not em.is_event_present('count.up', now_ts + 1e-10, {'different event': 10})
+    assert em.is_event_present("count.up", now_ts, {"num": 3})
+    assert em.is_event_present("count.up", now_ts + 1e-10, {"num": 3})
+    assert em.is_event_present("count.up", now_ts - 1e-10, {"num": 3})
+    assert not em.is_event_present("count.up", now_ts + 1, {"num": 3})
+    assert not em.is_event_present("different topic", now_ts + 1e-10, {"num": 3})
+    assert not em.is_event_present("count.up", now_ts + 1e-10, {"different event": 10})
 
     # test duplicate addition
     events_count_before = len(em.events)
-    em.add_event('count.up', now_ts, {'num': 3})
+    em.add_event("count.up", now_ts, {"num": 3})
     assert len(em.events) == events_count_before
 
     em.run()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     test_simple_event_manager()

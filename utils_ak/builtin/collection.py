@@ -15,6 +15,8 @@ delistify = delistify_single_list
 
 def cast_list(lst):
     return lst if isinstance(lst, list) else [lst]
+
+
 listify = cast_list
 
 
@@ -51,6 +53,7 @@ def apply_on_slice(f, lst, cond):
         res[i] = applied[j]
     return res
 
+
 # NOTE: use anyconfig.merge for more advanced merge logics
 def update_dic(dic, new_dic):
     """
@@ -73,7 +76,7 @@ def update_dic(dic, new_dic):
 def crop_to_chunks(lst, n):
     """Yield successive n-sized chunks from l."""
     for i in range(0, len(lst), n):
-        yield lst[i:i + n]
+        yield lst[i : i + n]
 
 
 def split_list(lst, n):
@@ -90,14 +93,43 @@ def unfold_dic(dic, keys, get=False, default=None):
 
 
 def test_collection():
-    d1 = {'k1': {'k3': 4}}
-    d2 = {'k1': {'k3': [2, 3]}}
+    d1 = {"k1": {"k3": 4}}
+    d2 = {"k1": {"k3": [2, 3]}}
     print(update_dic(d1, d2), d1, d2)
 
-    print(apply_on_slice(lambda lst: [x ** 2 for x in lst], [1, 2, 3, 4, 5, 6], lambda x: x % 2 == 0))
+    print(
+        apply_on_slice(
+            lambda lst: [x ** 2 for x in lst], [1, 2, 3, 4, 5, 6], lambda x: x % 2 == 0
+        )
+    )
     # print(filter_dic({'k': 1, 'e': 2}, leave=2))
-    print(remove_duplicates([1, 2, 3, 4, 5, 1, 1,]))
-    print(remove_neighbor_duplicates([1, 2, 3, 4, 5, 1, 1,]))
+    print(
+        remove_duplicates(
+            [
+                1,
+                2,
+                3,
+                4,
+                5,
+                1,
+                1,
+            ]
+        )
+    )
+    print(
+        remove_neighbor_duplicates(
+            [
+                1,
+                2,
+                3,
+                4,
+                5,
+                1,
+                1,
+            ]
+        )
+    )
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     test_collection()

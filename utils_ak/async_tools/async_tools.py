@@ -9,6 +9,7 @@ import time
 
 # todo: implement other backends
 
+
 def async_(f):
     @wraps(f)
     def inner(*args, **kwargs):
@@ -49,11 +50,10 @@ def test():
         time.sleep(1)
         print(i)
 
-
     for i in range(10):
         f(i)
 
-    print('Without join')
+    print("Without join")
 
     threads = []
     for i in range(10):
@@ -61,14 +61,15 @@ def test():
     for thread in threads:
         thread.join()
 
-    print('With join')
+    print("With join")
 
-    print('Run map')
-    print(run_map(lambda x: x ** 2, [1,2,3]))
+    print("Run map")
+    print(run_map(lambda x: x ** 2, [1, 2, 3]))
 
-    print('Run pool')
+    print("Run pool")
     from functools import partial
-    callbacks = [partial(lambda x: x ** 2, i) for i in [1,2,3]]
+
+    callbacks = [partial(lambda x: x ** 2, i) for i in [1, 2, 3]]
     print(run_pool(callbacks))
 
     def raise_exception(msg):
@@ -80,5 +81,5 @@ def test():
         print(e)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     test()

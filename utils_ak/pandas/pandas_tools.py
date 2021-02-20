@@ -10,7 +10,7 @@ from io import BytesIO
 from utils_ak.os import *
 from utils_ak.builtin import list_get
 
-pd.set_option('display.max_colwidth', None)
+pd.set_option("display.max_colwidth", None)
 
 
 def display_with_image_thumbnails(df, shape=None):
@@ -27,7 +27,7 @@ def display_with_image_thumbnails(df, shape=None):
         if isinstance(im, str):
             im = _get_thumbnail(im, shape)
         with BytesIO() as buffer:
-            im.save(buffer, 'jpeg')
+            im.save(buffer, "jpeg")
             return base64.b64encode(buffer.getvalue()).decode()
 
     def _image_formatter(im, shape):
@@ -39,10 +39,12 @@ def display_with_image_thumbnails(df, shape=None):
 
         ext = os.path.splitext(possible_path)[-1]
 
-        if ext not in ['.png', '.jpg']:
+        if ext not in [".png", ".jpg"]:
             return im
 
-        return '<img src="granular_storage:image/jpeg;base64,{}">'.format(_image_base64(im, shape))
+        return '<img src="granular_storage:image/jpeg;base64,{}">'.format(
+            _image_base64(im, shape)
+        )
 
     columns = df.columns
     formatters = {col: lambda x: _image_formatter(x, shape) for col in columns}
@@ -51,7 +53,7 @@ def display_with_image_thumbnails(df, shape=None):
 
 
 def where(cond, x, y):
-    """ np.where analogue for dataframes with the same signature. Return elements, either from x or y, depending on condition.
+    """np.where analogue for dataframes with the same signature. Return elements, either from x or y, depending on condition.
 
     Parameters
     ----------
@@ -71,35 +73,35 @@ def where(cond, x, y):
     elif isinstance(cond, pd.DataFrame):
         df = cond
     else:
-        raise Exception('Either cond, x, y must be a dataframe')
+        raise Exception("Either cond, x, y must be a dataframe")
     return pd.DataFrame(np.where(cond, x, y), index=df.index, columns=df.columns)
 
 
-def series_equal(s1, s2, dtype='float', eps=1e-8):
-    if dtype == 'float':
+def series_equal(s1, s2, dtype="float", eps=1e-8):
+    if dtype == "float":
         return s1.sub(s2).abs() < eps
     else:
         return s1 == s2
 
 
 def find_row(df, row):
-    """ Find last occurence of row in df
+    """Find last occurence of row in df
     :df: pd.DataFrame
     :row: pd.DataFrame with unit length
     :return: int. Row number
     """
     if len(row) != 1:
-        raise Exception('Row should be one line dataframe')
+        raise Exception("Row should be one line dataframe")
 
     if not np.all(df.columns == row.columns):
-        raise Exception('Dataframe and row have different columns')
+        raise Exception("Dataframe and row have different columns")
 
     # filter by index
     # time is considered discrete - no problem on rounding here
-    df.index.name = 'index'
+    df.index.name = "index"
     df = df.reset_index()
-    tmp = df[df['index'] == row.index[0]].copy()
-    tmp.pop('index')
+    tmp = df[df["index"] == row.index[0]].copy()
+    tmp.pop("index")
 
     if len(tmp) == 0:
         return None
@@ -107,17 +109,17 @@ def find_row(df, row):
     # filter by values
     for col in tmp.columns:
         # todo: make better
-        dtype = 'float' if 'float' in str(df.dtypes[0]) else None
+        dtype = "float" if "float" in str(df.dtypes[0]) else None
 
         row_series = pd.Series(index=tmp[col].index)
         row_series[:] = row[col].iloc[0]
 
         tmp[col] = series_equal(tmp[col], row_series, dtype=dtype)
-    ''' 0    False
+    """ 0    False
         1     True
         2    False
         3    False
-        dtype: bool'''
+        dtype: bool"""
     row_equal = tmp.all(axis=1)
     tmp = tmp[row_equal]
 
@@ -135,7 +137,7 @@ def merge_by_columns(dfs):
     return res_df
 
 
-def merge(dfs, by=None, by_index=False, keep='last', sort_index=True):
+def merge(dfs, by=None, by_index=False, keep="last", sort_index=True):
     """
     :param dfs: list(`pd.DataFrame`)
     :param by: name of column or list of columns names. 'all' for all columns. 'columns' for merge_by_columns method
@@ -145,25 +147,25 @@ def merge(dfs, by=None, by_index=False, keep='last', sort_index=True):
     :return:
     """
     if not by and not by_index:
-        raise TypeError('Either by or index should by non-trivial')
+        raise TypeError("Either by or index should by non-trivial")
 
     if by is None:
         by = []
-    elif by == 'all':
+    elif by == "all":
         pass
-    elif by == 'columns':
+    elif by == "columns":
         return merge_by_columns(dfs)
     elif isinstance(by, str):
         by = [by]
     elif isinstance(by, list):
         pass
     else:
-        raise TypeError('By should be list, str or None')
+        raise TypeError("By should be list, str or None")
 
     df = pd.concat(dfs, axis=0)
 
     masks = []
-    if by == 'all':
+    if by == "all":
         masks.append(df)
     elif by:
         masks.append(df[by])
@@ -188,20 +190,20 @@ def find_gaps(index, gap):
 # todo: search for existing solutions
 def pd_read(fn, **kwargs):
     ext = os.path.splitext(fn)[-1]
-    if '.zip' in ext:
+    if ".zip" in ext:
         ext = os.path.splitext(fn[:-4])[-1]
-    return getattr(pd, f'read_{ext[1:]}')(fn, **kwargs)
+    return getattr(pd, f"read_{ext[1:]}")(fn, **kwargs)
 
 
 def pd_write(df, fn, **kwargs):
     ext = os.path.splitext(fn)[-1]
-    if '.zip' in ext:
+    if ".zip" in ext:
         ext = os.path.splitext(fn[:-4])[-1]
-        kwargs['compression'] = 'zip'
-    kwargs['index'] = False
+        kwargs["compression"] = "zip"
+    kwargs["index"] = False
 
-    tmp_fn = fn + '.tmp'
-    res = getattr(df, f'to_{ext[1:]}')(tmp_fn, **kwargs)
+    tmp_fn = fn + ".tmp"
+    res = getattr(df, f"to_{ext[1:]}")(tmp_fn, **kwargs)
     if os.path.exists(fn):
         remove_path(fn)
     rename_path(tmp_fn, fn)
@@ -220,33 +222,33 @@ def mark_consecutive_groups(df, key, groups_key):
         values.append(cur_i)
     df[groups_key] = values
 
-if __name__ == '__main__':
-    df1 = pd.DataFrame.from_dict({'a': [1, 2, 3], 'b': [4, 5, 6], 'c': [1, 1, 1]})
-    df1 = df1.set_index('c')
-    df2 = pd.DataFrame.from_dict({'a': [3, 4, 5], 'b': [7, 8, 9]})
+
+if __name__ == "__main__":
+    df1 = pd.DataFrame.from_dict({"a": [1, 2, 3], "b": [4, 5, 6], "c": [1, 1, 1]})
+    df1 = df1.set_index("c")
+    df2 = pd.DataFrame.from_dict({"a": [3, 4, 5], "b": [7, 8, 9]})
 
     print(df1)
-    print('-----')
+    print("-----")
     print(df2)
 
-    print('----------')
+    print("----------")
 
     dfs = [df1, df2]
 
-    print(merge(dfs, index=False, by='a'))
+    print(merge(dfs, index=False, by="a"))
     print()
-    print(merge(dfs, index=True, by='a'))
+    print(merge(dfs, index=True, by="a"))
     print()
     print(merge(dfs, index=True, by=None))
     print()
-    print(merge(dfs, index=True, by=None, keep='first'))
+    print(merge(dfs, index=True, by=None, keep="first"))
     print()
-    print(merge(dfs, index=True, by='all', keep='first'))
+    print(merge(dfs, index=True, by="all", keep="first"))
 
     try:
         print(merge(dfs, index=False, by=None))
     except Exception as e:
         print(e)
     else:
-        raise Exception('Should not happen')
-
+        raise Exception("Should not happen")

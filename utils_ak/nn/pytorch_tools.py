@@ -49,7 +49,7 @@ class DynamicNet(nn.Module):
         if self.init:
             layer_count = 0
             while True:
-                if not hasattr(self, f'{name}_{layer_count}'):
+                if not hasattr(self, f"{name}_{layer_count}"):
                     break
                 layer_count += 1
 
@@ -58,13 +58,13 @@ class DynamicNet(nn.Module):
             elif hasattr(self, name):
                 res = getattr(self, name)(*args, **kwargs)
             else:
-                raise Exception(f'Layer not found: {name}]')
-            setattr(self, f'{name}_{layer_count}', res)
+                raise Exception(f"Layer not found: {name}]")
+            setattr(self, f"{name}_{layer_count}", res)
             return res
         else:
             layer_count = self.layer_counter.get(name, -1) + 1
             self.layer_counter[name] = layer_count
-            return getattr(self, f'{name}_{layer_count}')
+            return getattr(self, f"{name}_{layer_count}")
 
     def print_init(self, *args):
         if self.init:
@@ -72,7 +72,16 @@ class DynamicNet(nn.Module):
 
 
 class NPYDataset(torch.utils.datasets.Dataset):
-    def __init__(self, images_path, labels_path=None, transform=None, train=True, train_size=0.9, shuffle=False, seed=12):
+    def __init__(
+        self,
+        images_path,
+        labels_path=None,
+        transform=None,
+        train=True,
+        train_size=0.9,
+        shuffle=False,
+        seed=12,
+    ):
         self.images = np.load(images_path)
         if labels_path:
             self.labels = np.load(labels_path)
@@ -93,8 +102,8 @@ class NPYDataset(torch.utils.datasets.Dataset):
         else:
             np.random.seed(seed)
             permutation = np.random.permutation(self.total_size)
-            train_idxs = permutation[:self.train_size]
-            test_idxs = permutation[self.train_size:]
+            train_idxs = permutation[: self.train_size]
+            test_idxs = permutation[self.train_size :]
 
         if self.train:
             self.images = self.images[train_idxs, :, :]
@@ -127,7 +136,7 @@ def collect_images_to_numpy(data_loader):
     data = None
     labels = None
     for cur_data, cur_labels in data_loader:
-        data_numpy = (cur_data * 255).numpy().astype('uint8')
+        data_numpy = (cur_data * 255).numpy().astype("uint8")
         labels_numpy = cur_labels.numpy()
         if data is None:
             data = data_numpy

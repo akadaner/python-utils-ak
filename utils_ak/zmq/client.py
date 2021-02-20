@@ -12,10 +12,10 @@ class ZMQClient:
         self.subscribers = {}
         self.publishers = {}
 
-    def subscribe(self, endpoint, topic=None, conn_type='auto'):
+    def subscribe(self, endpoint, topic=None, conn_type="auto"):
         if not self.poller:
             self.poller = zmq.Poller()
-        topic = topic or ''
+        topic = topic or ""
         if endpoint not in self.subscribers:
             sub = Subscriber(endpoint, context=self.context, conn_type=conn_type)
             self.subscribers[endpoint] = sub
@@ -25,12 +25,14 @@ class ZMQClient:
     def _register(self, receiver):
         self.poller.register(receiver.socket, zmq.POLLIN)
 
-    def publish(self, endpoint, topic, msg, conn_type='auto'):
+    def publish(self, endpoint, topic, msg, conn_type="auto"):
         if endpoint not in self.publishers:
-            self.publishers[endpoint] = Publisher(endpoint, context=self.context, conn_type=conn_type)
+            self.publishers[endpoint] = Publisher(
+                endpoint, context=self.context, conn_type=conn_type
+            )
         self.publishers[endpoint].publish(topic, msg)
 
-    def poll(self, timeout=0.):
+    def poll(self, timeout=0.0):
         if not self.subscribers:
             return
 

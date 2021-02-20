@@ -1,4 +1,6 @@
 """ Pipeline is a callable, which runs consecutively an array of callables. """
+
+
 class Pipeline(object):
     def __init__(self, array):
         self.array = array
@@ -15,5 +17,5 @@ class Pipeline(object):
         self.run(*args, **kwargs)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     print(Pipeline([lambda y: y * 2, lambda x: x * 2, lambda x: x + 10]).run(15))

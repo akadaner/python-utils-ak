@@ -22,11 +22,16 @@ def relative_acc(parent, child, key, default=None, formatter=None):
 
 def cumsum_acc(parent, child, key, default=None, formatter=None):
     if parent:
-        return parent[key] + relative_acc(parent, child, key, default=default, formatter=formatter)
+        return parent[key] + relative_acc(
+            parent, child, key, default=default, formatter=formatter
+        )
     return relative_acc(parent, child, key, default=default, formatter=formatter)
 
+
 class DynamicProps:
-    def __init__(self, props=None, formatters=None, accumulators=None, required_keys=None):
+    def __init__(
+        self, props=None, formatters=None, accumulators=None, required_keys=None
+    ):
         self.accumulators = accumulators or {}
         self.required_keys = required_keys or []
         self.formatters = formatters or {}
@@ -68,34 +73,44 @@ class DynamicProps:
 
     def keys(self):
         parent_keys = [] if not self.parent else self.parent.keys()
-        res = parent_keys + list(self.accumulators.keys()) + list(self.relative_props.keys()) + self.required_keys
+        res = (
+            parent_keys
+            + list(self.accumulators.keys())
+            + list(self.relative_props.keys())
+            + self.required_keys
+        )
         return list(set(res))
 
     def all(self):
         return {key: self[key] for key in self.keys()}
 
 
-
 def test_dynamic_props():
-    ACCUMULATORS = {'foo': cumsum_acc, 'bar': relative_acc}
+    ACCUMULATORS = {"foo": cumsum_acc, "bar": relative_acc}
 
     def gen_props(props=None):
-        return DynamicProps(props=props, accumulators=ACCUMULATORS, required_keys=['foo', 'bar', 'other'])
+        return DynamicProps(
+            props=props,
+            accumulators=ACCUMULATORS,
+            required_keys=["foo", "bar", "other"],
+        )
 
-    root = gen_props({'foo': 1, 'bar': 5, 'other': 1})
-    child1 = gen_props({'foo': 2})
-    child2 = gen_props({'foo': 3})
+    root = gen_props({"foo": 1, "bar": 5, "other": 1})
+    child1 = gen_props({"foo": 2})
+    child2 = gen_props({"foo": 3})
     root.add_child(child1)
     child1.add_child(child2)
 
     values = []
     for i, node in enumerate([root, child1, child2]):
-        values.append([node[key] for key in ['foo', 'bar', 'other', 'non-existent_key']])
-    print(pd.DataFrame(values, columns=['foo', 'bar', 'other', 'non-existent_key']))
+        values.append(
+            [node[key] for key in ["foo", "bar", "other", "non-existent_key"]]
+        )
+    print(pd.DataFrame(values, columns=["foo", "bar", "other", "non-existent_key"]))
 
     for node in [root, child1, child2]:
         print(node.keys(), node.all())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     test_dynamic_props()

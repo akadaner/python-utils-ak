@@ -10,7 +10,17 @@ from logging import currentframe, _srcfile
 class ExtraFieldsLogger(logging.Logger):
     """ Logger with additional kwargs arguments. """
 
-    def _log(self, level, msg, args, exc_info=None, extra=None, stack_info=False, stacklevel=1, **kwargs):
+    def _log(
+        self,
+        level,
+        msg,
+        args,
+        exc_info=None,
+        extra=None,
+        stack_info=False,
+        stacklevel=1,
+        **kwargs
+    ):
         """
         Low-level _logging routine which creates a LogRecord and then calls
         all the handlers of this _logging to handle the record.
@@ -37,7 +47,9 @@ class ExtraFieldsLogger(logging.Logger):
             extra = extra or {}
             extra.update(kwargs)
 
-        record = self.makeRecord(self.name, level, fn, lno, msg, args, exc_info, func, extra, sinfo)
+        record = self.makeRecord(
+            self.name, level, fn, lno, msg, args, exc_info, func, extra, sinfo
+        )
         self.handle(record)
 
     def findCaller(self, stack_info=False, stacklevel=1):
@@ -66,10 +78,10 @@ class ExtraFieldsLogger(logging.Logger):
             sinfo = None
             if stack_info:
                 sio = io.StringIO()
-                sio.write('Stack (most recent call last):\n')
+                sio.write("Stack (most recent call last):\n")
                 traceback.print_stack(f, file=sio)
                 sinfo = sio.getvalue()
-                if sinfo[-1] == '\n':
+                if sinfo[-1] == "\n":
                     sinfo = sinfo[:-1]
                 sio.close()
             rv = (co.co_filename, f.f_lineno, co.co_name, sinfo)

@@ -7,7 +7,7 @@ class TimeLimitProxyGuard(AvailabilityProxyGuard):
         super().__init__(proxy_config, *args, **kwargs)
 
         if proxy_limits is None:
-            raise Exception('This proxy guard can`t work without limit')
+            raise Exception("This proxy guard can`t work without limit")
 
         proxies = proxy_config.keys()
         self.limit_usage_manager = LimitUsageManager(proxy_limits, proxies)
@@ -30,13 +30,15 @@ class TimeLimitProxyGuard(AvailabilityProxyGuard):
         self.limit_usage_manager.add_usage(proxy)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import time
 
-    config = {'http://localhos:80': 10, 'http://192.168.0.1:80': 10}
+    config = {"http://localhos:80": 10, "http://192.168.0.1:80": 10}
     # seconds: usage_limit
     limits = {1: 1, 4: 2}
-    proxy_guard = TimeLimitProxyGuard(config, check_proxy_availability=False, proxy_limits=limits)
+    proxy_guard = TimeLimitProxyGuard(
+        config, check_proxy_availability=False, proxy_limits=limits
+    )
 
     time_started = time.time()
 
@@ -64,4 +66,4 @@ if __name__ == '__main__':
     # this assert validate that we not sleep when use acquire_proxy
     assert time.time() - time_started < 4.1
 
-    print('Test TimeLimitProxyGuard is OK')
+    print("Test TimeLimitProxyGuard is OK")
