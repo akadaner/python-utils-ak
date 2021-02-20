@@ -59,6 +59,11 @@ def get_config(configs=None, require_local=False, global_configs=('common_config
     return cast_config(res)
 
 
+def test():
+    print(get_config(global_configs=('sample_configs/common_config.yml',
+                                     'sample_configs/secret_config.yml',
+                                     'sample_configs/instance_config.yml')))
+
+
 if __name__ == '__main__':
-    config = get_config()
-    print(config)
+    test()
