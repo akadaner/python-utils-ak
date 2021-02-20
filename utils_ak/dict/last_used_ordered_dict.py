@@ -14,7 +14,7 @@ class LastUsedOrderedDict(OrderedDict):
         return self[key]
 
 
-if __name__ == '__main__':
+def test():
     d = LastUsedOrderedDict()
     d['1'] = 1
     d['2'] = 2
@@ -23,3 +23,6 @@ if __name__ == '__main__':
     print(d)
     d['2'] = 3
     print(d)
+
+if __name__ == '__main__':
+    test()

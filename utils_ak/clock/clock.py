@@ -68,10 +68,10 @@ class Clock(object):
         self.last_key = key
         return ContextClockWithKey(key, self)
 
-    def stop(self, key=None, rie=True):
+    def stop(self, key=None, raise_if_not_started=True):
         """
         :param key: str.
-        :param rie:
+        :param raise_if_not_started:
         :return: bool. Raise if exists
         """
         if not self.enabled:
@@ -85,13 +85,13 @@ class Clock(object):
         else:
             if key in self.checkpoints:
                 self.add_lap(key, t - self.checkpoints.pop(key))
-            elif rie:
+            elif raise_if_not_started:
                 raise Exception('Key {} is not started'.format(key))
 
-    def start(self, key, rie=True):
+    def start(self, key, raise_if_already_started=True):
         """
         :param key: str.
-        :param rie:  bool. Raise if exists
+        :param raise_if_already_started:  bool. Raise if exists
         :return:
         """
         if not self.enabled:
@@ -99,7 +99,7 @@ class Clock(object):
 
         if key not in self.checkpoints:
             return self.clock(key)
-        elif rie:
+        elif raise_if_already_started:
             raise Exception('Key {} has already started'.format(key))
 
     def stats(self):
@@ -233,8 +233,8 @@ def test_time_with_exception():
     time.sleep(1)
     raise Exception('test')
 
-
-if __name__ == '__main__':
+# todo: make a reproducible test
+def test():
     # usage 1
     clock = Clock()
 
@@ -315,3 +315,7 @@ if __name__ == '__main__':
         time.sleep(1)
 
     print(clock.stats())
+
+
+if __name__ == '__main__':
+    test()

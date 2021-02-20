@@ -7,7 +7,7 @@ from datetime import datetime, timedelta, timezone
 from utils_ak.numeric import custom_round
 
 
-# slow
+# NOTE: slow
 def parse_human_timestamp_re(hts, min_date_str='2000'):
     """
     :param hts: Human timestamp: 20180101/2018010112/201801011200/20180101120000/20180101120000123...
@@ -134,6 +134,7 @@ cast_ts = cast_timestamp
 def cast_mts(dt_obj):
     return cast_timestamp(dt_obj) * 1000
 
+
 def cast_str(dt, format=None):
     if isinstance(dt, str):
         return dt
@@ -143,6 +144,7 @@ def cast_str(dt, format=None):
         return dt.strftime(format)
     else:
         raise Exception('Unsupported type')
+
 
 def get_strptime_pattern(s):
     """
@@ -291,10 +293,12 @@ def cast_timedelta(td_obj):
 
 cast_td = cast_timedelta
 
+
 def cast_sec(td_obj):
     if isinstance(td_obj, (int, float)):
         return td_obj
     return cast_timedelta(td_obj).total_seconds()
+
 
 
 def cast_dateoffset(td_obj):
@@ -302,13 +306,13 @@ def cast_dateoffset(td_obj):
     return cast_freq(td_obj, keys=['D', 'H', 'T', 'S'])
 
 
-def round_datetime(dt_obj, td_obj, rounding='round'):
+def round_datetime(dt_obj, td_obj, rounding='nearest_half_even'):
     ts = cast_timestamp(dt_obj)
     ts = custom_round(ts, cast_sec(td_obj), rounding)
     return cast_datetime(ts)
 
 
-if __name__ == '__main__':
+def test():
     print(cast_datetime(datetime.now()))
     print(cast_datetime('20180101'))
     print(cast_datetime(20180101))
@@ -349,4 +353,6 @@ if __name__ == '__main__':
     print(round_datetime(cast_datetime('2018-01-01 12:00:05'), 300, 'ceil'))
     print(round_datetime(cast_datetime('2018-01-01 12:00:05'), 300, 'floor'))
 
-    print(cast_datetime('5m'))
+
+if __name__ == '__main__':
+    test()

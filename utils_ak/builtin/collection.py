@@ -13,10 +13,9 @@ def delistify_single_list(lst_obj):
 delistify = delistify_single_list
 
 
-def listify(obj):
-    if not isinstance(obj, list):
-        return [obj]
-    return obj
+def cast_list(lst):
+    return lst if isinstance(lst, list) else [lst]
+listify = cast_list
 
 
 def list_get(lst, index=0, default=None):
@@ -24,10 +23,6 @@ def list_get(lst, index=0, default=None):
         return lst[index]
     except IndexError:
         return default
-
-
-def cast_list(lst):
-    return lst if isinstance(lst, list) else [lst]
 
 
 def remove_duplicates(seq, key=None):
@@ -93,15 +88,16 @@ def unfold_dic(dic, keys, get=False, default=None):
     else:
         return [dic[key] for key in keys]
 
+
 def test_collection():
     d1 = {'k1': {'k3': 4}}
     d2 = {'k1': {'k3': [2, 3]}}
     print(update_dic(d1, d2), d1, d2)
 
-    print(apply_on_slice(lambda lst: [x ** 2 for x in lst], [1,2,3,4,5,6], lambda x: x % 2 == 0))
+    print(apply_on_slice(lambda lst: [x ** 2 for x in lst], [1, 2, 3, 4, 5, 6], lambda x: x % 2 == 0))
     # print(filter_dic({'k': 1, 'e': 2}, leave=2))
-    print(remove_duplicates([1,2,3, 4,5,1,1,]))
-    print(remove_neighbor_duplicates([1,2,3, 4,5,1,1,]))
+    print(remove_duplicates([1, 2, 3, 4, 5, 1, 1,]))
+    print(remove_neighbor_duplicates([1, 2, 3, 4, 5, 1, 1,]))
 
 if __name__ == '__main__':
     test_collection()

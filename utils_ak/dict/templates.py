@@ -1,4 +1,5 @@
 import re
+
 def fill_template(js_obj, **params):
     if isinstance(js_obj, dict):
         return {k.format(**params): fill_template(v, **params) for k, v in js_obj.items()}
@@ -12,3 +13,5 @@ def fill_template(js_obj, **params):
         return js_obj.format(**params)
     else:
         return js_obj
+
+# todo: tests

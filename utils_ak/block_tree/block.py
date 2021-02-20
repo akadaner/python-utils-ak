@@ -96,7 +96,6 @@ class Block:
 
 
 
-
 def test_block():
     def cast_block(block_class, **kwargs):
         return Block(block_class, props_accumulators={'t': lambda parent, child, key: cumsum_acc(parent, child, key, default=0, formatter=int)}, **kwargs)

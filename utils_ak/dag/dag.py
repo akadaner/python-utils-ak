@@ -2,10 +2,12 @@ class DAGNode:
     def __init__(self):
         self.parents = []
         self.children = []
+
+        self._iteration_state = {}
         self.reset_iteration_state()
 
     def reset_iteration_state(self, orient='down', with_children=False):
-        self.iteration_state = {'is_processed': False}  # iteration state variable
+        self._iteration_state = {'is_processed': False}  # iteration state variable
 
         if with_children:
             for child in self.oriented_children(orient):
@@ -20,7 +22,7 @@ class DAGNode:
 
     def top(self, orient='down'):
         leaves = self.leaves(orient)
-        assert len(leaves) == 1, 'Top not found'
+        assert len(leaves) == 1, 'Top node not found'
         if len(leaves) == 1:
             return leaves[0]
 
@@ -46,15 +48,15 @@ class DAGNode:
         cur_node = self
 
         while True:
-            unprocessed_parents = [node for node in cur_node.oriented_parents(orient) if not node.iteration_state['is_processed']]
+            unprocessed_parents = [node for node in cur_node.oriented_parents(orient) if not node._iteration_state['is_processed']]
             if unprocessed_parents:
                 cur_node = unprocessed_parents[0]
                 continue
 
             yield cur_node
-            cur_node.iteration_state['is_processed'] = True
+            cur_node._iteration_state['is_processed'] = True
 
-            unprocessed_children = [node for node in cur_node.oriented_children(orient) if not node.iteration_state['is_processed']]
+            unprocessed_children = [node for node in cur_node.oriented_children(orient) if not node._iteration_state['is_processed']]
 
             if unprocessed_children:
                 cur_node = unprocessed_children[0]
@@ -64,11 +66,11 @@ class DAGNode:
 
     @staticmethod
     def _iter_node_as_tree_recursive(cur_node, orient='down'):
-        if cur_node.iteration_state['is_processed']:
+        if cur_node._iteration_state['is_processed']:
             return
         else:
             yield cur_node
-            cur_node.iteration_state['is_processed'] = True
+            cur_node._iteration_state['is_processed'] = True
 
         for child in cur_node.oriented_children(orient):
             for node in DAGNode._iter_node_as_tree_recursive(child, orient):

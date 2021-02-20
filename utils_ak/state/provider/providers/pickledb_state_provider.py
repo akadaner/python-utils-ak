@@ -63,6 +63,9 @@ def test_pickle_db_state_provider():
         assert sp.get_state() == 18
     print(state_provider.get_state())
 
+    # clean up
+    from utils_ak import remove_path
+    remove_path('state.pickledb')
 
 if __name__ == '__main__':
     test_pickle_db_state_provider()

@@ -4,7 +4,7 @@ from utils_ak.builtin import update_dic
 
 class Window:
     def __init__(self):
-        self.state = 'open' # 'open', 'closed'
+        self.state = 'open'  # 'open', 'closed'
 
     def close(self):
         self.state = 'closed'
@@ -54,8 +54,7 @@ class CollectorWindow(Window):
         return self.filled
 
 
-
-if __name__ == '__main__':
+def test():
     collector = CollectorWindow(fields=['a', 'b'])
 
     print(collector.add({'a': 1}))
@@ -77,3 +76,6 @@ if __name__ == '__main__':
     time.sleep(1)
     print(session.is_closeable())
     print(session.close())
+
+if __name__ == '__main__':
+    test()

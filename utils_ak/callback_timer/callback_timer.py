@@ -6,6 +6,7 @@ from dateutil import rrule
 from datetime import datetime, timedelta
 from utils_ak.time import cast_sec, cast_timedelta
 
+
 TIME_EPS = 0.001
 
 
@@ -140,7 +141,7 @@ class ScheduleTimer:
         self.rrule_params = dict(zip(param_names, units))
         self.rrule_params['freq'] = freq
 
-        self._upd_next_call()
+        self._update_next_call()
 
     def _parse_time_unit(self, unit):
         if unit == '*':
@@ -148,7 +149,7 @@ class ScheduleTimer:
         unit = unit.split(',')
         return [int(x) for x in unit]
 
-    def _upd_next_call(self):
+    def _update_next_call(self):
         # set next_call to closest
         self.last_call_dt = datetime.fromtimestamp(self.next_call) if self.next_call else datetime.now()
         next_call_lst = list(rrule.rrule(dtstart=self.last_call_dt + timedelta(seconds=1),
@@ -161,24 +162,24 @@ class ScheduleTimer:
 
         self.next_call = next_call_lst[0].timestamp()
 
-    def check(self):
+    def run_if_possible(self):
         if self.init_run or time.time() > self.next_call:
             self.init_run = False
             self.run()
-            self._upd_next_call()
+            self._update_next_call()
             return True
         return False
 
-    async def aiocheck(self):
+    async def run_if_possible_aio(self):
         if self.init_run or time.time() > self.next_call:
             self.init_run = False
-            await self.aiorun()
-            self._upd_next_call()
+            await self.run_aio()
+            self._update_next_call()
 
     def run(self):
         return self.callback(*self.args, **self.kwargs)
 
-    async def aiorun(self):
+    async def run_aio(self):
         if inspect.iscoroutinefunction(self.callback):
             return await self.callback(*self.args, **self.kwargs)
         else:
@@ -194,7 +195,7 @@ class CallbackTimers(object):
     def add_timer(self, timer):
         self.timers.append(timer)
 
-    def check(self):
+    def run_if_possible(self):
         if time.time() > self.next_call:
             for timer in self.timers:
                 timer.run_if_possible()
@@ -209,13 +210,13 @@ class CallbackTimers(object):
     def __len__(self):
         return len(self.timers)
 
-    async def aiocheck(self):
+    async def run_if_possible_aio(self):
         if time.time() > self.next_call:
             for timer in self.timers:
                 await timer.run_if_possible()
 
 
-def ex_sequential():
+def test():
     def print_msg(msg=None):
         print('Callback:', datetime.now(), msg)
 
@@ -232,8 +233,8 @@ def ex_sequential():
     timer1 = ScheduleTimer(print_msg, '* * * * * *')
     timer2 = ScheduleTimer(print_msg, '* * * * * *', args=('asdf',))
     for i in range(300):
-        timer1.check()
-        timer2.check()
+        timer1.run_if_possible()
+        timer2.run_if_possible()
         time.sleep(0.01)
 
     print('Timer 3')
@@ -242,11 +243,11 @@ def ex_sequential():
     print(timer.pattern)
     N = 3 * 1000
     for i in range(N):
-        timer.check()
+        timer.run_if_possible()
         time.sleep(1 / 10000)
 
 
-def ex_coroutine():
+def test_aio():
     import numpy as np
     async def print_msg(msg=None):
         timeout = np.random.uniform(0, 1)
@@ -271,4 +272,5 @@ def ex_coroutine():
 
 
 if __name__ == '__main__':
-    ex_coroutine()
+    test()
+    test_aio()

@@ -2,6 +2,7 @@ from utils_ak.architecture import PrefixHandler
 from sortedcollections import SortedList
 import logging
 
+
 class SimpleEventManager:
     def __init__(self):
         self.events = SortedList(key=lambda v: v[1])  # sorted(topic, ts, event)])

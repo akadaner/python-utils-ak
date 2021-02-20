@@ -61,11 +61,13 @@ class tqdm:
         return dt.strftime(self.timing_format)
 
 
-if __name__ == '__main__':
+def test():
     def sample_hook(i):
         if i % 100 == 0:
             print('\nThis is a hook message', i)
 
-
-    for x in tqdm(range(1000), show_timing=True, desc=lambda i: i ** 2, postfix=lambda i: {'i': i // 10}, hook=sample_hook):
+    for x in tqdm(range(100), show_timing=True, desc=lambda i: i ** 2, postfix=lambda i: {'i': i // 10}, hook=sample_hook):
         time.sleep(0.01)
+
+if __name__ == '__main__':
+    test()

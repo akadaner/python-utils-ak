@@ -60,10 +60,12 @@ class SimpleVector:
     def __iter__(self):
         return iter(self.values)
 
+
 def test_simple_vector():
     v1 = SimpleVector([1, 2])
     v2 = SimpleVector([3, 5])
     print(v1 + v2, v1 - v2)
+
 
 if __name__ == '__main__':
     test_simple_vector()

@@ -69,6 +69,7 @@ def init_block_maker(root_obj, default_push_func=stack_push, **kwargs):
     block_maker = BlockMaker(root_obj, default_push_func, **kwargs)
     return block_maker, block_maker.make
 
+
 def test_block_maker1():
     maker, make = init_block_maker('root', axis=0)
     make('a', size=[1, 0])

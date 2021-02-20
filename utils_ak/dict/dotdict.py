@@ -2,7 +2,7 @@
 from utils_ak.serialization import js as json
 
 
-def is_dict_instance(obj):
+def is_dict_like(obj):
     """
     Return if provided object is type of dict or instance of DotDict class
     """
@@ -13,14 +13,14 @@ class dotdict(dict):
     def __init__(self, dic=None, as_default_dict=False):
         super().__init__()
 
-        if dic is not None and not is_dict_instance(dic):
+        if dic is not None and not is_dict_like(dic):
             raise Exception('Bad dic input')
 
         self._as_default_dict = as_default_dict
 
         if dic is not None:
             for k, v in dic.items():
-                if is_dict_instance(v):
+                if is_dict_like(v):
                     self[k] = self._cls(v)
                 else:
                     self[k] = v
@@ -64,7 +64,7 @@ class dotdict(dict):
         if len(split_keys) == 1:
             return super().__contains__(key)
 
-        if not super().__contains__(first) or not is_dict_instance(self[first]):
+        if not super().__contains__(first) or not is_dict_like(self[first]):
             return False
 
         return '.'.join(split_keys[1:]) in self[first]
@@ -76,7 +76,7 @@ class dotdict(dict):
 
         for key in split_keys[:-1]:
             obj = obj.setdefault(key, self._cls())
-            if not is_dict_instance(obj):
+            if not is_dict_like(obj):
                 raise Exception('Cannot assign new value, internal obj is not dict')
 
         if len(split_keys) == 1:
@@ -115,7 +115,7 @@ class dotdict(dict):
                 # no dotted notation used
                 return obj
 
-            if is_dict_instance(obj):
+            if is_dict_like(obj):
                 return obj.get('.'.join(split_keys[1:]))
             else:
                 return default
@@ -137,8 +137,7 @@ class dotdict(dict):
             return key.split('.')
         return [key]
 
-
-if __name__ == '__main__':
+def test():
     dd = dotdict({0: 1})
 
     print(dd[0])
@@ -197,3 +196,6 @@ if __name__ == '__main__':
     import pickle
 
     print(pickle.dumps(dd))
+
+if __name__ == '__main__':
+    test()

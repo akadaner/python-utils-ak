@@ -18,9 +18,8 @@ from mongoengine import connect
 
 def create_new_job():
     connect(host='mongodb+srv://arseniikadaner:Nash0lsapog@cluster0.2umoy.mongodb.net/feature-store?retryWrites=true&w=majority')
+    configure_loguru_stdout('DEBUG')
     logger.info('Connected to mongodb')
-    logger.remove()
-    configure_loguru_stdout()
     time.sleep(2)
     logger.debug('Creating new job...')
     Job.drop_collection()
@@ -31,13 +30,12 @@ def create_new_job():
 
 
 def test():
-    logger.remove()
-    configure_loguru_stdout()
+    configure_loguru_stdout('DEBUG')
     connect(host='mongodb+srv://arseniikadaner:Nash0lsapog@cluster0.2umoy.mongodb.net/feature-store?retryWrites=true&w=majority')
     logger.info('Connected to mongodb')
-    controller = KubernetesController()
+    controller = DockerController()
     orchestrator = JobOrchestrator(controller, MESSAGE_BROKER)
-    # multiprocessing.Process(target=create_new_job).start()
+    multiprocessing.Process(target=create_new_job).start()
     orchestrator.run()
 
 

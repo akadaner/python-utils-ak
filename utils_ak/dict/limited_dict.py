@@ -16,11 +16,13 @@ class LimitedDict(LastUsedOrderedDict):
                 self.popitem(last=False)
 
 
-if __name__ == '__main__':
-
+def test():
     d = LimitedDict(max_size=2)
     d['1'] = 1
     d['2'] = 2
     print(d.pick('1'))
     d['3'] = 3
     print(d)
+
+if __name__ == '__main__':
+    test()

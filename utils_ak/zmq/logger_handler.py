@@ -1,5 +1,6 @@
 import logging
 
+# todo: migrate to loguru
 
 class ZMQLogHandler(logging.Handler):
     def __init__(self, publisher, root_topic=None):

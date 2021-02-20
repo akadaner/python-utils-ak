@@ -59,8 +59,6 @@ def get_config(configs=None, require_local=False, global_configs=('common_config
     return cast_config(res)
 
 
-config = get_config()
-
-
 if __name__ == '__main__':
+    config = get_config()
     print(config)

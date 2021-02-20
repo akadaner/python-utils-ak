@@ -43,7 +43,7 @@ def run_map(f, args, n_processes=4, Backend=ThreadPool):
     return run_pool([partial(f, arg) for arg in args], n_processes, Backend)
 
 
-if __name__ == '__main__':
+def test():
     @async_
     def f(i):
         time.sleep(1)
@@ -74,4 +74,11 @@ if __name__ == '__main__':
     def raise_exception(msg):
         raise Exception(msg)
 
-    print(run_map(raise_exception, [1,2,3]))
+    try:
+        run_map(raise_exception, [1, 2, 3])
+    except Exception as e:
+        print(e)
+
+
+if __name__ == '__main__':
+    test()

@@ -12,7 +12,7 @@ class FauxTb(object):
         self.tb_next = tb_next
 
 
-def current_stack(skip=0):
+def get_current_stack(skip=0):
     try:
         1 / 0
     except ZeroDivisionError:
@@ -37,14 +37,11 @@ def extend_traceback(tb, stack):
 def full_exc_info():
     """Like sys.exc_info, but includes the full traceback."""
     t, v, tb = sys.exc_info()
-    full_tb = extend_traceback(tb, current_stack(1))
+    full_tb = extend_traceback(tb, get_current_stack(1))
     return t, v, full_tb
 
 
-if __name__ == '__main__':
-    import logging
-
-
+def test():
     def func():
         try:
             raise Exception('Dummy')
@@ -53,15 +50,12 @@ if __name__ == '__main__':
             print(t)
             print(v)
             print(full_tb)
-
             print(traceback.format_exc())
-            # _logging.error("Something awful happened!", exc_info=full_exc_info())
-            # _logging.error("Something awful happened!", exc_info=e)
-            # print(traceback.format_exc())
-
 
     def func2():
         func()
-
-
     func2()
+
+
+if __name__ == '__main__':
+    test()

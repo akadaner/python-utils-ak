@@ -33,7 +33,7 @@ def test_streaming():
 
 
 def test_deployment():
-    test_worker_deployment('deployment.yml', message_broker=('zmq', {'endpoints': {'monitor': {'endpoint': 'tcp://localhost:5555', 'type': 'sub'}}}))
+    test_worker_deployment('sample_deployment.yml', message_broker=('zmq', {'endpoints': {'monitor': {'endpoint': 'tcp://localhost:5555', 'type': 'sub'}}}))
 
 
 if __name__ == '__main__':
