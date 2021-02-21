@@ -2,6 +2,8 @@ import multiprocessing
 import time
 import sys
 
+from mongoengine import connect
+
 from utils_ak.simple_microservice import run_listener_async
 from utils_ak.deployment import *
 from utils_ak.loguru import configure_loguru_stdout
@@ -20,8 +22,6 @@ BROKER_CONFIG = {
 }
 MESSAGE_BROKER = (BROKER, BROKER_CONFIG)
 
-from mongoengine import connect
-
 
 def create_new_job():
     connect(
@@ -37,18 +37,7 @@ def create_new_job():
         type="test",
         payload={
             "type": "batch",
-            "message_broker": [
-                "zmq",
-                {
-                    "endpoints": {
-                        "monitor": {
-                            # "endpoint": "tcp://host.k3d.internal:5555",
-                            "endpoint": "tcp://docker.internal:5555",
-                            "type": "sub",
-                        }
-                    }
-                },
-            ],
+            "message_broker": MESSAGE_BROKER,
         },
         image="akadaner/test-worker",
     )

@@ -1,6 +1,7 @@
 import time
 import asyncio
 import inspect
+import numpy as np
 
 from dateutil import rrule
 from datetime import datetime, timedelta
@@ -13,7 +14,15 @@ TIME_EPS = 0.001
 class CallbackTimer:
     """ Run callback function every interval. """
 
-    def __init__(self, callback, interval, timer_type="right", args=None, kwargs=None):
+    def __init__(
+        self,
+        callback,
+        interval,
+        timer_type="right",
+        n_times=None,
+        args=None,
+        kwargs=None,
+    ):
         """
         :param timer_type: str, "left" to start timing immediately, "right" to wait for callback() to finish
         """
@@ -28,9 +37,16 @@ class CallbackTimer:
         if timer_type not in ["right", "left"]:
             raise Exception("Only right/left timer is supported")
 
+        self.n_times = n_times
+        self.counter = 0
+
     @property
     def next_call(self):
-        return self.last_call + self.interval
+        if self.n_times and self.counter >= self.n_times:
+            # no further call
+            return np.inf
+        else:
+            return self.last_call + self.interval
 
     def run_if_possible(self):
         if time.time() > self.next_call:
@@ -50,7 +66,10 @@ class CallbackTimer:
         return False
 
     def run(self):
-        return self.callback(*self.args, **self.kwargs)
+        res = self.callback(*self.args, **self.kwargs)
+        if self.n_times:
+            self.counter += 1
+        return res
 
     async def run_if_possible_async(self):
         if time.time() > self.next_call:
@@ -70,9 +89,12 @@ class CallbackTimer:
 
     async def run_async(self):
         if inspect.iscoroutinefunction(self.callback):
-            return await self.callback(*self.args, **self.kwargs)
+            res = await self.callback(*self.args, **self.kwargs)
         else:
-            return self.callback(*self.args, **self.kwargs)
+            res = self.callback(*self.args, **self.kwargs)
+        if self.n_times:
+            self.counter += 1
+        return res
 
 
 class ScheduleTimer:

@@ -23,13 +23,17 @@ class MicroserviceWorker(Worker):
 
         self.microservice.add_timer(
             self.microservice.publish,
-            3.0,
+            interval=3.0,
             args=(
                 "monitor_in",
                 "heartbeat",
             ),
             kwargs={"id": self.id},
         )
+
+        self.microservice.add_timer(
+            self.process, interval=1, n_times=1
+        )  # run once on init
 
     def send_state(self, status, state):
         self.microservice.publish(
@@ -40,11 +44,6 @@ class MicroserviceWorker(Worker):
         raise NotImplementedError
 
     def run(self):
-        async def send_initial():
-            await asyncio.sleep(0.1)
-            await self.process()
-
-        self.microservice.tasks.append(asyncio.ensure_future(send_initial()))
         self.microservice.run()
 
 
