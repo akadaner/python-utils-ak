@@ -3,10 +3,10 @@ import asyncio
 
 from utils_ak.callback_timer import CallbackTimer, ScheduleTimer, CallbackTimers
 from utils_ak.architecture.func import PrefixHandler
-from utils_ak.str import cast_unicode
 from utils_ak.coder import JsonCoder
 from utils_ak.message_queue import cast_message_broker
 from utils_ak.loguru import patch_trace
+from utils_ak.str import cast_unicode
 
 from loguru import logger as global_logger
 
@@ -17,7 +17,7 @@ TIME_EPS = 0.001
 class SimpleMicroservice(object):
     """ Microservice base class with timers and subscriber. Works on asyncio. """
 
-    def __init__(self, id, message_broker, logger=None, serializer=None):
+    def __init__(self, id, message_broker, logger=None, coder=None):
         self.id = id
 
         # aio
@@ -44,13 +44,13 @@ class SimpleMicroservice(object):
 
         self.is_active = True
 
-        self.serializer = serializer or JsonSerializer()
+        self.coder = coder or JsonCoder()
 
     def stop(self):
         self.is_active = False
 
     def _args_formatter(self, topic, msg):
-        return (cast_unicode(topic), self.serializer.decode(msg)), {}
+        return (cast_unicode(topic),), self.coder.decode(msg)
 
     def add_timer(self, *args, **kwargs):
         """
@@ -95,7 +95,7 @@ class SimpleMicroservice(object):
         filter=None,
         topic_formatter=cast_unicode,
     ):
-        assert type(topic) == str, "Topic must be str"
+        assert isinstance(topic, str), "Topic must be a str"
 
         if formatter == "default":
             formatter = self._args_formatter
@@ -109,15 +109,15 @@ class SimpleMicroservice(object):
         self.broker.publish(collection, topic, msg)
 
     def publish_json(self, collection, topic, msg):
-        self.publish(collection, topic, self.serializer.encode(msg))
+        self.publish(collection, topic, self.coder.encode(msg))
 
     def wrap_coroutine_timer(self, timer):
         async def f():
             while True:
                 try:
-                    has_ran = await timer.run_if_possible_aio()
+                    ran = await timer.run_if_possible_async()
 
-                    if has_ran and self.fail_count != 0:
+                    if ran and self.fail_count != 0:
                         self.logger.debug("Success. Resetting the failure counter")
                         self.fail_count = 0
 
@@ -144,12 +144,14 @@ class SimpleMicroservice(object):
 
                     if received:
                         collection, topic, msg = received
+
                         try:
-                            self.logger.info(
+                            self.logger.debug(
                                 f"Received new message",
-                                custom={"topic": str(topic), "msg": str(msg)},
+                                topic=str(topic),
+                                msg=str(msg),
                             )
-                            await self.callbacks[collection].aiocall(topic, msg)
+                            await self.callbacks[collection].call_async(topic, msg)
 
                             if self.fail_count != 0:
                                 self.logger.info(
@@ -158,9 +160,9 @@ class SimpleMicroservice(object):
                                 self.fail_count = 0
 
                         except Exception as e:
-                            self.on_exception(e, f"Exception occurred at the callback")
+                            self.on_exception(e, "Exception occurred at the callback")
                 except Exception as e:
-                    self.on_exception(e, f"Failed to receive the message")
+                    self.on_exception(e, "Failed to receive the message")
 
                 if not self.is_active:
                     return
@@ -171,7 +173,6 @@ class SimpleMicroservice(object):
 
     def _aiorun(self):
         self.loop = asyncio.get_event_loop()
-        # self.loop.set_debug(True)
         self.logger.info("Microservice started")
 
         for timer in self.timers:
@@ -210,11 +211,12 @@ class SimpleMicroservice(object):
                     if not received:
                         continue
                     collection, topic, msg = received
+
                     try:
-                        self.logger.debug(f"Received new message", topic=topic, msg=msg)
+                        self.logger.debug("Received new message", topic=topic, msg=msg)
                         self.callbacks[collection].call(topic, msg)
                     except Exception as e:
-                        self.on_exception(e, f"Exception occurred")
+                        self.on_exception(e, "Exception occurred")
                     else:
                         success = True
 

@@ -3,10 +3,7 @@ import asyncio
 
 from utils_ak.zmq import endpoint
 from utils_ak.simple_microservice import SimpleMicroservice
-
-import logging
-
-logging.basicConfig(level=logging.INFO)
+from utils_ak.loguru import configure_loguru_stdout
 
 
 class Ping(SimpleMicroservice):
@@ -15,7 +12,7 @@ class Ping(SimpleMicroservice):
         self.add_callback("ping", "", self.send_ping)
 
     def send_ping(self, topic, msg):
-        self.logger.info(f"Received {topic} {msg}")
+        self.logger.info(f"Received", topic=topic, msg=msg)
         time.sleep(1)
         self.publish_json("pong", "", {"msg": "ping"})
 
@@ -26,18 +23,14 @@ class Pong(SimpleMicroservice):
         self.add_callback("pong", "", self.send_pong)
 
     def send_pong(self, topic, msg):
-        self.logger.info(f"Received {topic} {msg}")
+        self.logger.info(f"Received", topic=topic, msg=msg)
         time.sleep(1)
         self.publish_json("ping", "", {"msg": "pong"})
 
 
-ping_logger = logging.getLogger("ping")
-pong_logger = logging.getLogger("pong")
-
-
 def run_ping():
+    configure_loguru_stdout("DEBUG")
     ping = Ping(
-        logger=ping_logger,
         message_broker=(
             "zmq",
             {
@@ -58,8 +51,9 @@ def run_ping():
 
 
 def run_pong():
+    configure_loguru_stdout("DEBUG")
+
     Pong(
-        logger=pong_logger,
         message_broker=(
             "zmq",
             {

@@ -1,5 +1,6 @@
-from utils_ak.simple_microservice.microservice import SimpleMicroservice
 import multiprocessing
+from utils_ak.simple_microservice.microservice import SimpleMicroservice
+from utils_ak.loguru import configure_loguru_stdout
 
 
 class Listener(SimpleMicroservice):
@@ -7,11 +8,12 @@ class Listener(SimpleMicroservice):
         super().__init__(f"Listener_{collection}", *args, **kwargs)
         self.add_callback(collection, topic, self._log, formatter="default")
 
-    def _log(self, topic, msg):
-        self.logger.info(f"{topic}-{msg}")
+    def _log(self, topic, **kwargs):
+        self.logger.info(f"{topic}-{str(kwargs)}")
 
 
 def run_listener(collection, topic="", *args, **kwargs):
+    configure_loguru_stdout()
     Listener(collection, topic, *args, **kwargs).run()
 
 

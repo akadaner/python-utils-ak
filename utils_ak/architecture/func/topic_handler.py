@@ -42,7 +42,7 @@ class TopicHandler(object):
     def call(self, topic, *args, **kwargs):
         return self.__call__(topic, *args, **kwargs)
 
-    async def aiocall(self, topic, *args, **kwargs):
+    async def call_async(self, topic, *args, **kwargs):
         args = [topic] + list(args)
         if self.topic_formatter:
             topic = self.topic_formatter(topic)
@@ -50,7 +50,7 @@ class TopicHandler(object):
         res = []
         for _topic, handler in self.handlers.items():
             if self.topic_filter(_topic, topic):
-                res.append(await handler.aiocall(*args, **kwargs))
+                res.append(await handler.call_async(*args, **kwargs))
         return self.reducer(res)
 
     def has_topic(self, topic):

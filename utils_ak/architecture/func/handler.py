@@ -7,10 +7,10 @@ import inspect
 # todo: optimize aio code! Execute all callbacks using wait or something!
 
 
-def is_aio(func):
+def is_async(func):
     if inspect.iscoroutinefunction(func):
         return True
-    elif hasattr(func, "is_aio") and getattr(func, "is_aio"):
+    elif hasattr(func, "is_async") and getattr(func, "is_async"):
         return True
     else:
         return False
@@ -38,8 +38,8 @@ class Handler(object):
         self.reducer = reducer or delistify
 
     @property
-    def is_aio(self):
-        return any(is_aio(callback) for callback in self.callbacks)
+    def is_async(self):
+        return any(is_async(callback) for callback in self.callbacks)
 
     def add(self, callback=None, formatter=None, filter=None):
         self.add_formatter(formatter)
@@ -75,15 +75,15 @@ class Handler(object):
     def call(self, *args, **kwargs):
         return self.__call__(*args, **kwargs)
 
-    async def aiocall(self, *args, **kwargs):
+    async def call_async(self, *args, **kwargs):
         for formatter in self.formatters:
             args, kwargs = formatter(*args, **kwargs)
         if all(_filter(*args, **kwargs) for _filter in self.filters):
             res = []
             for callback in self.callbacks:
-                if is_aio(callback):
+                if is_async(callback):
                     if hasattr(callback, "aiocall"):
-                        res.append(await callback.aiocall(*args, **kwargs))
+                        res.append(await callback.call_async(*args, **kwargs))
                     else:
                         res.append(await callback(*args, **kwargs))
                 else:

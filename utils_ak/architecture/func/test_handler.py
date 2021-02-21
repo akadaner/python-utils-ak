@@ -1,7 +1,7 @@
 from utils_ak.architecture import TopicHandler, PrefixHandler, Handler
 
-if __name__ == "__main__":
 
+def test():
     def callback1(msg):
         print("callback1", msg)
         return 1
@@ -76,23 +76,27 @@ if __name__ == "__main__":
 
     print("Test 7. AIO 1")
     handler = Handler(callback=[callback1, callback2, aiocallback], filter=filter)
-    loop.run_until_complete(handler.aiocall("foo.bar1"))
-    loop.run_until_complete(handler.aiocall("foo.bar2"))
+    loop.run_until_complete(handler.call_async("foo.bar1"))
+    loop.run_until_complete(handler.call_async("foo.bar2"))
     print()
 
     print("Test 7. AIO Topic Handler")
     handler = TopicHandler()
     handler.add("a.b", callback=aiocallback)
-    loop.run_until_complete(handler.aiocall("a", ""))
-    loop.run_until_complete(handler.aiocall("a", ""))
-    loop.run_until_complete(handler.aiocall("a.b", ""))
+    loop.run_until_complete(handler.call_async("a", ""))
+    loop.run_until_complete(handler.call_async("a", ""))
+    loop.run_until_complete(handler.call_async("a.b", ""))
 
     print()
 
     print("Test 7. AIO Prefix Handler")
     handler = PrefixHandler()
     handler.add("a", callback=[topic_callback1, aiocallback])
-    loop.run_until_complete(handler.aiocall("a", ""))
-    loop.run_until_complete(handler.aiocall("b", ""))
-    loop.run_until_complete(handler.aiocall("a.b", ""))
+    loop.run_until_complete(handler.call_async("a", ""))
+    loop.run_until_complete(handler.call_async("b", ""))
+    loop.run_until_complete(handler.call_async("a.b", ""))
     print()
+
+
+if __name__ == "__main__":
+    test()

@@ -1,20 +1,15 @@
 import asyncio
-from datetime import datetime
 import numpy as np
-import logging
+from datetime import datetime
 
 from utils_ak.zmq import endpoint
 from utils_ak.simple_microservice import SimpleMicroservice, run_listener_async
-
-logging.basicConfig(level=logging.INFO)
-
-ping_logger = logging.getLogger("ping")
-pong_logger = logging.getLogger("pong")
+from utils_ak.loguru import configure_loguru_stdout
 
 
 class Ping(SimpleMicroservice):
     def __init__(self, *args, **kwargs):
-        super().__init__("Test publisher", logger=ping_logger, *args, **kwargs)
+        super().__init__("Test publisher", *args, **kwargs)
         self.add_callback("pong", "", self.send_ping)
         self.add_timer(self.print_random, 2.0)
 
@@ -25,23 +20,24 @@ class Ping(SimpleMicroservice):
         self.logger.info(f"Resume: {datetime.now()} {timeout}")
 
     async def send_ping(self, topic, msg):
-        self.logger.info(f"Received {topic} {msg}")
+        self.logger.info(f"Received", topic=topic, msg=msg)
         await asyncio.sleep(1.0)
         self.publish_json("ping", "", {"msg": "ping"})
 
 
 class Pong(SimpleMicroservice):
     def __init__(self, *args, **kwargs):
-        super().__init__("Test publisher", logger=pong_logger, *args, **kwargs)
+        super().__init__("Test publisher", *args, **kwargs)
         self.add_callback("ping", "", self.send_pong)
 
     async def send_pong(self, topic, msg):
-        self.logger.info(f"Received {topic} {msg}")
+        self.logger.info(f"Received", topic=topic, msg=msg)
         await asyncio.sleep(1.0)
         self.publish_json("pong", "", {"msg": "pong"})
 
 
 def run_ping():
+    configure_loguru_stdout()
     ping = Ping(
         message_broker=(
             "zmq",
@@ -63,6 +59,7 @@ def run_ping():
 
 
 def run_pong():
+    configure_loguru_stdout()
     Pong(
         message_broker=(
             "zmq",

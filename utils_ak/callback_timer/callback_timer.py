@@ -52,11 +52,11 @@ class CallbackTimer:
     def run(self):
         return self.callback(*self.args, **self.kwargs)
 
-    async def run_if_possible_aio(self):
+    async def run_if_possible_async(self):
         if time.time() > self.next_call:
             if self.timer_type == "right":
                 try:
-                    await self.run_aio()
+                    await self.run_async()
                 except:
                     self.last_call = time.time()
                     raise
@@ -64,11 +64,11 @@ class CallbackTimer:
                     self.last_call = time.time()
             elif self.timer_type == "left":
                 self.last_call = time.time()
-                await self.run_aio()
+                await self.run_async()
             return True
         return False
 
-    async def run_aio(self):
+    async def run_async(self):
         if inspect.iscoroutinefunction(self.callback):
             return await self.callback(*self.args, **self.kwargs)
         else:
@@ -79,14 +79,20 @@ class ScheduleTimer:
     """ Run callback function at schedule. """
 
     def __init__(
-        self, callback, pattern=None, freq=None, init_run=False, args=None, kwargs=None
+        self,
+        callback,
+        pattern=None,
+        freq=None,
+        run_on_init=False,
+        args=None,
+        kwargs=None,
     ):
         """
         :param pattern: (seconds) (minutes) (hours) (day) (month) (day-of-week) in cron-like manner: * 5 * * * * ...
         """
         self.callback = callback
         self.next_call = 0
-        self.init_run = init_run
+        self.run_on_init = run_on_init
 
         self.args = args or tuple()
         self.kwargs = kwargs or {}
@@ -192,23 +198,23 @@ class ScheduleTimer:
         self.next_call = next_call_lst[0].timestamp()
 
     def run_if_possible(self):
-        if self.init_run or time.time() > self.next_call:
-            self.init_run = False
+        if self.run_on_init or time.time() > self.next_call:
+            self.run_on_init = False
             self.run()
             self._update_next_call()
             return True
         return False
 
-    async def run_if_possible_aio(self):
-        if self.init_run or time.time() > self.next_call:
-            self.init_run = False
-            await self.run_aio()
+    async def run_if_possible_async(self):
+        if self.run_on_init or time.time() > self.next_call:
+            self.run_on_init = False
+            await self.run_async()
             self._update_next_call()
 
     def run(self):
         return self.callback(*self.args, **self.kwargs)
 
-    async def run_aio(self):
+    async def run_async(self):
         if inspect.iscoroutinefunction(self.callback):
             return await self.callback(*self.args, **self.kwargs)
         else:
@@ -239,7 +245,7 @@ class CallbackTimers(object):
     def __len__(self):
         return len(self.timers)
 
-    async def run_if_possible_aio(self):
+    async def run_if_possible_async(self):
         if time.time() > self.next_call:
             for timer in self.timers:
                 await timer.run_if_possible()
@@ -268,7 +274,7 @@ def test():
 
     print("Timer 3")
     # run every second
-    timer = ScheduleTimer(print_msg, freq="2s", init_run=True)
+    timer = ScheduleTimer(print_msg, freq="2s", run_on_init=True)
     print(timer.pattern)
     N = 3 * 1000
     for i in range(N):
@@ -276,7 +282,7 @@ def test():
         time.sleep(1 / 10000)
 
 
-def test_aio():
+def test_async():
     import numpy as np
 
     async def print_msg(msg=None):
@@ -303,4 +309,4 @@ def test_aio():
 
 if __name__ == "__main__":
     test()
-    test_aio()
+    test_async()

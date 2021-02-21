@@ -1,10 +1,7 @@
-import logging
 import random
-import time
 
-from utils_ak.interactive_imports import *
-
-configure_stream_logging(stream_level=logging.INFO)
+from utils_ak.simple_microservice import SimpleMicroservice, run_listener_async
+from utils_ak.loguru import configure_loguru_stdout
 
 
 class Heartbeater(SimpleMicroservice):
@@ -22,6 +19,7 @@ class Heartbeater(SimpleMicroservice):
 
 
 if __name__ == "__main__":
+    configure_loguru_stdout()
     run_listener_async(
         "monitor",
         message_broker=(

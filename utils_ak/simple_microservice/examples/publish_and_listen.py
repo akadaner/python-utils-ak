@@ -2,9 +2,7 @@ import logging
 
 from utils_ak.zmq import endpoint
 from utils_ak.simple_microservice import SimpleMicroservice, run_listener_async
-from utils_ak.log import configure_stream_logging
-
-configure_stream_logging(stream_level=logging.INFO)
+from utils_ak.loguru import configure_loguru_stdout
 
 
 class Publisher(SimpleMicroservice):
@@ -17,6 +15,7 @@ class Publisher(SimpleMicroservice):
 
 
 if __name__ == "__main__":
+    configure_loguru_stdout()
     run_listener_async(
         "collection",
         message_broker=(
