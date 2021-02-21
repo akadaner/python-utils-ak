@@ -1,9 +1,4 @@
-import time
-import threading
-
-from utils_ak.mongoengine import *
 from .models import Job, Worker
-import logging
 
 from utils_ak.deployment import *
 from utils_ak.simple_microservice import SimpleMicroservice
@@ -23,7 +18,7 @@ class JobOrchestrator:
         self.monitor = MonitorActor(self.ms)
         self.process_active_jobs()
         self.ms.add_timer(self.process_new_jobs, 1.0)
-        self.ms.add_callback("monitor_out", "", self.on_monitor_out)
+        self.ms.add_callback("monitor_out", "status_change", self.on_monitor_out)
 
     def run(self):
         self.ms.run()
@@ -33,6 +28,7 @@ class JobOrchestrator:
 
     def _create_worker_model(self, job):
         worker_model = Worker()
+        worker_model.job = job
         worker_model.save()
         job.workers.append(worker_model)
         job.save()
@@ -52,7 +48,8 @@ class JobOrchestrator:
             {
                 "endpoints": {
                     "monitor": {
-                        "endpoint": "tcp://host.k3d.internal:5555",
+                        # "endpoint": "tcp://host.k3d.internal:5555",
+                        "endpoint": "tcp://docker.internal:5555",
                         "type": "sub",
                     }
                 }
@@ -67,7 +64,6 @@ class JobOrchestrator:
             "message_broker": MESSAGE_BROKER,
         }
         deployment = fill_template(deployment, **params)
-
         return deployment
 
     def process_new_jobs(self):
@@ -84,14 +80,12 @@ class JobOrchestrator:
 
             self.controller.start(deployment)
 
-    def on_monitor_out(self, topic, msg):
-        self.ms.logger.info("On monitor out", topic=str(topic), msg=str(msg))
-        if topic == "status_change":
-            worker = Worker.objects(pk=msg["id"]).first()  # todo: check if missing
-            worker.status = msg["new_status"]
-            if worker.status == "success":
-                worker.response = self.monitor.workers[msg["id"]]["state"]["response"]
-            worker.save()
+    def on_monitor_out(self, topic, id, old_status, new_status):
+        worker = Worker.objects(pk=id).first()  # todo: check if missing
+        worker.status = new_status
+        if worker.status == "success":
+            worker.response = self.monitor.workers[id]["state"]["response"]
+        worker.save()
 
-            if worker.status == "success":
-                self.controller.stop(msg["id"])
+        if worker.status == "success":
+            self.controller.stop(id)

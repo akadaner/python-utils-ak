@@ -5,7 +5,7 @@ import tempfile
 from loguru import logger
 from utils_ak.deployment.config import BASE_DIR
 from utils_ak.deployment.controller import Controller
-from utils_ak.serialization import cast_js, cast_dict_or_list
+from utils_ak.coder import cast_js, cast_dict_or_list
 from utils_ak.os import *
 from utils_ak.dict import fill_template
 
@@ -34,7 +34,6 @@ class DockerController(Controller):
 
         makedirs(f"data/docker-compose/{id}/")
         fn = f"data/docker-compose/{id}/docker-compose.yml"
-
         with open(fn, "w") as f:
             f.write(anyconfig.dumps(config, "yaml"))
 

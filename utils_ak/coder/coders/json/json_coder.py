@@ -54,7 +54,7 @@ class JsonCoder(Coder):
         return ujson.loads(s)
 
 
-json_coder = JsonCoder()
+json_coder = JsonCoder(encoding=None)
 
 
 def cast_js(js_obj):

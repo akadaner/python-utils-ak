@@ -6,7 +6,7 @@ from utils_ak.simple_microservice import run_listener_async
 def test_worker(worker_cls, payload, message_broker):
     from utils_ak.loguru import configure_loguru_stdout
 
-    configure_loguru_stdout("INFO")
+    configure_loguru_stdout("DEBUG")
     run_listener_async("monitor", message_broker=message_broker)
     time.sleep(2)
     worker = worker_cls("worker_id", payload, message_broker=message_broker)
