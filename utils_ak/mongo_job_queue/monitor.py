@@ -8,13 +8,13 @@ class MonitorActor:
         self.workers = {}  # {id: {status, state, last_heartbeat}}
         self.heartbeat_timeout = heartbeat_timeout
 
-        self.microservice.add_callback("monitor", "", self.on_monitor)
-        self.microservice.add_timer(self.update_stalled, 3.0)
+        self.microservice.add_callback("monitor", "", self._on_monitor)
+        self.microservice.add_timer(self._update_stalled, 3.0)
 
         # todo: del, hardcode
         self.received_messages_cache = []
 
-    def update_status(self, worker_id, status):
+    def _update_status(self, worker_id, status):
         if status != self.workers[worker_id].get("status"):
             self.microservice.publish_json(
                 "monitor_out",
@@ -27,7 +27,7 @@ class MonitorActor:
             )
             self.workers[worker_id]["status"] = status
 
-    def update_stalled(self):
+    def _update_stalled(self):
         for worker_id in self.workers:
             if "status" not in self.workers[worker_id]:
                 # non-initialized
@@ -44,9 +44,9 @@ class MonitorActor:
                 ).total_seconds()
                 > self.heartbeat_timeout
             ):
-                self.update_status(worker_id, "stalled")
+                self._update_status(worker_id, "stalled")
 
-    def on_monitor(self, topic, msg):
+    def _on_monitor(self, topic, msg):
         # todo: preview hardcode
         if "state" in msg:
             key = msg["id"] + str(msg["state"])
@@ -65,7 +65,7 @@ class MonitorActor:
         if topic == "heartbeat":
             self.workers[worker_id]["last_heartbeat"] = datetime.utcnow()
         elif topic == "state":
-            self.update_status(worker_id, msg["status"])
+            self._update_status(worker_id, msg["status"])
             self.workers[worker_id]["state"] = msg["state"]
         elif topic in ["status_change", "new"]:
             pass

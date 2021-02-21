@@ -1,14 +1,10 @@
-import logging
-import os
-import sys
 import time
-import traceback
 import asyncio
 
 from utils_ak.callback_timer import CallbackTimer, ScheduleTimer, CallbackTimers
 from utils_ak.architecture.func import PrefixHandler
 from utils_ak.str import cast_unicode
-from utils_ak.serialization import JsonSerializer
+from utils_ak.coder import JsonCoder
 from utils_ak.message_queue import cast_message_broker
 from utils_ak.loguru import patch_trace
 
@@ -35,11 +31,11 @@ class SimpleMicroservice(object):
 
         self.broker = cast_message_broker(message_broker)
 
-        # {broker: f'{collection}::{topic}'}
+        # {broker: collection::topic}
         self.subscribed_to = {}
 
         self.logger = logger or global_logger
-        self.logger = self.logger.bind(inner_source=str(id))
+        self.logger = self.logger.bind(microservice_id=str(id))
         self.logger = self.logger.patch(patch_trace)
 
         self.default_exception_timeout = 10.0

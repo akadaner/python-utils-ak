@@ -3,7 +3,7 @@ import logging
 import zmq
 
 from utils_ak.str import b, u
-from utils_ak.serialization import js as json
+from utils_ak.coder import JsonCoder
 
 CONTEXT = zmq.Context()
 
@@ -44,11 +44,18 @@ def connect_socket(socket, address, conn_type):
 
 class Publisher(object):
     def __init__(
-        self, address, sndhwm=0, init_timeout=0.1, context=CONTEXT, conn_type="auto"
+        self,
+        address,
+        sndhwm=0,
+        init_timeout=0.1,
+        context=CONTEXT,
+        conn_type="auto",
+        json_coder=JsonCoder(),
     ):
         self.context = context
         self.socket = context.socket(zmq.PUB)
         self.address = address
+        self.json_coder = json_coder
 
         if sndhwm is not None:
             # self.socket.SNDHWM = sndhwm
@@ -64,7 +71,7 @@ class Publisher(object):
         self.socket.send_multipart([b(topic), b(msg)])
 
     def publish_json(self, topic, msg):
-        self.socket.send_multipart([b(topic), b(json.dumps(msg))])
+        self.socket.send_multipart([b(topic), b(self.json_coder.encode(msg))])
 
 
 class Subscriber(object):

@@ -5,14 +5,13 @@ from .dict import *
 from .exceptions import *
 from .functions import *
 from .json import *
-from .log import *
 from .messenger import *
 from .numeric import *
 from .os import *
 from .pandas import *
 from .re import *
 from .reflexion import *
-from .serialization import *
+from .coder import *
 from .str import *
 from .time import *
 from .tqdm import *

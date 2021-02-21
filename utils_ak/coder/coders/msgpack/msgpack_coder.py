@@ -1,7 +1,10 @@
 import datetime
 import msgpack
 import decimal
-from utils_ak.serialization.binary import (
+
+from utils_ak.coder import Coder
+
+from utils_ak.coder.binary import (
     pack_datetime,
     pack_decimal,
     pack_time,
@@ -54,26 +57,15 @@ def ext_hook(code, data):
         )
 
 
-class MsgPackSerializer:
-    @staticmethod
-    def encode(obj):
+class MsgPackCoder(Coder):
+    def encode(self, obj):
         return msgpack.dumps(obj, default=default, use_bin_type=True)
 
-    @staticmethod
-    def decode(obj):
+    def decode(self, obj):
         return msgpack.loads(obj, ext_hook=ext_hook, raw=False)
 
 
 if __name__ == "__main__":
-    ser = MsgPackSerializer()
-    obj = {
-        "int": 1,
-        "datetime": datetime.datetime.now(),
-        "decimal": decimal.Decimal("0.12431234123000"),
-        "date": datetime.date(2018, 1, 1),
-        "time": datetime.datetime.now().time(),
-    }
-    data = ser.encode(obj)
-    print(obj)
-    print(len(data), data)
-    print(ser.decode(data))
+    from utils_ak.coder import test_coder
+
+    test_coder(MsgPackCoder())

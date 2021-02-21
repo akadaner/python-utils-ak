@@ -1,5 +1,5 @@
 """ Dictionary with dot as a level separator. """
-from utils_ak.serialization import js as json
+from utils_ak.coder import json_coder
 
 
 def is_dict_like(obj):
@@ -188,7 +188,7 @@ def test():
     dd.foo.bar = 2
     print(dd)
 
-    print(json.dumps(dd))
+    print(json_coder.encode(dd))
 
     from collections import Mapping
 
