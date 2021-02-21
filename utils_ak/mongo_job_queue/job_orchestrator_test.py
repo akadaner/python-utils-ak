@@ -2,6 +2,7 @@ import multiprocessing
 import time
 import sys
 
+from utils_ak.simple_microservice import run_listener_async
 from utils_ak.deployment import *
 from utils_ak.loguru import configure_loguru_stdout
 from utils_ak.mongo_job_queue.job_orchestrator import JobOrchestrator
@@ -12,8 +13,9 @@ from loguru import logger
 BROKER = "zmq"
 BROKER_CONFIG = {
     "endpoints": {
-        "monitor": {"endpoint": "tcp://localhost:5555", "type": "sub"},
+        "monitor_in": {"endpoint": "tcp://localhost:5555", "type": "sub"},
         "monitor_out": {"endpoint": "tcp://localhost:5556", "type": "sub"},
+        "job_orchestrator": {"endpoint": "tcp://localhost:5557", "type": "pub"},
     }
 }
 MESSAGE_BROKER = (BROKER, BROKER_CONFIG)
@@ -60,9 +62,10 @@ def test():
     )
     logger.info("Connected to mongodb")
     controller = DockerController()
-    orchestrator = JobOrchestrator(controller, MESSAGE_BROKER)
+    run_listener_async("job_orchestrator", message_broker=MESSAGE_BROKER)
+    job_orchestrator = JobOrchestrator(controller, MESSAGE_BROKER)
     multiprocessing.Process(target=create_new_job).start()
-    orchestrator.run()
+    job_orchestrator.run()
 
 
 if __name__ == "__main__":

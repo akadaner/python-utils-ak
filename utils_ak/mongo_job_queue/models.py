@@ -16,6 +16,20 @@ class Job(Document):
     image = StringField(required=True)
     params = DictField()
 
+    status = StringField(
+        required=True,
+        default="pending",
+        choices=[
+            "pending",
+            "initializing",
+            "running",
+            "error",
+            "success",
+            "stalled",
+            "terminated",
+        ],
+    )
+
     workers = ListField(ReferenceField("Worker"))
 
     meta = {"allow_inheritance": True}
@@ -29,7 +43,15 @@ class Worker(Document):
     status = StringField(
         required=True,
         default="pending",
-        choices=["pending", "initializing", "running", "error", "success", "stalled"],
+        choices=[
+            "pending",
+            "initializing",
+            "running",
+            "error",
+            "success",
+            "stalled",
+            "terminated",
+        ],
     )
     response = StringField()
 

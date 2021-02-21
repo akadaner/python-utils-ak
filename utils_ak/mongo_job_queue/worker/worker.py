@@ -1,7 +1,6 @@
 import time
 import os
 import asyncio
-from loguru import logger
 from utils_ak.simple_microservice import SimpleMicroservice
 from utils_ak.coder import cast_dict_or_list
 
@@ -10,6 +9,9 @@ class Worker:
     def __init__(self, id, payload):
         self.id = id
         self.payload = payload
+
+    def run(self):
+        raise NotImplementedError
 
 
 class MicroserviceWorker(Worker):
@@ -23,7 +25,7 @@ class MicroserviceWorker(Worker):
             self.microservice.publish,
             3.0,
             args=(
-                "monitor",
+                "monitor_in",
                 "heartbeat",
             ),
             kwargs={"id": self.id},
@@ -31,11 +33,11 @@ class MicroserviceWorker(Worker):
 
     def send_state(self, status, state):
         self.microservice.publish(
-            "monitor", "state", id=self.id, status=status, state=state
+            "monitor_in", "state", id=self.id, status=status, state=state
         )
 
     async def process(self):
-        raise NotImplemented
+        raise NotImplementedError
 
     def run(self):
         async def send_initial():

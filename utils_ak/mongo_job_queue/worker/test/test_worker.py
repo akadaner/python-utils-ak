@@ -33,7 +33,10 @@ def test_batch():
                 "zmq",
                 {
                     "endpoints": {
-                        "monitor": {"endpoint": "tcp://localhost:5555", "type": "sub"}
+                        "monitor_in": {
+                            "endpoint": "tcp://localhost:5555",
+                            "type": "sub",
+                        }
                     }
                 },
             ),
@@ -50,7 +53,10 @@ def test_streaming():
                 "zmq",
                 {
                     "endpoints": {
-                        "monitor": {"endpoint": "tcp://localhost:5555", "type": "sub"}
+                        "monitor_in": {
+                            "endpoint": "tcp://localhost:5555",
+                            "type": "sub",
+                        }
                     }
                 },
             ),
@@ -65,7 +71,7 @@ def test_deployment():
             "zmq",
             {
                 "endpoints": {
-                    "monitor": {"endpoint": "tcp://localhost:5555", "type": "sub"}
+                    "monitor_in": {"endpoint": "tcp://localhost:5555", "type": "sub"}
                 }
             },
         ),
@@ -74,5 +80,5 @@ def test_deployment():
 
 if __name__ == "__main__":
     # test_batch()
-    test_streaming()
-    # test_deployment()
+    # test_streaming()
+    test_deployment()

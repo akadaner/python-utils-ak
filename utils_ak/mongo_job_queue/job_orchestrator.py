@@ -55,17 +55,32 @@ class JobOrchestrator:
         for new_job in new_jobs:
             worker_model = self._create_worker_model(new_job)
             deployment = self._create_deployment(worker_model)
-
             self.ms.logger.info("Starting new worker", deployment=deployment)
-
             self.controller.start(deployment)
+            new_job.status = "initializing"
+            new_job.save()
 
     def on_monitor_out(self, topic, id, old_status, new_status):
-        worker = Worker.objects(pk=id).first()  # todo: check if missing
-        worker.status = new_status
-        if worker.status == "success":
+        try:
+            worker = Worker.objects(pk=id).first()  # todo: check if missing
+        except:
+            raise Exception("Failed to fetch worker")
+
+        if new_status == "success":
             worker.response = self.monitor.workers[id]["state"]["response"]
+            old_job_status = worker.job
+            self.ms.publish(
+                "job_orchestrator",
+                "status_change",
+                id=str(worker.job.id),
+                old_status=old_job_status,
+                new_status="success",
+            )
+            worker.job.save()
+
+        worker.status = new_status
         worker.save()
 
         if worker.status == "success":
+            logger.info("Stopping worker", id=id)
             self.controller.stop(id)

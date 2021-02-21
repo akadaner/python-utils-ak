@@ -7,27 +7,12 @@ class MonitorActor:
         self.workers = {}  # {id: {status, state, last_heartbeat}}
         self.heartbeat_timeout = heartbeat_timeout
 
-        self.microservice.add_callback(
-            "monitor", "heartbeat", self._on_monitor_heartbeat
-        )
-        self.microservice.add_callback("monitor", "state", self._on_monitor_state)
         self.microservice.add_timer(self._update_stalled, 3.0)
+        self.microservice.add_callback("monitor_in", "heartbeat", self._on_heartbeat)
+        self.microservice.add_callback("monitor_in", "state", self._on_state)
 
         # todo: del, hardcode
         self.received_messages_cache = []
-
-    def _update_status(self, worker_id, status):
-        if status != self.workers[worker_id].get("status"):
-            self.microservice.publish(
-                "monitor_out",
-                "status_change",
-                {
-                    "id": worker_id,
-                    "old_status": self.workers[worker_id].get("status"),
-                    "new_status": status,
-                },
-            )
-            self.workers[worker_id]["status"] = status
 
     def _update_stalled(self):
         for worker_id in self.workers:
@@ -48,10 +33,25 @@ class MonitorActor:
             ):
                 self._update_status(worker_id, "stalled")
 
-    def _on_monitor_heartbeat(self, topic, id):
-        self.workers[id]["last_heartbeat"] = datetime.utcnow()
+    def _on_heartbeat(self, topic, id):
+        # todo: make properly
+        if id in self.workers:
+            self.workers[id]["last_heartbeat"] = datetime.utcnow()
 
-    def _on_monitor_state(self, topic, id, status, state):
+    def _update_status(self, worker_id, status):
+        if status != self.workers[worker_id].get("status"):
+            self.microservice.publish(
+                "monitor_out",
+                "status_change",
+                {
+                    "id": worker_id,
+                    "old_status": self.workers[worker_id].get("status"),
+                    "new_status": status,
+                },
+            )
+            self.workers[worker_id]["status"] = status
+
+    def _on_state(self, topic, id, status, state):
         # todo: del, preview hardcode
         if id is not None and state is not None:
             key = id + state

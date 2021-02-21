@@ -6,4 +6,3 @@ containers:
       config:
         worker_id: "{deployment_id}"
         payload: "{payload}"
-        params: "{params}"
