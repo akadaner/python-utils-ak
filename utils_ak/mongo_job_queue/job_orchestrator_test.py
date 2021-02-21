@@ -31,7 +31,25 @@ def create_new_job():
     logger.debug("Creating new job...")
     Job.drop_collection()
     Worker.drop_collection()
-    job = Job(type="test", payload={"type": "batch"})
+    job = Job(
+        type="test",
+        payload={
+            "type": "batch",
+            "message_broker": [
+                "zmq",
+                {
+                    "endpoints": {
+                        "monitor": {
+                            # "endpoint": "tcp://host.k3d.internal:5555",
+                            "endpoint": "tcp://docker.internal:5555",
+                            "type": "sub",
+                        }
+                    }
+                },
+            ],
+        },
+        image="akadaner/test-worker",
+    )
     job.save()
 
 

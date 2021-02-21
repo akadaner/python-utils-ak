@@ -6,4 +6,4 @@ containers:
       config:
         worker_id: "{deployment_id}"
         payload: "{payload}"
-        message_broker: "{message_broker}"
+        params: "{params}"

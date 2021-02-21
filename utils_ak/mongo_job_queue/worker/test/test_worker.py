@@ -1,9 +1,9 @@
 import asyncio
-from utils_ak.mongo_job_queue.worker.worker import Worker
+from utils_ak.mongo_job_queue.worker.worker import MicroserviceWorker
 from utils_ak.mongo_job_queue.worker.worker_test import *
 
 
-class TestWorker(Worker):
+class TestWorker(MicroserviceWorker):
     async def process(self):
         if self.payload.get("type") == "batch":
             await asyncio.sleep(1)
@@ -25,37 +25,41 @@ class TestWorker(Worker):
 
 
 def test_batch():
-    test_worker(
+    test_microservice_worker(
         TestWorker,
-        {"type": "batch"},
-        message_broker=(
-            "zmq",
-            {
-                "endpoints": {
-                    "monitor": {"endpoint": "tcp://localhost:5555", "type": "sub"}
-                }
-            },
-        ),
+        {
+            "type": "batch",
+            "message_broker": (
+                "zmq",
+                {
+                    "endpoints": {
+                        "monitor": {"endpoint": "tcp://localhost:5555", "type": "sub"}
+                    }
+                },
+            ),
+        },
     )
 
 
 def test_streaming():
-    test_worker(
+    test_microservice_worker(
         TestWorker,
-        {"type": "streaming"},
-        message_broker=(
-            "zmq",
-            {
-                "endpoints": {
-                    "monitor": {"endpoint": "tcp://localhost:5555", "type": "sub"}
-                }
-            },
-        ),
+        {
+            "type": "streaming",
+            "message_broker": (
+                "zmq",
+                {
+                    "endpoints": {
+                        "monitor": {"endpoint": "tcp://localhost:5555", "type": "sub"}
+                    }
+                },
+            ),
+        },
     )
 
 
 def test_deployment():
-    test_worker_deployment(
+    test_microservice_worker_deployment(
         "sample_deployment.yml",
         message_broker=(
             "zmq",
@@ -70,5 +74,5 @@ def test_deployment():
 
 if __name__ == "__main__":
     # test_batch()
-    # test_streaming()
-    test_deployment()
+    test_streaming()
+    # test_deployment()

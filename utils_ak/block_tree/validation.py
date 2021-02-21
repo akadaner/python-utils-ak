@@ -1,5 +1,5 @@
 from utils_ak.portion import *
-from utils_ak.serialization import cast_js
+from utils_ak.coder import cast_js
 from utils_ak.block_tree.parallelepiped_block import ParallelepipedBlock
 from utils_ak.block_tree.block import Block
 

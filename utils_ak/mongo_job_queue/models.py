@@ -13,6 +13,9 @@ class Job(Document):
     locked_by = ReferenceField("Execution")
     locked_at = DateTimeField()
 
+    image = StringField(required=True)
+    params = DictField()
+
     workers = ListField(ReferenceField("Worker"))
 
     meta = {"allow_inheritance": True}

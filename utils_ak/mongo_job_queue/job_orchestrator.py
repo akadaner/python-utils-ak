@@ -14,7 +14,6 @@ class JobOrchestrator:
         self.timeout = 1
         self.controller = deployment_controller
         self.ms = SimpleMicroservice("JobOrchestrator", message_broker=message_broker)
-        # todo: make properly
         self.monitor = MonitorActor(self.ms)
         self.process_active_jobs()
         self.ms.add_timer(self.process_new_jobs, 1.0)
@@ -35,33 +34,14 @@ class JobOrchestrator:
         return worker_model
 
     def _create_deployment(self, worker_model):
-        # generate deployment
         deployment = cast_dict_or_list(
             os.path.join(BASE_DIR, "worker/deployment.yml.template")
         )
 
-        # todo: Hardcode, use new_job.type
-        IMAGE = "akadaner/test-worker"
-        # todo: hardcode, use generic message broker
-        MESSAGE_BROKER = [
-            "zmq",
-            {
-                "endpoints": {
-                    "monitor": {
-                        # "endpoint": "tcp://host.k3d.internal:5555",
-                        "endpoint": "tcp://docker.internal:5555",
-                        "type": "sub",
-                    }
-                }
-            },
-        ]
-        # MESSAGE_BROKER = ['zmq', {'endpoints': {'monitor': {'endpoint': 'tcp://host.docker.internal:5555', 'type': 'sub'}}}]
-
         params = {
             "deployment_id": str(worker_model.id),
             "payload": worker_model.job.payload,
-            "image": IMAGE,
-            "message_broker": MESSAGE_BROKER,
+            "image": worker_model.job.image,
         }
         deployment = fill_template(deployment, **params)
         return deployment
