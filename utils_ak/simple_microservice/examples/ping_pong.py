@@ -10,6 +10,7 @@ class Ping(SimpleMicroservice):
     def __init__(self, *args, **kwargs):
         super().__init__("Ping", *args, **kwargs)
         self.add_callback("ping", "", self.send_ping)
+        self.add_timer(self.send_ping, interval=1, n_times=1, args=("init", "init"))
 
     def send_ping(self, topic, msg):
         self.logger.info(f"Received", topic=topic, msg=msg)
@@ -42,11 +43,6 @@ def run_ping():
         ),
     )
 
-    async def send_initial():
-        await asyncio.sleep(1.0)
-        ping.send_ping("init", "init")
-
-    ping.tasks.append(asyncio.ensure_future(send_initial()))
     ping.run()
 
 

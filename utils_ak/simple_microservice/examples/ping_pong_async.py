@@ -12,6 +12,7 @@ class Ping(SimpleMicroservice):
         super().__init__("Test publisher", *args, **kwargs)
         self.add_callback("pong", "", self.send_ping)
         self.add_timer(self.print_random, 2.0)
+        self.add_timer(self.send_ping, interval=1, n_times=1, args=("init", "init"))
 
     async def print_random(self):
         timeout = np.random.uniform(5.0, 6.0)
@@ -50,11 +51,6 @@ def run_ping():
         )
     )
 
-    async def send_initial():
-        await asyncio.sleep(1.0)
-        await ping.send_ping("init", "init")
-
-    ping.tasks.append(asyncio.ensure_future(send_initial()))
     ping.run()
 
 
