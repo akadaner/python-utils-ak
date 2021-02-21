@@ -105,11 +105,11 @@ class SimpleMicroservice(object):
         handler.add(topic, callback=callback, filter=filter, formatter=formatter)
         return handler
 
-    def publish(self, collection, topic, msg):
+    def publish_raw(self, collection, topic, msg):
         self.broker.publish(collection, topic, msg)
 
-    def publish_json(self, collection, topic, msg):
-        self.publish(collection, topic, self.coder.encode(msg))
+    def publish(self, collection, topic, **msg):
+        self.publish_raw(collection, topic, self.coder.encode(msg))
 
     def wrap_coroutine_timer(self, timer):
         async def f():

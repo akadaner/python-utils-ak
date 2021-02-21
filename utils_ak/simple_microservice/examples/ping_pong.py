@@ -14,7 +14,7 @@ class Ping(SimpleMicroservice):
     def send_ping(self, topic, msg):
         self.logger.info(f"Received", topic=topic, msg=msg)
         time.sleep(1)
-        self.publish_json("pong", "", {"msg": "ping"})
+        self.publish("pong", "", msg="ping")
 
 
 class Pong(SimpleMicroservice):
@@ -25,7 +25,7 @@ class Pong(SimpleMicroservice):
     def send_pong(self, topic, msg):
         self.logger.info(f"Received", topic=topic, msg=msg)
         time.sleep(1)
-        self.publish_json("ping", "", {"msg": "pong"})
+        self.publish("ping", "", msg="pong")
 
 
 def run_ping():

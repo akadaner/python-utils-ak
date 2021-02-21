@@ -8,7 +8,7 @@ import logging
 from utils_ak.deployment import *
 from utils_ak.simple_microservice import SimpleMicroservice
 from utils_ak.dict import fill_template
-from utils_ak.serialization import cast_dict_or_list
+from utils_ak.coder.coders.json import cast_dict_or_list
 
 from utils_ak.mongo_job_queue.monitor import MonitorActor
 from utils_ak.mongo_job_queue.config import BASE_DIR

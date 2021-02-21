@@ -8,13 +8,13 @@ class Heartbeater(SimpleMicroservice):
     def __init__(self, *args, **kwargs):
         super().__init__(f"Publisher {random.randint(0, 10 ** 6)}", *args, **kwargs)
         self.add_timer(
-            self.publish_json,
+            self.publish,
             1.0,
             args=(
                 "monitor",
-                "asdf",
-                {"id": self.id},
+                "my_topic",
             ),
+            kwargs={"id": self.id},
         )
 
 

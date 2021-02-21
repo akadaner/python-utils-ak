@@ -22,7 +22,7 @@ class Ping(SimpleMicroservice):
     async def send_ping(self, topic, msg):
         self.logger.info(f"Received", topic=topic, msg=msg)
         await asyncio.sleep(1.0)
-        self.publish_json("ping", "", {"msg": "ping"})
+        self.publish("ping", "", msg="ping")
 
 
 class Pong(SimpleMicroservice):
@@ -33,7 +33,7 @@ class Pong(SimpleMicroservice):
     async def send_pong(self, topic, msg):
         self.logger.info(f"Received", topic=topic, msg=msg)
         await asyncio.sleep(1.0)
-        self.publish_json("pong", "", {"msg": "pong"})
+        self.publish("pong", "", msg="pong")
 
 
 def run_ping():

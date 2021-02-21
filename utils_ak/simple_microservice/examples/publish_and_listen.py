@@ -11,7 +11,7 @@ class Publisher(SimpleMicroservice):
         self.add_timer(self.timer_function, 2)
 
     def timer_function(self):
-        self.publish_json("collection", "", {})
+        self.publish("collection", "")
 
 
 if __name__ == "__main__":

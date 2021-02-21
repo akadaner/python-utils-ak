@@ -1,5 +1,4 @@
 from datetime import datetime
-from pprint import pprint
 
 
 class MonitorActor:
@@ -8,7 +7,10 @@ class MonitorActor:
         self.workers = {}  # {id: {status, state, last_heartbeat}}
         self.heartbeat_timeout = heartbeat_timeout
 
-        self.microservice.add_callback("monitor", "", self._on_monitor)
+        self.microservice.add_callback(
+            "monitor", "heartbeat", self._on_monitor_heartbeat
+        )
+        self.microservice.add_callback("monitor", "state", self._on_monitor_state)
         self.microservice.add_timer(self._update_stalled, 3.0)
 
         # todo: del, hardcode
@@ -16,7 +18,7 @@ class MonitorActor:
 
     def _update_status(self, worker_id, status):
         if status != self.workers[worker_id].get("status"):
-            self.microservice.publish_json(
+            self.microservice.publish(
                 "monitor_out",
                 "status_change",
                 {
@@ -46,30 +48,22 @@ class MonitorActor:
             ):
                 self._update_status(worker_id, "stalled")
 
-    def _on_monitor(self, topic, msg):
-        # todo: preview hardcode
-        if "state" in msg:
-            key = msg["id"] + str(msg["state"])
+    def _on_monitor_heartbeat(self, topic, id):
+        self.workers[id]["last_heartbeat"] = datetime.utcnow()
+
+    def _on_monitor_state(self, topic, id, status, state):
+        # todo: del, preview hardcode
+        if id is not None and state is not None:
+            key = id + state
             if key not in self.received_messages_cache:
                 self.received_messages_cache.append(key)
             else:
                 return
 
-        self.microservice.logger.info("On monitor", topic=topic, msg=msg)
-
-        worker_id = msg["id"]
-        if worker_id not in self.workers:
-            self.microservice.publish_json("monitor_out", "new", {"id": worker_id})
-            self.workers[worker_id] = {}
-
-        if topic == "heartbeat":
-            self.workers[worker_id]["last_heartbeat"] = datetime.utcnow()
-        elif topic == "state":
-            self._update_status(worker_id, msg["status"])
-            self.workers[worker_id]["state"] = msg["state"]
-        elif topic in ["status_change", "new"]:
-            pass
-        else:
-            raise ValueError(topic)
+        if id not in self.workers:
+            self.microservice.publish("monitor_out", "new", {"id": id})
+            self.workers[id] = {}
+            self._update_status(id, status)
+            self.workers[id]["state"] = state
 
         self.microservice.logger.info("Current monitor state", state=self.workers)

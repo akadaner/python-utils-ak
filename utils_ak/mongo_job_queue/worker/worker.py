@@ -3,7 +3,7 @@ import os
 import asyncio
 from loguru import logger
 from utils_ak.mongo_job_queue.worker.microservice import WorkerMicroservice
-from utils_ak.serialization import cast_dict_or_list
+from utils_ak.coder import cast_dict_or_list
 
 
 class Worker:
