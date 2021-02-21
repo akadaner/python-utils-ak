@@ -2,7 +2,7 @@ import time
 import os
 import asyncio
 from loguru import logger
-from utils_ak.mongo_job_queue.worker.microservice import WorkerMicroservice
+from utils_ak.simple_microservice import SimpleMicroservice
 from utils_ak.coder import cast_dict_or_list
 
 
@@ -15,8 +15,23 @@ class Worker:
 class MicroserviceWorker(Worker):
     def __init__(self, id, payload):
         super().__init__(id, payload)
-        self.microservice = WorkerMicroservice(
+        self.microservice = SimpleMicroservice(
             id, message_broker=self.payload["message_broker"]
+        )
+
+        self.microservice.add_timer(
+            self.microservice.publish,
+            3.0,
+            args=(
+                "monitor",
+                "heartbeat",
+            ),
+            kwargs={"id": self.id},
+        )
+
+    def send_state(self, status, state):
+        self.microservice.publish(
+            "monitor", "state", id=self.id, status=status, state=state
         )
 
     async def process(self):
