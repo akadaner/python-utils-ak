@@ -40,8 +40,11 @@ class ProcessController(Controller):
         self.processes[id] = execute(cmd, is_async=True)
 
     def stop(self, deployment_id):
-        self.processes[deployment_id].kill()
-        self.processes.pop(deployment_id)
+        try:
+            self.processes[deployment_id].kill()
+            self.processes.pop(deployment_id)
+        except:
+            pass
 
     def log(self, deployment_id):
         pass

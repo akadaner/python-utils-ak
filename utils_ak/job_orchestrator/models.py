@@ -16,6 +16,9 @@ class Job(Document):
     runnable = DictField(required=True)
     params = DictField()
 
+    running_timeout = IntField()
+    initializing_timeout = IntField(default=10.0, required=True)
+
     status = StringField(
         required=True,
         default="pending",

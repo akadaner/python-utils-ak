@@ -14,14 +14,14 @@ from .models import Job, Worker
 
 
 class JobOrchestrator:
-    def __init__(self, deployment_controller, message_broker, timeout=600):
+    def __init__(self, deployment_controller, message_broker):
         self.timeout = 1
         self.controller = deployment_controller
         self.microservice = SimpleMicroservice(
             "JobOrchestrator", message_broker=message_broker
         )
-        self._process_active_jobs()
         self.microservice.add_timer(self._process_new_jobs, 1.0)
+        self.microservice.add_timer(self._process_initializing_jobs, 5.0)
 
         # todo: ping first message for zmq properly working. # todo: why needed though?
         self.microservice.add_timer(
@@ -31,13 +31,36 @@ class JobOrchestrator:
             args=("job_orchestrator", "ping"),
         )
         self.microservice.add_callback("monitor_out", "status_change", self._on_monitor)
-        self.timeout = timeout
 
     def run(self):
         self.microservice.run()
 
-    def _process_active_jobs(self):
-        pass
+    def _process_initializing_jobs(self):
+        initializing_jobs = Job.objects(status="initializing").all()
+
+        if initializing_jobs:
+            self.microservice.logger.info(
+                "Processing initializing jobs", n_jobs=len(initializing_jobs)
+            )
+
+        for job in initializing_jobs:
+            worker = job.locked_by
+            assert worker is not None, "Worker not assigned for the job"
+            if (
+                datetime.utcnow() - worker.job.locked_at
+            ).total_seconds() > job.initializing_timeout:
+                logger.error(
+                    "Timeout expired",
+                    worker_id=worker.id,
+                    locked_at=worker.job.locked_at,
+                )
+                self._update_worker_status(
+                    worker,
+                    worker.status,
+                    "error",
+                    {"response": cast_js({"msg": "Timeout expired"})},
+                )
+                return
 
     def _create_worker_model(self, job):
         worker_model = Worker()
@@ -104,11 +127,13 @@ class JobOrchestrator:
             )
         elif new_status == "running":
             self._update_job_status(worker, old_status, "running", "")
+        elif new_status == "error":
+            self._update_job_status(worker, old_status, "error", "")
 
         worker.status = new_status
         worker.save()
 
-        if worker.status in ["success", "stalled"]:
+        if worker.status in ["success", "stalled", "error"]:
             logger.info("Stopping worker", id=worker.id)
             self.controller.stop(str(worker.id))
 
@@ -119,23 +144,12 @@ class JobOrchestrator:
             logger.error("Failed to fetch worker", id=id)
             return
 
-        # todo: test
         # check if locked by another worker
         if str(id) != str(worker.job.locked_by.id):
             logger.error(
                 "Job is locked by another worker",
                 worker_id=id,
                 another_worker_id=worker.job.locked_by.id,
-            )
-            logger.info("Stopping worker", id=id)
-            self.controller.stop(id)
-            return
-
-        # todo: test
-        # check if timeout expired
-        if (datetime.utcnow() - worker.job.locked_at).total_seconds() > self.timeout:
-            logger.error(
-                "Timeout expired", worker_id=id, locked_at=worker.job.locked_at
             )
             logger.info("Stopping worker", id=id)
             self.controller.stop(id)
