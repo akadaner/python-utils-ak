@@ -9,6 +9,8 @@ from utils_ak.coder import cast_js, cast_dict_or_list
 from utils_ak.os import *
 from utils_ak.dict import fill_template
 
+from utils_ak.deployment.controller.test_controller import test_controller
+
 # todo: success and failure responses (or errors?)
 
 
@@ -53,25 +55,11 @@ class DockerController(Controller):
         return ids
 
     def log(self, deployment_id):
+        # todo: log only deployment_id, not all
         ids = self._get_docker_ids(deployment_id)
         for id in ids:
             logger.debug("Logs for id", id=id, logs=execute(f"docker logs {id}"))
 
 
-def test_docker_controller():
-    import anyconfig
-    import time
-    from utils_ak.loguru import logger, configure_loguru_stdout
-
-    configure_loguru_stdout("DEBUG")
-
-    deployment = anyconfig.load("../../example/deployment.yml")
-    ctrl = DockerController()
-    ctrl.start(deployment)
-    time.sleep(3)
-    ctrl.log(deployment["id"])
-    ctrl.stop(deployment["id"])
-
-
 if __name__ == "__main__":
-    test_docker_controller()
+    test_controller(DockerController)

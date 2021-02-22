@@ -6,20 +6,23 @@ from utils_ak.job_orchestrator.worker.worker_test import *
 class TestWorker(MicroserviceWorker):
     async def process(self):
         if self.payload.get("type") == "batch":
-            await asyncio.sleep(1)
+            time.sleep(1)
+            time.sleep(self.payload.get("pre_running_timeout", 0))
             self.send_state("running", {})
+            time.sleep(self.payload.get("running_timeout", 0))
             for i in range(5):
                 self.send_state("running", {"progress": (i + 1) * 20})
                 await asyncio.sleep(0.1)
             self.send_state("success", {"response": "42"})
             self.microservice.stop()
         elif self.payload.get("type") == "streaming":
-            await asyncio.sleep(3)
+            time.sleep(3)
+            time.sleep(self.payload.get("pre_running_timeout", 0))
             self.send_state("running", {})
-
+            time.sleep(self.payload.get("running_timeout", 0))
             while True:
                 self.send_state("running", {"foo": "bar"})
-                await asyncio.sleep(3)
+                time.sleep(3)
         else:
             raise Exception(f'Bad payload type {self.payload.get("type")}')
 
@@ -81,6 +84,6 @@ def test_deployment():
 
 
 if __name__ == "__main__":
-    # test_batch()
-    test_streaming()
+    test_batch()
+    # test_streaming()
     # test_deployment()

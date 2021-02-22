@@ -3,6 +3,8 @@ from utils_ak.coder import *
 from utils_ak.builtin import *
 import fire
 
+# todo: put to deployment util
+
 
 def generate_bats_from_deployment(deployment_fn="sample_deployment.yml"):
     d = anyconfig.load(deployment_fn)

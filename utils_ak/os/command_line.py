@@ -7,8 +7,9 @@ from utils_ak.str import cast_unicode
 def execute(cmd, is_async=False, verbose=True):
     if verbose:
         logger.trace("Executing command", cmd=cmd, is_async=is_async)
+
     if is_async:
-        subprocess.Popen(cmd, shell=True)
+        return subprocess.Popen(cmd)
     else:
         process = subprocess.Popen(
             cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
