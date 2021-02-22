@@ -79,6 +79,6 @@ def test_deployment():
 
 
 if __name__ == "__main__":
-    test_batch()
-    # test_streaming()
+    # test_batch()
+    test_streaming()
     # test_deployment()
