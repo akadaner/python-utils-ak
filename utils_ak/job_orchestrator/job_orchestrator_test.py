@@ -20,7 +20,21 @@ BROKER_CONFIG = {
         "job_orchestrator": {"endpoint": "tcp://localhost:5557", "type": "pub"},
     }
 }
+
+WORKER_BROKER_CONFIG = {
+    "endpoints": {
+        "monitor_in": {"endpoint": "tcp://host.docker.internal:5555", "type": "sub"},
+        "monitor_out": {"endpoint": "tcp://host.docker.internal:5556", "type": "sub"},
+        "job_orchestrator": {
+            "endpoint": "tcp://host.docker.internal:5557",
+            "type": "pub",
+        },
+    }
+}
+
+
 MESSAGE_BROKER = (BROKER, BROKER_CONFIG)
+WORKER_MESSAGE_BROKER = (BROKER, WORKER_BROKER_CONFIG)
 
 
 def create_new_job():
@@ -36,8 +50,8 @@ def create_new_job():
     job = Job(
         type="test",
         payload={
-            "type": "streaming",
-            "message_broker": MESSAGE_BROKER,
+            "type": "batch",
+            "message_broker": WORKER_MESSAGE_BROKER,
         },
         image="akadaner/test-worker",
     )

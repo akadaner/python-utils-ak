@@ -147,7 +147,7 @@ class SimpleMicroservice(object):
                         collection, topic, msg = received
 
                         try:
-                            self.logger.debug(
+                            self.logger.trace(
                                 f"Received new message",
                                 topic=str(topic),
                                 msg=str(msg),

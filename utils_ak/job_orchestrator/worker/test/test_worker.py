@@ -62,6 +62,7 @@ def test_streaming():
                 },
             ),
         },
+        run_listener=False,
     )
 
 
