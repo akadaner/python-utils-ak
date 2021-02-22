@@ -17,6 +17,14 @@ class JobOrchestrator:
         )
         self._process_active_jobs()
         self.microservice.add_timer(self._process_new_jobs, 1.0)
+
+        # todo: ping first message for zmq properly working. # todo: why needed though?
+        self.microservice.add_timer(
+            self.microservice.publish,
+            interval=1,
+            n_times=1,
+            args=("job_orchestrator", "ping"),
+        )
         self.microservice.add_callback("monitor_out", "status_change", self._on_monitor)
 
     def run(self):
@@ -69,7 +77,7 @@ class JobOrchestrator:
 
         if new_status == "success":
             worker.response = state.get("response")
-            old_job_status = worker.job
+            old_job_status = worker.job.status
             self.microservice.publish(
                 "job_orchestrator",
                 "status_change",

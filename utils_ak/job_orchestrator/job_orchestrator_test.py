@@ -67,8 +67,8 @@ def test():
     controller = DockerController()
     run_listener_async("job_orchestrator", message_broker=MESSAGE_BROKER)
     job_orchestrator = JobOrchestrator(controller, MESSAGE_BROKER)
-    multiprocessing.Process(target=create_new_job).start()
     multiprocessing.Process(target=run_monitor).start()
+    multiprocessing.Process(target=create_new_job).start()
     job_orchestrator.run()
 
 

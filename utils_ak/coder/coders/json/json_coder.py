@@ -86,7 +86,7 @@ def cast_dict_or_list(obj, *args, **kwargs):
 
         # todo: hardcode, put in different place
         try:
-            res = delistify(list(yaml.load_all(StringIO(obj))))
+            res = delistify(list(yaml.load_all(StringIO(obj), Loader=yaml.FullLoader)))
             assert isinstance(res, (dict, list))
             return res
         except:
