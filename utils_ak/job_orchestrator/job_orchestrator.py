@@ -56,6 +56,8 @@ class JobOrchestrator:
             "deployment_id": str(worker_model.id),
             "payload": worker_model.job.payload,
             "image": worker_model.job.image,
+            # todo: make properly
+            "main_file_path": r"C:\Users\Mi\Desktop\master\code\git\python-utils-ak\utils_ak\job_orchestrator\worker\test\main.py",
         }
         deployment = fill_template(deployment, **params)
         return deployment
@@ -95,19 +97,21 @@ class JobOrchestrator:
     def _update_worker_status(self, worker, old_status, new_status, state):
         if new_status == "success":
             self._update_job_status(
-                worker, old_status, "success", state.get("response", {})
+                worker, old_status, "success", state.get("response", "")
             )
         elif new_status == "stalled":
-            self._update_job_status(worker, old_status, "error", {"msg": "stalled"})
+            self._update_job_status(
+                worker, old_status, "error", cast_js({"msg": "stalled"})
+            )
         elif new_status == "running":
-            self._update_job_status(worker, old_status, "running", {})
+            self._update_job_status(worker, old_status, "running", "")
 
         worker.status = new_status
         worker.save()
 
         if worker.status in ["success", "stalled"]:
-            logger.info("Stopping worker", id=id)
-            self.controller.stop(id)
+            logger.info("Stopping worker", id=worker.id)
+            self.controller.stop(str(worker.id))
 
     def _on_monitor(self, topic, id, old_status, new_status, state):
         try:
@@ -118,11 +122,11 @@ class JobOrchestrator:
 
         # todo: test
         # check if locked by another worker
-        if str(id) != worker.job.locked_by:
+        if str(id) != str(worker.job.locked_by.id):
             logger.error(
                 "Job is locked by another worker",
                 worker_id=id,
-                another_worker_id=worker.job.locked_by,
+                another_worker_id=worker.job.locked_by.id,
             )
             logger.info("Stopping worker", id=id)
             self.controller.stop(id)

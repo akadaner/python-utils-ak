@@ -2,6 +2,7 @@ id: "{deployment_id}"
 containers:
   test-worker:
     image: "{image}"
+    main_file_path: "{main_file_path}"
     command_line_arguments:
       config:
         worker_id: "{deployment_id}"

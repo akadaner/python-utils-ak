@@ -41,7 +41,7 @@ def create_new_job():
     connect(
         host="mongodb+srv://arseniikadaner:Nash0lsapog@cluster0.2umoy.mongodb.net/feature-store?retryWrites=true&w=majority"
     )
-    configure_loguru_stdout("DEBUG")
+    configure_loguru_stdout("TRACE")
     logger.info("Connected to mongodb")
     time.sleep(2)
     logger.debug("Creating new job...")
@@ -59,12 +59,12 @@ def create_new_job():
 
 
 def test():
-    configure_loguru_stdout("DEBUG")
+    configure_loguru_stdout("TRACE")
     connect(
         host="mongodb+srv://arseniikadaner:Nash0lsapog@cluster0.2umoy.mongodb.net/feature-store?retryWrites=true&w=majority"
     )
     logger.info("Connected to mongodb")
-    controller = DockerController()
+    controller = ProcessController()
     run_listener_async("job_orchestrator", message_broker=MESSAGE_BROKER)
     job_orchestrator = JobOrchestrator(controller, MESSAGE_BROKER)
     multiprocessing.Process(target=run_monitor).start()

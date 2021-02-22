@@ -12,6 +12,8 @@ from utils_ak.dict import fill_template
 from utils_ak.builtin import *
 from utils_ak.deployment.controller.test_controller import test_controller
 
+# todo: add screen support for *nix
+
 
 class ProcessController(Controller):
     def __init__(self):
@@ -28,12 +30,21 @@ class ProcessController(Controller):
         main_file_path = container["main_file_path"]
         command_line_arguments = {}
         for k, v in container["command_line_arguments"].items():
-            command_line_arguments[k] = cast_js(v)
+            command_line_arguments[k] = v
 
         cmd = f'python "{main_file_path}"'
         for k, v in command_line_arguments.items():
             cmd += f" --{k} "
-            cmd += v
+            if isinstance(v, str):
+                cmd += v
+            elif isinstance(v, (dict, list)):
+                js = cast_js(v)
+                js = js.replace('"', r"\"")
+                js = f'"{js}"'
+                cmd += js
+            else:
+                raise Exception("Unknown command line argument type")
+
         self.processes[id] = execute(cmd, is_async=True)
 
     def stop(self, deployment_id):

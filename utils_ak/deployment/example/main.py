@@ -5,6 +5,8 @@ from loguru import logger
 from notifiers import get_notifier
 from datetime import datetime
 
+# todo: make beep properly
+
 
 def main(name=None, run_forever=True, beep=False):
     telegram_bot_token = "<telegram_bot_token>"
