@@ -14,7 +14,7 @@ class Listener(SimpleMicroservice):
 
 
 def run_listener(collection, topic="", *args, **kwargs):
-    configure_loguru_stdout()
+    configure_loguru_stdout("DEBUG")
     Listener(collection, topic, *args, **kwargs).run()
 
 
