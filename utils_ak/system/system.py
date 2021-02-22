@@ -8,20 +8,6 @@ import re
 import pandas as pd
 
 
-def execute(cmd, run_async=False):
-    if run_async:
-        process = subprocess.Popen(cmd, shell=True)
-    else:
-        process = subprocess.Popen(
-            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
-        )
-        output, error = process.communicate()
-        return (
-            " ".join([cast_unicode(x) for x in [output, error] if x]),
-            process.returncode,
-        )
-
-
 def get_system_usage_stats():
     # todo: add cpu stats
     stats = {}

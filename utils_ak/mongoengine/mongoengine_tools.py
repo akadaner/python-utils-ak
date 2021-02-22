@@ -1,4 +1,4 @@
-from utils_ak import update_dic
+from utils_ak.builtin import update_dic
 
 from bson.objectid import ObjectId
 
