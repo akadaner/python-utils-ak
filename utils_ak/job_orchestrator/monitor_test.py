@@ -6,7 +6,7 @@ import multiprocessing
 from utils_ak.loguru import configure_loguru_stdout
 from utils_ak.simple_microservice import SimpleMicroservice, run_listener_async
 from utils_ak.job_orchestrator.worker.test import TestWorker
-from utils_ak.job_orchestrator.monitor import MonitorActor
+from utils_ak.job_orchestrator.monitor import Monitor
 
 BROKER = "zmq"
 BROKER_CONFIG = {
@@ -20,9 +20,8 @@ MESSAGE_BROKER = (BROKER, BROKER_CONFIG)
 
 def run_monitor():
     configure_loguru_stdout("DEBUG")
-    ms = SimpleMicroservice("Monitor", message_broker=MESSAGE_BROKER)
-    actor = MonitorActor(ms)
-    ms.run()
+    monitor = Monitor(MESSAGE_BROKER)
+    monitor.microservice.run()
 
 
 def run_worker():

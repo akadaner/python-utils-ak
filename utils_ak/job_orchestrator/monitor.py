@@ -1,9 +1,11 @@
 from datetime import datetime
+from utils_ak.simple_microservice import SimpleMicroservice
 
 
-class MonitorActor:
-    def __init__(self, microservice, heartbeat_timeout=10):
-        self.microservice = microservice
+class Monitor:
+    def __init__(self, message_broker, heartbeat_timeout=10):
+        self.microservice = SimpleMicroservice("Monitor", message_broker=message_broker)
+
         self.workers = {}  # {id: {status, state, last_heartbeat}}
         self.heartbeat_timeout = heartbeat_timeout
 
@@ -36,12 +38,14 @@ class MonitorActor:
 
     def _update_status(self, worker_id, status):
         if status != self.workers[worker_id].get("status"):
+            self.microservice.logger.info("Status updated", id=worker_id, status=status)
             self.microservice.publish(
                 "monitor_out",
                 "status_change",
                 id=worker_id,
                 old_status=self.workers[worker_id].get("status"),
                 new_status=status,
+                state=self.workers[worker_id].get("state", {}),
             )
             self.workers[worker_id]["status"] = status
 
@@ -58,6 +62,8 @@ class MonitorActor:
             self.microservice.publish("monitor_out", "new", id=id)
             self.workers[id] = {}
         self._update_status(id, status)
-        self.workers[id]["state"] = state
 
-        self.microservice.logger.info("Current monitor state", state=self.workers)
+        _old_state = self.workers[id].get("state")
+        self.workers[id]["state"] = state
+        if _old_state != state:
+            self.microservice.logger.debug("New state", id=id, state=state)
