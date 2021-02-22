@@ -39,11 +39,9 @@ class MonitorActor:
             self.microservice.publish(
                 "monitor_out",
                 "status_change",
-                {
-                    "id": worker_id,
-                    "old_status": self.workers[worker_id].get("status"),
-                    "new_status": status,
-                },
+                id=worker_id,
+                old_status=self.workers[worker_id].get("status"),
+                new_status=status,
             )
             self.workers[worker_id]["status"] = status
 
@@ -57,7 +55,7 @@ class MonitorActor:
         #         return
 
         if id not in self.workers:
-            self.microservice.publish("monitor_out", "new", {"id": id})
+            self.microservice.publish("monitor_out", "new", id=id)
             self.workers[id] = {}
         self._update_status(id, status)
         self.workers[id]["state"] = state
