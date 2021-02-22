@@ -1,2 +1,2 @@
-docker run akadaner/test-worker --config "{\"worker_id\": \"worker_id\", \"payload\": {\"type\": \"streaming\"}, \"message_broker\": [\"zmq\", {\"endpoints\": {\"monitor\": {\"endpoint\": \"tcp://host.docker.internal:5555\", \"type\": \"sub\"}}}]}"
+docker run akadaner/test-worker --config "{\"worker_id\": \"deployment_id\", \"payload\": {\"type\": \"batch\", \"message_broker\": [\"zmq\", {\"endpoints\": {\"monitor_in\": {\"endpoint\": \"tcp://host.docker.internal:5555\", \"type\": \"sub\"}}}]}}"
 pause
