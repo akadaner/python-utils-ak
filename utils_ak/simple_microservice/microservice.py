@@ -3,7 +3,7 @@ import asyncio
 
 from utils_ak.callback_timer import CallbackTimer, ScheduleTimer, CallbackTimers
 from utils_ak.architecture.func import PrefixHandler
-from utils_ak.coder import JsonCoder
+from utils_ak.coder import JsonCoder, MsgPackCoder
 from utils_ak.message_queue import cast_message_broker
 from utils_ak.loguru import patch_trace
 from utils_ak.str import cast_unicode
@@ -44,7 +44,8 @@ class SimpleMicroservice(object):
 
         self.is_active = True
 
-        self.coder = coder or JsonCoder()
+        # todo: make JsonCoder default after datetime can be decoded properly
+        self.coder = coder or MsgPackCoder()
 
     def stop(self):
         self.logger.info("Stopping microservice")

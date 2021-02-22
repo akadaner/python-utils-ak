@@ -19,19 +19,19 @@ MESSAGE_BROKER = (BROKER, BROKER_CONFIG)
 
 
 def run_monitor():
-    configure_loguru_stdout("DEBUG")
+    configure_loguru_stdout("TRACE")
     monitor = Monitor(MESSAGE_BROKER)
     monitor.microservice.run()
 
 
 def run_worker():
-    configure_loguru_stdout("DEBUG")
+    configure_loguru_stdout("TRACE")
     worker = TestWorker("WorkerId", {"type": "batch", "message_broker": MESSAGE_BROKER})
     worker.run()
 
 
 def test():
-    configure_loguru_stdout("DEBUG")
+    configure_loguru_stdout("TRACE")
     run_listener_async("monitor_out", message_broker=MESSAGE_BROKER)
     time.sleep(1)
 

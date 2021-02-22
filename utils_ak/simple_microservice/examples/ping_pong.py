@@ -30,7 +30,7 @@ class Pong(SimpleMicroservice):
 
 
 def run_ping():
-    configure_loguru_stdout("DEBUG")
+    configure_loguru_stdout("TRACE")
     ping = Ping(
         message_broker=(
             "zmq",
@@ -47,7 +47,7 @@ def run_ping():
 
 
 def run_pong():
-    configure_loguru_stdout("DEBUG")
+    configure_loguru_stdout("TRACE")
 
     Pong(
         message_broker=(
