@@ -53,7 +53,10 @@ def create_new_job():
             "type": "batch",
             "message_broker": WORKER_MESSAGE_BROKER,
         },
-        image="akadaner/test-worker",
+        runnable={
+            "image": "akadaner/test-worker",
+            "main_file_path": r"C:\Users\Mi\Desktop\master\code\git\python-utils-ak\utils_ak\job_orchestrator\worker\test\main.py",
+        },
     )
     job.save()
 

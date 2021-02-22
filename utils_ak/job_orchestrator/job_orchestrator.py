@@ -55,9 +55,8 @@ class JobOrchestrator:
         params = {
             "deployment_id": str(worker_model.id),
             "payload": worker_model.job.payload,
-            "image": worker_model.job.image,
-            # todo: make properly
-            "main_file_path": r"C:\Users\Mi\Desktop\master\code\git\python-utils-ak\utils_ak\job_orchestrator\worker\test\main.py",
+            "image": worker_model.job.runnable.get("image", ""),
+            "main_file_path": worker_model.job.runnable.get("main_file_path", ""),
         }
         deployment = fill_template(deployment, **params)
         return deployment

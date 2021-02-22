@@ -13,7 +13,7 @@ class Job(Document):
     locked_by = ReferenceField("Worker")
     locked_at = DateTimeField()
 
-    image = StringField(required=True)
+    runnable = DictField(required=True)
     params = DictField()
 
     status = StringField(
