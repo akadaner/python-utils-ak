@@ -37,6 +37,10 @@ def iter_get(iterable, index=0, default=None):
             return default
 
 
+def iter_len(iterable):
+    return len(list(iterable))
+
+
 def remove_duplicates(seq, key=None):
     # preserves order of sequence
     seen = set()
