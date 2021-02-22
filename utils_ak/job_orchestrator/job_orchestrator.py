@@ -5,7 +5,6 @@ from utils_ak.simple_microservice import SimpleMicroservice
 from utils_ak.dict import fill_template
 from utils_ak.coder.coders.json import cast_dict_or_list
 
-from utils_ak.job_orchestrator.monitor import Monitor
 from utils_ak.job_orchestrator.config import BASE_DIR
 
 
@@ -13,16 +12,17 @@ class JobOrchestrator:
     def __init__(self, deployment_controller, message_broker):
         self.timeout = 1
         self.controller = deployment_controller
-        self.ms = SimpleMicroservice("JobOrchestrator", message_broker=message_broker)
-        self.monitor = MonitorActor(self.ms)
-        self.process_active_jobs()
-        self.ms.add_timer(self.process_new_jobs, 1.0)
-        self.ms.add_callback("monitor_out", "status_change", self.on_monitor_out)
+        self.microservice = SimpleMicroservice(
+            "JobOrchestrator", message_broker=message_broker
+        )
+        self._process_active_jobs()
+        self.microservice.add_timer(self._process_new_jobs, 1.0)
+        self.microservice.add_callback("monitor_out", "status_change", self._on_monitor)
 
     def run(self):
-        self.ms.run()
+        self.microservice.run()
 
-    def process_active_jobs(self):
+    def _process_active_jobs(self):
         pass  # todo: go through all active jobs and process them
 
     def _create_worker_model(self, job):
@@ -46,35 +46,37 @@ class JobOrchestrator:
         deployment = fill_template(deployment, **params)
         return deployment
 
-    def process_new_jobs(self):
+    def _process_new_jobs(self):
         new_jobs = Job.objects(workers__size=0).all()
 
         if new_jobs:
-            self.ms.logger.info(f"Processing {len(new_jobs)} new jobs")
+            self.microservice.logger.info(f"Processing {len(new_jobs)} new jobs")
 
         for new_job in new_jobs:
             worker_model = self._create_worker_model(new_job)
             deployment = self._create_deployment(worker_model)
-            self.ms.logger.info("Starting new worker", deployment=deployment)
+            self.microservice.logger.info("Starting new worker", deployment=deployment)
             self.controller.start(deployment)
             new_job.status = "initializing"
             new_job.save()
 
-    def on_monitor_out(self, topic, id, old_status, new_status):
+    def _on_monitor(self, topic, id, old_status, new_status, state):
         try:
             worker = Worker.objects(pk=id).first()  # todo: check if missing
         except:
-            raise Exception("Failed to fetch worker")
+            logger.error("Failed to fetch worker", id=id)
+            return
 
         if new_status == "success":
-            worker.response = self.monitor.workers[id]["state"]["response"]
+            worker.response = state.get("response")
             old_job_status = worker.job
-            self.ms.publish(
+            self.microservice.publish(
                 "job_orchestrator",
                 "status_change",
                 id=str(worker.job.id),
                 old_status=old_job_status,
                 new_status="success",
+                response=state.get("response"),
             )
             worker.job.save()
 

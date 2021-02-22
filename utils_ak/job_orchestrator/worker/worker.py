@@ -36,6 +36,7 @@ class MicroserviceWorker(Worker):
         )  # run once on init
 
     def send_state(self, status, state):
+        self.microservice.logger.debug("Sending state", status=status, state=state)
         self.microservice.publish(
             "monitor_in", "state", id=self.id, status=status, state=state
         )

@@ -41,6 +41,7 @@ def test_batch():
                 },
             ),
         },
+        run_listener=False,
     )
 
 
@@ -80,5 +81,5 @@ def test_deployment():
 
 if __name__ == "__main__":
     # test_batch()
-    # test_streaming()
-    test_deployment()
+    test_streaming()
+    # test_deployment()

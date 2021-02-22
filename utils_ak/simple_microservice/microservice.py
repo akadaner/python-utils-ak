@@ -47,6 +47,7 @@ class SimpleMicroservice(object):
         self.coder = coder or JsonCoder()
 
     def stop(self):
+        self.logger.info("Stopping microservice")
         self.is_active = False
 
     def _args_formatter(self, topic, msg):

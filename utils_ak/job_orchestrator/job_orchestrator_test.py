@@ -9,7 +9,7 @@ from utils_ak.deployment import *
 from utils_ak.loguru import configure_loguru_stdout
 from utils_ak.job_orchestrator.job_orchestrator import JobOrchestrator
 from utils_ak.job_orchestrator.models import *
-
+from utils_ak.job_orchestrator.monitor_test import run_monitor
 from loguru import logger
 
 BROKER = "zmq"
@@ -36,7 +36,7 @@ def create_new_job():
     job = Job(
         type="test",
         payload={
-            "type": "batch",
+            "type": "streaming",
             "message_broker": MESSAGE_BROKER,
         },
         image="akadaner/test-worker",
@@ -54,6 +54,7 @@ def test():
     run_listener_async("job_orchestrator", message_broker=MESSAGE_BROKER)
     job_orchestrator = JobOrchestrator(controller, MESSAGE_BROKER)
     multiprocessing.Process(target=create_new_job).start()
+    multiprocessing.Process(target=run_monitor).start()
     job_orchestrator.run()
 
 

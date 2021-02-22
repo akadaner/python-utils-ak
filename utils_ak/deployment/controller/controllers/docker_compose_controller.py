@@ -43,7 +43,8 @@ class DockerController(Controller):
         for id in self._get_docker_ids(deployment_id):
             execute(f"docker stop {id}")
             execute(f"docker rm {id}")
-
+            # todo: review
+            execute(f"docker network prune -f")  # clean networks
         remove_path(f"data/docker-compose/{deployment_id}/")
 
     def _get_docker_ids(self, deployment_id):
