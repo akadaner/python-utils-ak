@@ -1,6 +1,7 @@
 """ Miscellaneous functionality with basic python built-in objects. """
 import collections
 import numpy
+import itertools
 
 
 def delistify_single_list(lst_obj):
@@ -20,11 +21,20 @@ def cast_list(lst):
 listify = cast_list
 
 
-def list_get(lst, index=0, default=None):
-    try:
-        return lst[index]
-    except IndexError:
-        return default
+def iter_get(iterable, index=0, default=None):
+    iterator = iter(iterable)
+
+    if index >= 0:
+        try:
+            return next(itertools.islice(iterator, index, None))
+        except StopIteration:
+            return default
+    else:
+        lst = list(iterator)
+        try:
+            return lst[index]
+        except IndexError:
+            return default
 
 
 def remove_duplicates(seq, key=None):
