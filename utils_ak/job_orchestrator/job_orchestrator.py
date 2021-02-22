@@ -5,8 +5,8 @@ from utils_ak.simple_microservice import SimpleMicroservice
 from utils_ak.dict import fill_template
 from utils_ak.coder.coders.json import cast_dict_or_list
 
-from utils_ak.mongo_job_queue.monitor import MonitorActor
-from utils_ak.mongo_job_queue.config import BASE_DIR
+from utils_ak.job_orchestrator.monitor import MonitorActor
+from utils_ak.job_orchestrator.config import BASE_DIR
 
 
 class JobOrchestrator:

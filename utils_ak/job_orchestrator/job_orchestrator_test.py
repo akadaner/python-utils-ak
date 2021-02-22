@@ -7,8 +7,8 @@ from mongoengine import connect
 from utils_ak.simple_microservice import run_listener_async
 from utils_ak.deployment import *
 from utils_ak.loguru import configure_loguru_stdout
-from utils_ak.mongo_job_queue.job_orchestrator import JobOrchestrator
-from utils_ak.mongo_job_queue.models import *
+from utils_ak.job_orchestrator.job_orchestrator import JobOrchestrator
+from utils_ak.job_orchestrator.models import *
 
 from loguru import logger
 

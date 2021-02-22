@@ -5,8 +5,8 @@ import multiprocessing
 
 from utils_ak.loguru import configure_loguru_stdout
 from utils_ak.simple_microservice import SimpleMicroservice, run_listener_async
-from utils_ak.mongo_job_queue.worker.test import TestWorker
-from utils_ak.mongo_job_queue.monitor import MonitorActor
+from utils_ak.job_orchestrator.worker.test import TestWorker
+from utils_ak.job_orchestrator.monitor import MonitorActor
 
 BROKER = "zmq"
 BROKER_CONFIG = {
