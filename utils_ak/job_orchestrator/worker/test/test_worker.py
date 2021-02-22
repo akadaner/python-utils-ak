@@ -1,6 +1,6 @@
 import asyncio
-from utils_ak.mongo_job_queue.worker.worker import MicroserviceWorker
-from utils_ak.mongo_job_queue.worker.worker_test import *
+from utils_ak.job_orchestrator.worker.worker import MicroserviceWorker
+from utils_ak.job_orchestrator.worker.worker_test import *
 
 
 class TestWorker(MicroserviceWorker):
@@ -79,6 +79,6 @@ def test_deployment():
 
 
 if __name__ == "__main__":
-    # test_batch()
-    test_streaming()
+    test_batch()
+    # test_streaming()
     # test_deployment()
