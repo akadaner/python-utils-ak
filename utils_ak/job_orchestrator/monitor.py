@@ -26,10 +26,8 @@ class Monitor:
                 continue
 
             if (
-                "last_heartbeat" in worker
-                and (datetime.utcnow() - worker["last_heartbeat"]).total_seconds()
-                > self.heartbeat_timeout
-            ):
+                datetime.utcnow() - worker["last_heartbeat"]
+            ).total_seconds() > self.heartbeat_timeout:
                 self._update_status(worker_id, "stalled")
 
     def _on_heartbeat(self, topic, id):
@@ -58,11 +56,14 @@ class Monitor:
         #     else:
         #         return
 
+        # init if necessary
         if id not in self.workers:
             self.microservice.publish("monitor_out", "new", id=id)
-            self.workers[id] = {}
+            self.workers[id] = {"last_heartbeat": datetime.utcnow()}
+
         self._update_status(id, status)
 
+        # set state
         _old_state = self.workers[id].get("state")
         self.workers[id]["state"] = state
         if _old_state != state:

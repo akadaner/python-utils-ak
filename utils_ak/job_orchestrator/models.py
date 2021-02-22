@@ -10,7 +10,7 @@ class Job(Document):
 
     created = DateTimeField(default=datetime.utcnow)
 
-    locked_by = ReferenceField("Execution")
+    locked_by = ReferenceField("Worker")
     locked_at = DateTimeField()
 
     image = StringField(required=True)
