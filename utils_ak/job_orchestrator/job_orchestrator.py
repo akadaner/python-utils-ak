@@ -76,7 +76,7 @@ class JobOrchestrator:
         )
 
         params = {
-            "deployment_id": worker_model.id,
+            "deployment_id": str(worker_model.id),
             "payload": worker_model.job.payload,
             "image": worker_model.job.runnable.get("image", ""),
             "main_file_path": worker_model.job.runnable.get("main_file_path", ""),
