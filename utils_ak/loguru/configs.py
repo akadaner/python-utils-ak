@@ -42,13 +42,12 @@ def format_as_json(record):
 def format_with_trace(record):
     format = "<green>{time:YYYY-MM-DD HH:mm:ss!UTC}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan> - <level>{message}</level>"
 
-    exception_info = sys.exc_info()
-    if exception_info[0]:
+    if record["exception"]:
         for key in ["_stack", "_error", "_original_extra"]:
             assert key not in record["extra"]
 
         assert "_stack" not in record["extra"] and "_error" not in record["extra"]
-        record["extra"]["_stack"] = stackprinter.format(record["exception"])
+        record["extra"]["_stack"] = _get_stack(record["exception"])
         record["extra"]["_error"] = record["extra"]["_stack"].split("\n")[-1]
         original_extra = dict(record["extra"])
         original_extra.pop("_stack")
@@ -61,7 +60,9 @@ def format_with_trace(record):
 
 
 def configure_loguru_stdout(
-    level="DEBUG", remove_others=True, formatter=format_with_trace
+    level="DEBUG",
+    remove_others=True,
+    formatter=format_with_trace,
 ):
     if remove_others:
         logger.remove()
@@ -77,17 +78,21 @@ def test():
     configure_loguru_stdout(formatter=format_as_json)
 
     logger.info("Info message", foo="bar")
+    a = 1
+    b = 0
     try:
-        1 / 0
+        a / b
     except ZeroDivisionError:
+        logger.error("Oups...")
         logger.exception("Oups...")
 
     configure_loguru_stdout(formatter=format_with_trace)
     logger.info("Info message", foo="bar")
 
     try:
-        1 / 0
+        a / b
     except ZeroDivisionError:
+        logger.error("Oups...")
         logger.exception("Oups...")
 
 

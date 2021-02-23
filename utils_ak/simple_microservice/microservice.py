@@ -242,7 +242,7 @@ class SimpleMicroservice(object):
             return self._run()
 
     def on_exception(self, e, msg):
-        self.logger.error("Generic microservice error")
+        self.logger.exception("Generic microservice error")
         to_sleep = min(
             self.default_exception_timeout * 2 ** (self.fail_count - 1),
             self.max_exception_timeout,
