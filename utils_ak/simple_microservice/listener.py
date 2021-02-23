@@ -10,7 +10,7 @@ class Listener(SimpleMicroservice):
         self.add_callback(collection, topic, self._log)
 
     def _log(self, topic, **kwargs):
-        self.logger.info(f"{topic}-{str(kwargs)}")
+        self.logger.info("Listened", topic=topic, **kwargs)
 
 
 def run_listener(collection, topic="", *args, **kwargs):

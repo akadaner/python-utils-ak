@@ -81,7 +81,7 @@ def test_job_orchestrator(payload):
 
 
 def test_success():
-    test_job_orchestrator({"type": "batch", "running_timeout": 600})
+    test_job_orchestrator({"type": "batch"})
 
 
 def test_stalled():
@@ -93,4 +93,4 @@ def test_failure():
 
 
 if __name__ == "__main__":
-    test_failure()
+    test_stalled()

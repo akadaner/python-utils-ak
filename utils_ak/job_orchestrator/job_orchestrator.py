@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from utils_ak.loguru import *
 from utils_ak.deployment import *
 from utils_ak.simple_microservice import SimpleMicroservice
 from utils_ak.dict import fill_template
@@ -22,15 +23,8 @@ class JobOrchestrator:
         )
         self.microservice.add_timer(self._process_new_jobs, 1.0)
         self.microservice.add_timer(self._process_initializing_jobs, 5.0)
-
-        # todo: ping first message for zmq properly working. # todo: why needed though?
-        self.microservice.add_timer(
-            self.microservice.publish,
-            interval=1,
-            n_times=1,
-            args=("job_orchestrator", "ping"),
-        )
         self.microservice.add_callback("monitor_out", "status_change", self._on_monitor)
+        self.microservice.register_publishers(["job_orchestrator"])
 
     def run(self):
         self.microservice.run()

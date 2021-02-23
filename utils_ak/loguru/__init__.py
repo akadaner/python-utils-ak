@@ -1,2 +1,2 @@
-from .generic import *
-from .configs import *
+from .configuration import *
+from .log_function import *

@@ -12,6 +12,7 @@ class Monitor:
         self.microservice.add_timer(self._update_stalled, 3.0)
         self.microservice.add_callback("monitor_in", "heartbeat", self._on_heartbeat)
         self.microservice.add_callback("monitor_in", "state", self._on_state)
+        self.microservice.register_publishers(["monitor_out"])
 
         # # todo: del, hardcode
         # self.received_messages_cache = []

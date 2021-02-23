@@ -5,7 +5,6 @@ from utils_ak.callback_timer import CallbackTimer, ScheduleTimer, CallbackTimers
 from utils_ak.architecture.func import PrefixHandler
 from utils_ak.coder import JsonCoder, MsgPackCoder
 from utils_ak.message_queue import cast_message_broker
-from utils_ak.loguru import patch_trace
 from utils_ak.str import cast_unicode
 
 from loguru import logger as global_logger
@@ -29,6 +28,7 @@ class SimpleMicroservice(object):
         # {collection: callback}
         self.callbacks = {}
 
+        self.message_broker = message_broker
         self.broker = cast_message_broker(message_broker)
 
         # {broker: collection::topic}
@@ -49,6 +49,16 @@ class SimpleMicroservice(object):
     def stop(self):
         self.logger.info("Stopping microservice")
         self.is_active = False
+
+    def register_publishers(self, collections):
+        for collection in collections:
+            if self.message_broker[0] == "zmq":
+                self.add_timer(
+                    self.publish,
+                    interval=1,
+                    n_times=1,
+                    args=(collection, "register"),
+                )
 
     def _args_formatter(self, topic, msg):
         return (cast_unicode(topic),), self.coder.decode(msg)
