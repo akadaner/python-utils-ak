@@ -23,6 +23,7 @@ class JobOrchestrator:
         )
         self.microservice.add_timer(self._process_new_jobs, 1.0)
         self.microservice.add_timer(self._process_initializing_jobs, 5.0)
+        self.microservice.add_timer(self._process_running_jobs, 5.0)
         self.microservice.add_callback("monitor_out", "status_change", self._on_monitor)
         self.microservice.register_publishers(["job_orchestrator"])
 
@@ -41,17 +42,48 @@ class JobOrchestrator:
             worker = job.locked_by
             assert worker is not None, "Worker not assigned for the job"
             if (
-                datetime.utcnow() - worker.job.locked_at
-            ).total_seconds() > job.initializing_timeout:
+                job.initializing_timeout
+                and (datetime.utcnow() - worker.job.locked_at).total_seconds()
+                > job.initializing_timeout
+            ):
                 logger.error(
-                    "Timeout expired",
+                    "Initializing timeout expired",
                     worker_id=worker.id,
                     locked_at=worker.job.locked_at,
                 )
                 self._update_worker_status(
                     worker,
                     "error",
-                    {"response": cast_js({"msg": "Timeout expired"})},
+                    {"response": "Initializing timeout expired"},
+                )
+                return
+
+    # todo: code duplicate with initializing timeout
+    def _process_running_jobs(self):
+        running = Job.objects(status="running").all()
+
+        if running:
+            self.microservice.logger.info(
+                "Processing running jobs", n_jobs=len(running)
+            )
+
+        for job in running:
+            worker = job.locked_by
+            assert worker is not None, "Worker not assigned for the job"
+            if (
+                job.running_timeout
+                and (datetime.utcnow() - worker.job.locked_at).total_seconds()
+                > job.running_timeout
+            ):
+                logger.error(
+                    "Running timeout expired",
+                    worker_id=worker.id,
+                    locked_at=worker.job.locked_at,
+                )
+                self._update_worker_status(
+                    worker,
+                    "error",
+                    {"response": "Running timeout expired"},
                 )
                 return
 

@@ -62,6 +62,7 @@ def create_new_job(payload):
             "image": "akadaner/test-worker",
             "main_file_path": r"C:\Users\Mi\Desktop\master\code\git\python-utils-ak\utils_ak\job_orchestrator\worker\test\main.py",
         },
+        running_timeout=10,
     )
     job.save()
 
@@ -85,12 +86,19 @@ def test_success():
 
 
 def test_stalled():
-    test_job_orchestrator({"type": "batch", "running_timeout": 600})
+    test_job_orchestrator({"type": "batch", "stalled_timeout": 600})
+
+
+def test_timeout():
+    test_job_orchestrator({"type": "batch", "running_timeout": 20})
 
 
 def test_failure():
-    test_job_orchestrator({"type": "batch", "pre_running_timeout": 600})
+    test_job_orchestrator({"type": "batch", "initializing_timeout": 600})
 
 
 if __name__ == "__main__":
-    test_stalled()
+    # test_success()
+    # test_stalled()
+    test_timeout()
+    # test_failure()
