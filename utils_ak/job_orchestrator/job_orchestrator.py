@@ -50,7 +50,6 @@ class JobOrchestrator:
                 )
                 self._update_worker_status(
                     worker,
-                    worker.status,
                     "error",
                     {"response": cast_js({"msg": "Timeout expired"})},
                 )
@@ -94,37 +93,39 @@ class JobOrchestrator:
             new_job.locked_at = datetime.utcnow()
             new_job.save()
 
-    def _update_job_status(
-        self, worker, old_worker_status, new_worker_status, response
-    ):
-        logger.info("Successfully processed job", id=worker.job.id)
+    def _update_job_status(self, worker, status, response):
+        logger.debug(
+            "Updating job status", id=worker.job.id, status=status, response=response
+        )
+
+        if status == "success":
+            logger.info(
+                "Successfully processed job", id=worker.job.id, response=response
+            )
+        elif status == "error":
+            logger.error("Failed to process job", id=worker.job.id, response=response)
+
         worker.response = response
         self.microservice.publish(
             "job_orchestrator",
             "status_change",
             id=str(worker.job.id),
             old_status=worker.job.status,
-            new_status=new_worker_status,
+            new_status=status,
             response=response,
         )
-        worker.job.status = new_worker_status
+        worker.job.status = status
         worker.job.save()
 
-    def _update_worker_status(self, worker, old_status, new_status, state):
-        if new_status == "success":
-            self._update_job_status(
-                worker, old_status, "success", state.get("response", "")
-            )
-        elif new_status == "stalled":
-            self._update_job_status(
-                worker, old_status, "error", cast_js({"msg": "stalled"})
-            )
-        elif new_status == "running":
-            self._update_job_status(worker, old_status, "running", "")
-        elif new_status == "error":
-            self._update_job_status(worker, old_status, "error", "")
+    def _update_worker_status(self, worker, status, state):
+        if status == "success":
+            self._update_job_status(worker, "success", state.get("response", ""))
+        elif status == "running":
+            self._update_job_status(worker, "running", state.get("response", ""))
+        elif status == "error":
+            self._update_job_status(worker, "error", state.get("response", ""))
 
-        worker.status = new_status
+        worker.status = status
         worker.save()
 
         if worker.status in ["success", "stalled", "error"]:
@@ -149,4 +150,10 @@ class JobOrchestrator:
             self.controller.stop(str(id))
             return
 
-        self._update_worker_status(worker, old_status, new_status, state)
+        status = new_status
+        if status in ["stalled", "error"]:
+            # todo: make properly
+            if "response" not in state:
+                state["response"] = status
+            status = "error"
+        self._update_worker_status(worker, status, state)
