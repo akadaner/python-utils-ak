@@ -16,12 +16,11 @@ from .models import Job, Worker
 
 class JobOrchestrator:
     def __init__(self, deployment_controller, message_broker):
-        self.timeout = 1
         self.controller = deployment_controller
         self.microservice = SimpleMicroservice(
             "JobOrchestrator", message_broker=message_broker
         )
-        self.microservice.add_timer(self._process_new_jobs, 1.0)
+        self.microservice.add_timer(self._process_pending_jobs, 1.0)
         self.microservice.add_timer(self._process_initializing_jobs, 5.0)
         self.microservice.add_timer(self._process_running_jobs, 5.0)
         self.microservice.add_callback("monitor_out", "status_change", self._on_monitor)
@@ -29,101 +28,6 @@ class JobOrchestrator:
 
     def run(self):
         self.microservice.run()
-
-    def _process_initializing_jobs(self):
-        initializing_jobs = Job.objects(status="initializing").all()
-
-        if initializing_jobs:
-            self.microservice.logger.info(
-                "Processing initializing jobs", n_jobs=len(initializing_jobs)
-            )
-
-        for job in initializing_jobs:
-            worker = job.locked_by
-            assert worker is not None, "Worker not assigned for the job"
-            if (
-                job.initializing_timeout
-                and (datetime.utcnow() - worker.job.locked_at).total_seconds()
-                > job.initializing_timeout
-            ):
-                logger.error(
-                    "Initializing timeout expired",
-                    worker_id=worker.id,
-                    locked_at=worker.job.locked_at,
-                )
-                self._update_worker_status(
-                    worker,
-                    "error",
-                    {"response": "Initializing timeout expired"},
-                )
-                return
-
-    # todo: code duplicate with initializing timeout
-    def _process_running_jobs(self):
-        running = Job.objects(status="running").all()
-
-        if running:
-            self.microservice.logger.info(
-                "Processing running jobs", n_jobs=len(running)
-            )
-
-        for job in running:
-            worker = job.locked_by
-            assert worker is not None, "Worker not assigned for the job"
-            if (
-                job.running_timeout
-                and (datetime.utcnow() - worker.job.locked_at).total_seconds()
-                > job.running_timeout
-            ):
-                logger.error(
-                    "Running timeout expired",
-                    worker_id=worker.id,
-                    locked_at=worker.job.locked_at,
-                )
-                self._update_worker_status(
-                    worker,
-                    "error",
-                    {"response": "Running timeout expired"},
-                )
-                return
-
-    def _create_worker_model(self, job):
-        worker_model = Worker()
-        worker_model.job = job
-        worker_model.save()
-        job.workers.append(worker_model)
-        job.save()
-        return worker_model
-
-    def _create_deployment(self, worker_model):
-        deployment = cast_dict_or_list(
-            os.path.join(BASE_DIR, "worker/deployment.yml.template")
-        )
-
-        params = {
-            "deployment_id": str(worker_model.id),
-            "payload": worker_model.job.payload,
-            "image": worker_model.job.runnable.get("image", ""),
-            "main_file_path": worker_model.job.runnable.get("main_file_path", ""),
-        }
-        deployment = fill_template(deployment, **params)
-        return deployment
-
-    def _process_new_jobs(self):
-        new_jobs = Job.objects(workers__size=0).all()
-
-        if new_jobs:
-            self.microservice.logger.info(f"Processing {len(new_jobs)} new jobs")
-
-        for new_job in new_jobs:
-            worker_model = self._create_worker_model(new_job)
-            deployment = self._create_deployment(worker_model)
-            self.microservice.logger.info("Starting new worker", deployment=deployment)
-            self.controller.start(deployment)
-            new_job.status = "initializing"
-            new_job.locked_by = worker_model
-            new_job.locked_at = datetime.utcnow()
-            new_job.save()
 
     def _update_job_status(self, worker, status, response):
         logger.debug(
@@ -149,20 +53,108 @@ class JobOrchestrator:
         worker.job.status = status
         worker.job.save()
 
-    def _update_worker_status(self, worker, status, state):
-        if status == "success":
-            self._update_job_status(worker, "success", state.get("response", ""))
-        elif status == "running":
-            self._update_job_status(worker, "running", state.get("response", ""))
-        elif status == "error":
-            self._update_job_status(worker, "error", state.get("response", ""))
+    def _update_worker_status(self, worker, status, state=None):
+        logger.debug("Updating worker status", id=worker.id, status=status, state=state)
+        state = state or {}
+        self._update_job_status(worker, status, state.get("response", ""))
 
         worker.status = status
         worker.save()
 
         if worker.status in ["success", "stalled", "error"]:
-            logger.info("Stopping worker", id=worker.id)
-            self.controller.stop(str(worker.id))
+            self._stop_worker(worker)
+
+    def _stop_worker(self, worker):
+        logger.info("Stopping worker", id=worker.id)
+        self.controller.stop(str(worker.id))
+
+    def _create_worker_model(self, job):
+        worker_model = Worker()
+        worker_model.job = job
+        worker_model.save()
+        job.workers.append(worker_model)
+        job.locked_by = worker_model
+        job.locked_at = datetime.utcnow()
+        job.save()
+        return worker_model
+
+    def _create_deployment(self, worker_model):
+        deployment = cast_dict_or_list(
+            os.path.join(BASE_DIR, "worker/deployment.yml.template")
+        )
+
+        params = {
+            "deployment_id": str(worker_model.id),
+            "payload": worker_model.job.payload,
+            "image": worker_model.job.runnable.get("image", ""),
+            "main_file_path": worker_model.job.runnable.get("main_file_path", ""),
+        }
+        deployment = fill_template(deployment, **params)
+        return deployment
+
+    def _process_pending_jobs(self):
+        jobs = Job.objects(status="pending").all()
+
+        if jobs:
+            self.microservice.logger.info("Processing jobs: pending", n_jobs=len(jobs))
+
+        for job in jobs:
+            worker_model = self._create_worker_model(job)
+            self._update_worker_status(worker_model, "initializing")
+            deployment = self._create_deployment(worker_model)
+            self.controller.start(deployment)
+
+    def _process_initializing_jobs(self):
+        jobs = Job.objects(status="initializing").all()
+
+        if jobs:
+            self.microservice.logger.info(
+                "Processing jobs: initializing", n_jobs=len(jobs)
+            )
+
+        for job in jobs:
+            worker = job.locked_by
+            assert worker is not None, "Worker not assigned for the job"
+            if (
+                job.initializing_timeout
+                and (datetime.utcnow() - worker.job.locked_at).total_seconds()
+                > job.initializing_timeout
+            ):
+                logger.error(
+                    "Initializing timeout expired",
+                    worker_id=worker.id,
+                    locked_at=worker.job.locked_at,
+                )
+                self._update_worker_status(
+                    worker,
+                    "error",
+                    {"response": "Initializing timeout expired"},
+                )
+
+    def _process_running_jobs(self):
+        jobs = Job.objects(status="running").all()
+
+        if jobs:
+            self.microservice.logger.info("Processing jobs: running", n_jobs=len(jobs))
+
+        for job in jobs:
+            worker = job.locked_by
+            assert worker is not None, "Worker not assigned for the job"
+            if (
+                job.running_timeout
+                and (datetime.utcnow() - worker.job.locked_at).total_seconds()
+                > job.running_timeout
+            ):
+                logger.error(
+                    "Running timeout expired",
+                    worker_id=worker.id,
+                    locked_at=worker.job.locked_at,
+                )
+                self._update_worker_status(
+                    worker,
+                    "error",
+                    {"response": "Running timeout expired"},
+                )
 
     def _on_monitor(self, topic, id, old_status, new_status, state):
         try:
@@ -178,8 +170,7 @@ class JobOrchestrator:
                 worker_id=id,
                 another_worker_id=worker.job.locked_by.id,
             )
-            logger.info("Stopping worker", id=id)
-            self.controller.stop(str(id))
+            self._stop_worker(worker)
             return
 
         status = new_status
