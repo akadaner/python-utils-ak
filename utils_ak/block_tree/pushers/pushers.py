@@ -1,6 +1,6 @@
 from loguru import logger
 
-from utils_ak import cast_dict_or_list
+from utils_ak.coder import cast_dict_or_list
 from utils_ak.simple_vector import *
 from utils_ak.block_tree.parallelepiped_block import ParallelepipedBlock
 

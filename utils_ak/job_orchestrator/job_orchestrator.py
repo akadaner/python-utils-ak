@@ -20,9 +20,9 @@ class JobOrchestrator:
         self.microservice = SimpleMicroservice(
             "JobOrchestrator", message_broker=message_broker
         )
-        self.microservice.add_timer(self._process_pending_jobs, 1.0)
-        self.microservice.add_timer(self._process_initializing_jobs, 5.0)
-        self.microservice.add_timer(self._process_running_jobs, 5.0)
+        self.microservice.add_timer(self._process_pending, 1.0)
+        self.microservice.add_timer(self._process_initializing, 5.0)
+        self.microservice.add_timer(self._process_running, 5.0)
         self.microservice.add_callback("monitor_out", "status_change", self._on_monitor)
         self.microservice.register_publishers(["job_orchestrator"])
 
@@ -41,7 +41,6 @@ class JobOrchestrator:
         elif status == "error":
             logger.error("Failed to process job", id=worker.job.id, response=response)
 
-        worker.response = response
         self.microservice.publish(
             "job_orchestrator",
             "status_change",
@@ -50,6 +49,7 @@ class JobOrchestrator:
             new_status=status,
             response=response,
         )
+        worker.response = response
         worker.job.status = status
         worker.job.save()
 
@@ -92,11 +92,11 @@ class JobOrchestrator:
         deployment = fill_template(deployment, **params)
         return deployment
 
-    def _process_pending_jobs(self):
+    def _process_pending(self):
         jobs = Job.objects(status="pending").all()
 
         if jobs:
-            self.microservice.logger.info("Processing jobs: pending", n_jobs=len(jobs))
+            self.microservice.logger.info("Processing: pending", n=len(jobs))
 
         for job in jobs:
             worker_model = self._create_worker_model(job)
@@ -104,13 +104,11 @@ class JobOrchestrator:
             deployment = self._create_deployment(worker_model)
             self.controller.start(deployment)
 
-    def _process_initializing_jobs(self):
+    def _process_initializing(self):
         jobs = Job.objects(status="initializing").all()
 
         if jobs:
-            self.microservice.logger.info(
-                "Processing jobs: initializing", n_jobs=len(jobs)
-            )
+            self.microservice.logger.info("Processing: initializing", n=len(jobs))
 
         for job in jobs:
             worker = job.locked_by
@@ -131,11 +129,11 @@ class JobOrchestrator:
                     {"response": "Initializing timeout expired"},
                 )
 
-    def _process_running_jobs(self):
+    def _process_running(self):
         jobs = Job.objects(status="running").all()
 
         if jobs:
-            self.microservice.logger.info("Processing jobs: running", n_jobs=len(jobs))
+            self.microservice.logger.info("Processing: running", n=len(jobs))
 
         for job in jobs:
             worker = job.locked_by

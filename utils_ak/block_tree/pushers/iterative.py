@@ -1,6 +1,6 @@
 import copy
 
-from utils_ak.serialization import cast_dict_or_list
+from utils_ak.coder import cast_dict_or_list
 from utils_ak.numeric import *
 from utils_ak.simple_vector import *
 

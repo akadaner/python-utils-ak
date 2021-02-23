@@ -1,46 +1,23 @@
-import multiprocessing
 import time
-import sys
+import multiprocessing
 
-from mongoengine import connect
+from mongoengine import connect as connect_to_mongodb
 
 from utils_ak.simple_microservice import run_listener_async
 from utils_ak.deployment import *
 from utils_ak.loguru import configure_loguru_stdout
+
 from utils_ak.job_orchestrator.job_orchestrator import JobOrchestrator
 from utils_ak.job_orchestrator.models import *
 from utils_ak.job_orchestrator.monitor_test import run_monitor
-from loguru import logger
-
-BROKER = "zmq"
-BROKER_CONFIG = {
-    "endpoints": {
-        "monitor_in": {"endpoint": "tcp://localhost:5555", "type": "sub"},
-        "monitor_out": {"endpoint": "tcp://localhost:5556", "type": "sub"},
-        "job_orchestrator": {"endpoint": "tcp://localhost:5557", "type": "pub"},
-    }
-}
-
-WORKER_BROKER_CONFIG = {
-    "endpoints": {
-        "monitor_in": {"endpoint": "tcp://host.docker.internal:5555", "type": "sub"},
-        "monitor_out": {"endpoint": "tcp://host.docker.internal:5556", "type": "sub"},
-        "job_orchestrator": {
-            "endpoint": "tcp://host.docker.internal:5557",
-            "type": "pub",
-        },
-    }
-}
-
-
-MESSAGE_BROKER = (BROKER, BROKER_CONFIG)
-WORKER_MESSAGE_BROKER = (BROKER, WORKER_BROKER_CONFIG)
+from utils_ak.job_orchestrator.config import load_config
 
 
 def create_new_job(payload):
-    connect(
-        host="mongodb+srv://arseniikadaner:Nash0lsapog@cluster0.2umoy.mongodb.net/feature-store?retryWrites=true&w=majority"
-    )
+    load_config("test")
+    from utils_ak.job_orchestrator.config import CONFIG
+
+    connect_to_mongodb(host="")
     configure_loguru_stdout("DEBUG")
     logger.info("Connected to mongodb")
     time.sleep(2)
@@ -51,7 +28,7 @@ def create_new_job(payload):
     payload = dict(payload)
     payload.update(
         {
-            "message_broker": WORKER_MESSAGE_BROKER,
+            "message_broker": CONFIG["worker_message_broker"],
         }
     )
 
@@ -67,17 +44,17 @@ def create_new_job(payload):
     job.save()
 
 
-def test_job_orchestrator(payload):
+def test_job_orchestrator(payload=None):
+    CONFIG = load_config("test")
     configure_loguru_stdout("DEBUG")
-    connect(
-        host="mongodb+srv://arseniikadaner:Nash0lsapog@cluster0.2umoy.mongodb.net/feature-store?retryWrites=true&w=majority"
-    )
+    connect_to_mongodb(host=CONFIG["mongodb_host"], db=CONFIG["mongodb_db"])
     logger.info("Connected to mongodb")
     controller = ProcessController()
-    run_listener_async("job_orchestrator", message_broker=MESSAGE_BROKER)
-    job_orchestrator = JobOrchestrator(controller, MESSAGE_BROKER)
+    run_listener_async("job_orchestrator", message_broker=CONFIG["message_broker"])
+    job_orchestrator = JobOrchestrator(controller, CONFIG["message_broker"])
     multiprocessing.Process(target=run_monitor).start()
-    multiprocessing.Process(target=create_new_job, args=(payload,)).start()
+    if payload:
+        multiprocessing.Process(target=create_new_job, args=(payload,)).start()
     job_orchestrator.run()
 
 
@@ -97,8 +74,13 @@ def test_failure():
     test_job_orchestrator({"type": "batch", "initializing_timeout": 600})
 
 
+def test_run():
+    test_job_orchestrator()
+
+
 if __name__ == "__main__":
     # test_success()
     # test_stalled()
-    test_timeout()
+    # test_timeout()
     # test_failure()
+    test_run()
