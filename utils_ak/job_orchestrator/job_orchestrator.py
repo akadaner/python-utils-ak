@@ -76,7 +76,7 @@ class JobOrchestrator:
         )
 
         params = {
-            "deployment_id": str(worker_model.id),
+            "deployment_id": worker_model.id,
             "payload": worker_model.job.payload,
             "image": worker_model.job.runnable.get("image", ""),
             "main_file_path": worker_model.job.runnable.get("main_file_path", ""),
@@ -152,7 +152,7 @@ class JobOrchestrator:
                 another_worker_id=worker.job.locked_by.id,
             )
             logger.info("Stopping worker", id=id)
-            self.controller.stop(id)
+            self.controller.stop(str(id))
             return
 
         self._update_worker_status(worker, old_status, new_status, state)

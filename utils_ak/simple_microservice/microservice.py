@@ -36,7 +36,6 @@ class SimpleMicroservice(object):
 
         self.logger = logger or global_logger
         self.logger = self.logger.bind(microservice_id=str(id))
-        self.logger = self.logger.patch(patch_trace)
 
         self.default_exception_timeout = 10.0
         self.max_exception_timeout = 3600
