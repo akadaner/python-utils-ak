@@ -32,7 +32,7 @@ class MicroserviceWorker(Worker):
         )
 
         self.microservice.add_timer(
-            self.process, interval=1, n_times=1
+            self.process, interval=60.0, n_times=1, counter_type="left"
         )  # run once on init
 
     def send_state(self, status, state):

@@ -7,6 +7,7 @@ from dateutil import rrule
 from datetime import datetime, timedelta
 from utils_ak.time import cast_sec, cast_timedelta
 
+from loguru import logger
 
 TIME_EPS = 0.001
 
@@ -20,6 +21,7 @@ class CallbackTimer:
         interval,
         timer_type="right",
         n_times=None,
+        counter_type="left",
         args=None,
         kwargs=None,
     ):
@@ -30,13 +32,9 @@ class CallbackTimer:
         self.interval = cast_sec(interval)
         self.last_call = 0
         self.timer_type = timer_type
-
+        self.counter_type = counter_type
         self.args = args or tuple()
         self.kwargs = kwargs or {}
-
-        if timer_type not in ["right", "left"]:
-            raise Exception("Only right/left timer is supported")
-
         self.n_times = n_times
         self.counter = 0
 
@@ -66,8 +64,10 @@ class CallbackTimer:
         return False
 
     def run(self):
+        if self.n_times and self.counter_type == "left":
+            self.counter += 1
         res = self.callback(*self.args, **self.kwargs)
-        if self.n_times:
+        if self.n_times and self.counter_type == "right":
             self.counter += 1
         return res
 
@@ -88,12 +88,17 @@ class CallbackTimer:
         return False
 
     async def run_async(self):
+        if self.n_times and self.counter_type == "left":
+            self.counter += 1
+
         if inspect.iscoroutinefunction(self.callback):
             res = await self.callback(*self.args, **self.kwargs)
         else:
             res = self.callback(*self.args, **self.kwargs)
-        if self.n_times:
+
+        if self.n_times and self.counter_type == "right":
             self.counter += 1
+
         return res
 
 

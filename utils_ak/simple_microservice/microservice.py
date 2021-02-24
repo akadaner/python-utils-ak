@@ -16,7 +16,13 @@ TIME_EPS = 0.001
 class SimpleMicroservice(object):
     """ Microservice base class with timers and subscriber. Works on asyncio. """
 
-    def __init__(self, id, message_broker, logger=None, coder=None):
+    def __init__(
+        self,
+        id,
+        message_broker,
+        logger=None,
+        coder=None,
+    ):
         self.id = id
 
         # aio
@@ -128,7 +134,7 @@ class SimpleMicroservice(object):
                 try:
                     ran = await timer.run_if_possible_async()
 
-                    if ran and self.fail_count != 0:
+                    if ran and self.fail_count:
                         self.logger.debug("Success. Resetting the failure counter")
                         self.fail_count = 0
 
@@ -182,7 +188,7 @@ class SimpleMicroservice(object):
 
         return f()
 
-    def _aiorun(self):
+    def _run_async(self):
         self.loop = asyncio.get_event_loop()
         self.logger.info("Microservice started")
 
@@ -247,7 +253,7 @@ class SimpleMicroservice(object):
 
     def run(self, asyncio=True):
         if asyncio:
-            return self._aiorun()
+            return self._run_async()
         else:
             return self._run()
 
