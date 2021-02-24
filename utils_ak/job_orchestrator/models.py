@@ -17,7 +17,7 @@ class Job(Document):
     params = DictField()
 
     running_timeout = IntField()
-    initializing_timeout = IntField(default=10.0, required=True)
+    initializing_timeout = IntField(default=20.0, required=True)
 
     status = StringField(
         required=True,
