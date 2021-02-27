@@ -27,7 +27,7 @@ class IterativePusher:
     def __call__(self, *args, **kwargs):
         return self.push(*args, **kwargs)
 
-    def push(self, parent, block, validator, iter_props=None, max_tries=24):
+    def push(self, parent, block, validator, iter_props=None, max_tries=300):
         self.parent = parent
         self.block = block
 
@@ -54,6 +54,12 @@ class IterativePusher:
 
             self.update(results)
             cur_try += 1
+
+        logger.info(
+            "Failed to push element",
+            parent=parent.props["cls"],
+            block=block.props["cls"],
+        )
         raise AssertionError("Failed to push element")
 
 
