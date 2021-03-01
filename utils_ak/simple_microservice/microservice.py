@@ -13,7 +13,7 @@ from loguru import logger as global_logger
 TIME_EPS = 0.001
 
 
-class SimpleMicroservice(object):
+class SimpleMicroservice:
     """ Microservice base class with timers and subscriber. Works on asyncio. """
 
     def __init__(
