@@ -66,9 +66,19 @@ class SimpleIterator:
             yield next
             counter += 1
 
-    def iter_sequences(self, n=2):
+    def iter_sequences(self, n=2, method="all"):
+        assert method in ["all", "any"]
+
+        if method == "any":
+            for i in range(n - 1, 0, -1):
+                yield [None] * i + self.lst[: n - i]
+
         for i in range(len(self) - n + 1):
             yield self.lst[i : i + n]
+
+        if method == "any":
+            for i in range(1, n):
+                yield self.lst[len(self) - n + i : len(self)] + [None] * i
 
     def reset(self):
         self.current_index = 0
@@ -90,7 +100,11 @@ def test_simple_bounded_iterator():
     for i in range(5):
         print(it.prev(return_first_if_out=True))
 
+    print("Sequences")
     for seq in it.iter_sequences(2):
+        print(seq)
+
+    for seq in it.iter_sequences(3, method="any"):
         print(seq)
 
     it.reset()
