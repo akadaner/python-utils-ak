@@ -43,10 +43,11 @@ def format_with_trace(record):
     format = "<green>{time:YYYY-MM-DD HH:mm:ss!UTC}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan> - <level>{message}</level>"
 
     if record["exception"]:
-        for key in ["_stack", "_error", "_original_extra"]:
-            assert key not in record["extra"]
+        assert all(
+            key in record["extra"] for key in ["_stack", "_error", "_original_extra"]
+        )
+        assert all(key not in record["extra"] for key in ["_stack", "_error"])
 
-        assert "_stack" not in record["extra"] and "_error" not in record["extra"]
         record["extra"]["_stack"] = _get_stack(record["exception"])
         record["extra"]["_error"] = record["extra"]["_stack"].split("\n")[-1]
         original_extra = dict(record["extra"])
