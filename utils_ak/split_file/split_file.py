@@ -1,13 +1,15 @@
 import os
 import glob
 
+from utils_ak.os import list_files
+
 
 class SplitFile:
     def __init__(self, fn):
         self.fn = fn
 
     def list(self):
-        return glob.glob(os.path.splitext(self.fn)[0] + "*")
+        return list_files(os.path.splitext(self.fn)[0] + "*")
 
     def get_indexes(self):
         cur_indexes = []
