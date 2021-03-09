@@ -69,16 +69,14 @@ class SimpleIterator:
     def iter_sequences(self, n=2, method="all"):
         assert method in ["all", "any"]
 
-        if method == "any":
-            for i in range(n - 1, 0, -1):
-                yield [None] * i + self.lst[: n - i]
+        if method == "all":
+            lst = self.lst
+        elif method == "any":
+            # todo: optimize without creating a new list
+            lst = [None] * (n - 1) + self.lst + [None] * (n - 1)
 
-        for i in range(len(self) - n + 1):
-            yield self.lst[i : i + n]
-
-        if method == "any":
-            for i in range(1, n):
-                yield self.lst[len(self) - n + i : len(self)] + [None] * i
+        for i in range(len(lst) - n + 1):
+            yield lst[i : i + n]
 
     def reset(self):
         self.current_index = 0
@@ -88,31 +86,43 @@ def test_simple_bounded_iterator():
     lst = [1, 2, 3, 4]
     it = SimpleIterator(lst)
 
+    print("Iter up")
     for v in it.iter("up"):
         print(v)
-    print()
+    print("Iter down")
     for v in it.iter("down"):
         print(v)
-    print()
+    print("return_last_if_out: false")
     for i in range(5):
         print(it.next(return_last_if_out=False))
-    print()
+    print("return_last_if_out: true")
     for i in range(5):
         print(it.prev(return_first_if_out=True))
 
     print("Sequences")
+    print("all-2")
     for seq in it.iter_sequences(2):
         print(seq)
 
-    for seq in it.iter_sequences(3, method="any"):
+    print("any-2")
+    for seq in it.iter_sequences(2, method="any"):
+        print(seq)
+
+    print("all-5")
+    for seq in it.iter_sequences(5):
+        print(seq)
+
+    print("any-5")
+    for seq in it.iter_sequences(5, method="any"):
         print(seq)
 
     it.reset()
-
+    print("Step-2")
     for v in it.iter(step=2):
         print(v)
     it.reset()
 
+    print("limit-2")
     for v in it.iter(limit=2):
         print(v)
 
