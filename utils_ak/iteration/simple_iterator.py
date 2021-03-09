@@ -73,6 +73,8 @@ class SimpleIterator:
             for i in range(len(self.lst) - n + 1):
                 yield self.lst[i : i + n]
         elif method == "any":
+            if not self.lst:
+                return
             # todo: refactor using compound lists
             nones = [None] * (n - 1)
             for i in range(len(self.lst) + n - 1):
@@ -116,6 +118,10 @@ def test_simple_bounded_iterator():
 
     print("any-5")
     for seq in it.iter_sequences(5, method="any"):
+        print(seq)
+
+    print("Empty list, any")
+    for seq in SimpleIterator([]).iter_sequences(5, method="any"):
         print(seq)
 
     it.reset()
