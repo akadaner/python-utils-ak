@@ -66,7 +66,7 @@ class SimpleIterator:
             yield next
             counter += 1
 
-    def iter_sequences(self, n=2, method="all"):
+    def iter_sequences(self, n=2, method="all", none_object=None):
         assert method in ["all", "any"]
 
         if method == "all":
@@ -76,7 +76,7 @@ class SimpleIterator:
             if not self.lst:
                 return
             # todo: refactor using compound lists
-            nones = [None] * (n - 1)
+            nones = [none_object] * (n - 1)
             for i in range(len(self.lst) + n - 1):
                 yield nones[i:] + self.lst[max(i + 1 - n, 0) : i + 1] + nones[
                     len(self.lst) + n - 2 - i :
