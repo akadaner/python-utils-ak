@@ -70,13 +70,15 @@ class SimpleIterator:
         assert method in ["all", "any"]
 
         if method == "all":
-            lst = self.lst
+            for i in range(len(self.lst) - n + 1):
+                yield self.lst[i : i + n]
         elif method == "any":
-            # todo: optimize without creating a new list
-            lst = [None] * (n - 1) + self.lst + [None] * (n - 1)
-
-        for i in range(len(lst) - n + 1):
-            yield lst[i : i + n]
+            # todo: refactor using compound lists
+            nones = [None] * (n - 1)
+            for i in range(len(self.lst) + n - 1):
+                yield nones[i:] + self.lst[max(i + 1 - n, 0) : i + 1] + nones[
+                    len(self.lst) + n - 2 - i :
+                ]
 
     def reset(self):
         self.current_index = 0
