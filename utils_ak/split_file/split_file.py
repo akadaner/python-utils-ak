@@ -9,7 +9,13 @@ class SplitFile:
         self.fn = fn
 
     def list(self):
-        return list_files(os.path.splitext(self.fn)[0] + "*")
+        return list_files(
+            os.path.dirname(fn),
+            pattern=os.path.join(
+                os.path.dirname(fn), os.path.splitext(os.path.basename(fn))[0]
+            )
+            + "*",
+        )
 
     def get_indexes(self):
         cur_indexes = []
