@@ -67,17 +67,23 @@ class SimpleIterator:
             counter += 1
 
     def iter_sequences(self, n=2, method="all", none_object=None):
-        assert method in ["all", "any"]
+        assert method in ["all", "any", "any_prefix", "any_suffix"]
 
         if method == "all":
             for i in range(len(self.lst) - n + 1):
                 yield self.lst[i : i + n]
-        elif method == "any":
+        elif method.startswith("any"):
             if not self.lst:
                 return
             # todo: refactor using compound lists
             nones = [none_object] * (n - 1)
             for i in range(len(self.lst) + n - 1):
+                if method == "any_suffix" and i < n - 1:
+                    continue
+
+                if method == "any_prefix" and i > len(self.lst) - 1:
+                    continue
+
                 yield nones[i:] + self.lst[max(i + 1 - n, 0) : i + 1] + nones[
                     len(self.lst) + n - 2 - i :
                 ]
@@ -118,6 +124,14 @@ def test_simple_bounded_iterator():
 
     print("any-5")
     for seq in it.iter_sequences(5, method="any"):
+        print(seq)
+
+    print("any_prefix-5")
+    for seq in it.iter_sequences(5, method="any_prefix"):
+        print(seq)
+
+    print("any_suffix-5")
+    for seq in it.iter_sequences(5, method="any_suffix"):
         print(seq)
 
     print("Empty list, any")
