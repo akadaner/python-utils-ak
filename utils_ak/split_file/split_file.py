@@ -10,9 +10,9 @@ class SplitFile:
 
     def list(self):
         return list_files(
-            os.path.dirname(fn),
+            os.path.dirname(self.fn),
             pattern=os.path.join(
-                os.path.dirname(fn), os.path.splitext(os.path.basename(fn))[0]
+                os.path.dirname(self.fn), os.path.splitext(os.path.basename(self.fn))[0]
             )
             + "*",
         )
