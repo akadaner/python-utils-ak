@@ -97,9 +97,8 @@ class ParallelepipedBlock(Block):
                 if not self.children:
                     values.append(0)
                 else:
-                    values.append(
-                        max([c.y[axis] - self.x[axis] for c in self.children])
-                    )
+                    start = min([c.x[axis] for c in self.children] + [self.x[axis]])
+                    values.append(max([c.y[axis] - start for c in self.children]))
             else:
                 values.append(size[axis])
         return SimpleVector(values)
