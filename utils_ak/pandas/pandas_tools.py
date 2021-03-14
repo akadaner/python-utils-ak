@@ -224,6 +224,7 @@ def mark_consecutive_groups(df, key, groups_key):
 
 
 def df_to_tree(df, recursive=True):
+    df = df.copy()
     if len(df.columns) == 1:
         return list(set(df[df.columns[0]].tolist()))
 
@@ -238,9 +239,13 @@ def df_to_tree(df, recursive=True):
     return res
 
 
-def df_to_ordered_tree(df, recursive=True):
+def df_to_ordered_tree(df, recursive=True, prune_last=True):
+    df = df.copy()
     if len(df.columns) == 1:
-        return remove_neighbor_duplicates(df[df.columns[0]].tolist())
+        res = df[df.columns[0]].tolist()
+        if prune_last:
+            res = remove_neighbor_duplicates(res)
+        return res
 
     res = []
     pre_res = []
@@ -252,7 +257,7 @@ def df_to_ordered_tree(df, recursive=True):
         grp.pop(col)
         grp.pop("__key")
         if recursive:
-            child = df_to_ordered_tree(grp, recursive=True)
+            child = df_to_ordered_tree(grp, recursive=True, prune_last=prune_last)
         else:
             child = grp
         pre_res.append((value[0], value[1], child))
@@ -309,11 +314,14 @@ def test_tree():
             ["B", "b", "b2"],
             ["A", "c", "c1"],
             ["A", "c", "c2"],
+            ["A", "c", "c2"],
         ],
         columns=["col1", "col2", "col3"],
     )
+    print(df)
     print(df_to_tree(df))
     print(df_to_ordered_tree(df))
+    print(df_to_ordered_tree(df, prune_last=False))
 
 
 if __name__ == "__main__":
