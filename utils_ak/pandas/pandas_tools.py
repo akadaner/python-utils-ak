@@ -8,7 +8,7 @@ from PIL import Image
 from io import BytesIO
 
 from utils_ak.os import *
-from utils_ak.builtin import iter_get
+from utils_ak.builtin import iter_get, remove_neighbor_duplicates
 
 pd.set_option("display.max_colwidth", None)
 
@@ -225,7 +225,7 @@ def mark_consecutive_groups(df, key, groups_key):
 
 def df_to_tree(df, recursive=True):
     if len(df.columns) == 1:
-        return df[df.columns[0]].tolist()
+        return list(set(df[df.columns[0]].tolist()))
 
     res = {}
 
@@ -240,7 +240,7 @@ def df_to_tree(df, recursive=True):
 
 def df_to_ordered_tree(df, recursive=True):
     if len(df.columns) == 1:
-        return df[df.columns[0]].tolist()
+        return remove_neighbor_duplicates(df[df.columns[0]].tolist())
 
     res = []
     pre_res = []
@@ -256,6 +256,7 @@ def df_to_ordered_tree(df, recursive=True):
         else:
             child = grp
         pre_res.append((value[0], value[1], child))
+
     pre_res = list(
         sorted(
             pre_res,
@@ -303,6 +304,7 @@ def test_tree():
         [
             ["A", "a", "a1"],
             ["A", "a", "a2"],
+            ["A", "a", "a1"],
             ["B", "b", "b1"],
             ["B", "b", "b2"],
             ["A", "c", "c1"],
