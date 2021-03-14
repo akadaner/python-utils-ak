@@ -238,6 +238,35 @@ def df_to_tree(df, recursive=True):
     return res
 
 
+def df_to_ordered_tree(df, recursive=True):
+    if len(df.columns) == 1:
+        return df[df.columns[0]].tolist()
+
+    res = []
+    pre_res = []
+
+    col = df.columns[0]
+    mark_consecutive_groups(df, col, "__key")
+
+    for value, grp in df.groupby([col, "__key"]):
+        grp.pop(col)
+        grp.pop("__key")
+        if recursive:
+            child = df_to_ordered_tree(grp, recursive=True)
+        else:
+            child = grp
+        pre_res.append((value[0], value[1], child))
+    pre_res = list(
+        sorted(
+            pre_res,
+            key=lambda obj: df[(df[col] == obj[0]) & (df["__key"] == obj[1])].iloc[0][
+                "__key"
+            ],
+        )
+    )
+    return [(x[0], x[2]) for x in pre_res]
+
+
 def test():
     df1 = pd.DataFrame.from_dict({"a": [1, 2, 3], "b": [4, 5, 6], "c": [1, 1, 1]})
     df1 = df1.set_index("c")
@@ -274,14 +303,15 @@ def test_tree():
         [
             ["A", "a", "a1"],
             ["A", "a", "a2"],
-            ["A", "b", "b1"],
-            ["A", "b", "b2"],
+            ["B", "b", "b1"],
+            ["B", "b", "b2"],
             ["A", "c", "c1"],
             ["A", "c", "c2"],
         ],
         columns=["col1", "col2", "col3"],
     )
     print(df_to_tree(df))
+    print(df_to_ordered_tree(df))
 
 
 if __name__ == "__main__":
