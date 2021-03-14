@@ -223,7 +223,22 @@ def mark_consecutive_groups(df, key, groups_key):
     df[groups_key] = values
 
 
-if __name__ == "__main__":
+def df_to_tree(df, recursive=True):
+    if len(df.columns) == 1:
+        return df[df.columns[0]].tolist()
+
+    res = {}
+
+    for value, grp in df.groupby(df.columns[0]):
+        grp.pop(df.columns[0])
+        if recursive:
+            res[value] = df_to_tree(grp, recursive=True)
+        else:
+            res[value] = grp
+    return res
+
+
+def test():
     df1 = pd.DataFrame.from_dict({"a": [1, 2, 3], "b": [4, 5, 6], "c": [1, 1, 1]})
     df1 = df1.set_index("c")
     df2 = pd.DataFrame.from_dict({"a": [3, 4, 5], "b": [7, 8, 9]})
@@ -236,19 +251,39 @@ if __name__ == "__main__":
 
     dfs = [df1, df2]
 
-    print(merge(dfs, index=False, by="a"))
+    print(merge(dfs, by_index=False, by="a"))
     print()
-    print(merge(dfs, index=True, by="a"))
+    print(merge(dfs, by_index=True, by="a"))
     print()
-    print(merge(dfs, index=True, by=None))
+    print(merge(dfs, by_index=True, by=None))
     print()
-    print(merge(dfs, index=True, by=None, keep="first"))
+    print(merge(dfs, by_index=True, by=None, keep="first"))
     print()
-    print(merge(dfs, index=True, by="all", keep="first"))
+    print(merge(dfs, by_index=True, by="all", keep="first"))
 
     try:
-        print(merge(dfs, index=False, by=None))
+        print(merge(dfs, by_index=False, by=None))
     except Exception as e:
         print(e)
     else:
         raise Exception("Should not happen")
+
+
+def test_tree():
+    df = pd.DataFrame(
+        [
+            ["A", "a", "a1"],
+            ["A", "a", "a2"],
+            ["A", "b", "b1"],
+            ["A", "b", "b2"],
+            ["A", "c", "c1"],
+            ["A", "c", "c2"],
+        ],
+        columns=["col1", "col2", "col3"],
+    )
+    print(df_to_tree(df))
+
+
+if __name__ == "__main__":
+    test()
+    test_tree()

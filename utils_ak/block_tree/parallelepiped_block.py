@@ -98,6 +98,7 @@ class ParallelepipedBlock(Block):
                     values.append(0)
                 else:
                     start = min([c.x[axis] for c in self.children] + [self.x[axis]])
+                    # start = self.x[axis]
                     values.append(max([c.y[axis] - start for c in self.children]))
             else:
                 values.append(size[axis])
