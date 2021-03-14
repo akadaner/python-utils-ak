@@ -14,6 +14,9 @@ def stack_push(parent, block):
     )
 
     x = block.props.get("x", cast_simple_vector(block.n_dims))
+
+    assert not x[axis], "Cannot push non-zero axis"
+
     x[axis] = cur_end
     block.props.update(x=x)
     return add_push(parent, block)
