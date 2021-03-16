@@ -64,9 +64,10 @@ class IterativePusher:
 
 
 class AxisPusher(IterativePusher):
-    def __init__(self, start_from="last_end"):
+    def __init__(self, start_from="last_end", start_shift=0):
         super().__init__()
         self.start_from = start_from
+        self.start_shift = start_shift
 
     def init(self):
         self.axis = self.parent.props["axis"]
@@ -95,6 +96,9 @@ class AxisPusher(IterativePusher):
                     )
                 else:
                     raise Exception("Unknown beg type")
+        cur_start += self.start_shift
+        cur_start = max(cur_start, 0)
+
         self.cur_x = cast_simple_vector(self.block.n_dims)
         self.cur_x[self.axis] = cur_start
         self.block.props.update(x=self.cur_x)

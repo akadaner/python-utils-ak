@@ -15,6 +15,17 @@ def to_lower_name(upper_case_name):
     return res
 
 
+def to_upper_case(lower_case_name, camel=False):
+    values = lower_case_name.split("_")
+    values = [v.title() for v in values]
+    if camel:
+        first = values[0]
+        values[0] = first[0].lower() + first[1:]
+    return "".join(values)
+
+
 if __name__ == "__main__":
     print(to_lower_name("camelCase"))  # camel_case
     print(to_lower_name("UpperCase"))  # upper_case
+    print(to_upper_case("upper_case"))  # upper_case
+    print(to_upper_case("upper_case", camel=True))  # upper_case
