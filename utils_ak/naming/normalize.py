@@ -16,9 +16,8 @@ def to_lower_case(upper_case_name):
 
 
 def to_upper_case(lower_case_name, camel=False):
-    assert all(not c.isupper() for c in lower_case_name)
     values = lower_case_name.split("_")
-    values = [v.title() for v in values]
+    values = [v[0].upper() + v[1:] for v in values]
     if camel:
         first = values[0]
         values[0] = first[0].lower() + first[1:]
@@ -31,11 +30,8 @@ def test():
     assert to_lower_case("upper_case") == "upper_case"
     assert to_upper_case("upper_case") == "UpperCase"
     assert to_upper_case("upper_case", camel=True) == "upperCase"
-
-    try:
-        to_upper_case("UpperCase") == "UpperCase"
-    except AssertionError:
-        print("Wrong input")
+    assert to_upper_case("UpperCase") == "UpperCase"
+    assert to_upper_case("UpperCase", camel=True) == "upperCase"
 
 
 if __name__ == "__main__":

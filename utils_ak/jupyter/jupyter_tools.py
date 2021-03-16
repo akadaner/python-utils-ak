@@ -65,7 +65,7 @@ def parse_cells(notebook_code):
     return cells[1:]
 
 
-def is_in_ipynb():
+def is_running_in_ipython():
     try:
         cfg = get_ipython().config
         if cfg["IPKernelApp"]["parent_appname"] == "ipython-notebook":
@@ -76,8 +76,22 @@ def is_in_ipynb():
         return False
 
 
+def is_running_in_jupyter():
+    # https://stackoverflow.com/questions/15411967/how-can-i-check-if-code-is-executed-in-the-ipython-notebook
+    try:
+        shell = get_ipython().__class__.__name__
+        if shell == "ZMQInteractiveShell":
+            return True  # Jupyter notebook or qtconsole
+        elif shell == "TerminalInteractiveShell":
+            return False  # Terminal running IPython
+        else:
+            return False  # Other type (?)
+    except NameError:
+        return False  # Probably standard Python interpreter
+
+
 def safe_display(obj):
-    if is_in_ipynb():
+    if is_running_in_ipython():
         from IPython.display import display
 
         display(obj)
@@ -86,7 +100,7 @@ def safe_display(obj):
 
 
 def safe_markdown(obj):
-    if is_in_ipynb():
+    if is_running_in_ipython():
         from IPython.display import Markdown
 
         Markdown(obj)

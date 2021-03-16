@@ -92,6 +92,14 @@ class SimpleIterator:
         self.current_index = 0
 
 
+def iter_sequences(lst, *args, **kwargs):
+    yield from SimpleIterator(lst).iter_sequences(*args, **kwargs)
+
+
+def iter_pairs(lst, *args, **kwargs):
+    yield from iter_sequences(lst, 2, *args, **kwargs)
+
+
 def test_simple_bounded_iterator():
     lst = [1, 2, 3, 4]
     it = SimpleIterator(lst)
@@ -146,6 +154,14 @@ def test_simple_bounded_iterator():
 
     print("limit-2")
     for v in it.iter(limit=2):
+        print(v)
+
+    print("iter_sequences")
+    for v in iter_sequences(list(range(5)), n=3, method="all"):
+        print(v)
+
+    print("iter_pairs")
+    for v in iter_pairs(list(range(5)), method="any_prefix"):
         print(v)
 
 

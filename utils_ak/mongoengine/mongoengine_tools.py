@@ -1,6 +1,5 @@
-from utils_ak.builtin import update_dic
-
 from bson.objectid import ObjectId
+from mongoengine import Document
 
 
 def cast_object_id(obj):
@@ -17,19 +16,16 @@ def cast_object_id(obj):
 
 
 def cast_model(obj, cls):
-    if isinstance(obj, ObjectId):
-        return cast_model({"_id": obj}, cls)
+    if isinstance(obj, ObjectId) or isinstance(obj, str):
+        object_id = cast_object_id(obj)
+        return cast_model({"_id": object_id}, cls)
     elif isinstance(obj, dict):
         if "_id" in obj:
             # fetch and return updated version from server
             element = cls.objects(pk=obj["_id"]).first()
             if not element:
                 raise Exception("Object not found")
-            db_obj = cast_model(element, cls)
-            pk = obj["_id"]
-            d1, d2 = db_obj.to_mongo(), dict(obj)
-            d1.pop("_id", None), d2.pop("_id", None)
-            return cls(pk=pk, **update_dic(d1, d2))
+            return element
         else:
             # init
             return cls(**obj)
@@ -39,8 +35,12 @@ def cast_model(obj, cls):
         raise Exception("Unknown model format")
 
 
-def cast_dict(obj, cls):
-    model = cast_model(obj, cls=cls)
-    res = dict(model.to_mongo())
-    res["_cls"] = cls.__name__
-    return res
+def cast_dict(obj):
+    if isinstance(obj, dict):
+        return obj
+    elif isinstance(obj, Document):
+        res = dict(obj.to_mongo())
+        res["_cls"] = obj.__class__.__name__
+        return res
+    else:
+        raise Exception("Unknown dict type")
