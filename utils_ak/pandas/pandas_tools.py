@@ -188,14 +188,21 @@ def find_gaps(index, gap):
 
 
 # todo: search for existing solutions
-def pd_read(fn, **kwargs):
+def pd_read(fn, index_column=None, **kwargs):
     ext = os.path.splitext(fn)[-1]
     if ".zip" in ext:
         ext = os.path.splitext(fn[:-4])[-1]
-    return getattr(pd, f"read_{ext[1:]}")(fn, **kwargs)
+    df = getattr(pd, f"read_{ext[1:]}")(fn, **kwargs)
+    if index_column:
+        df = df.set_index(index_column)
+    return df
 
 
-def pd_write(df, fn, **kwargs):
+def pd_write(df, fn, index_column=None, **kwargs):
+    """NOTE: index is dropped when writing pandas dataframe."""
+    if index_column:
+        df = df.reset_index()
+        df[index_column] = df.pop("index")
     ext = os.path.splitext(fn)[-1]
     if ".zip" in ext:
         ext = os.path.splitext(fn[:-4])[-1]
