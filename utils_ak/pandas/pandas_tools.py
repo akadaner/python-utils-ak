@@ -223,17 +223,20 @@ def mark_consecutive_groups(df, key, groups_key):
     df[groups_key] = values
 
 
-def df_to_tree(df, recursive=True):
+def df_to_tree(df, recursive=True, delistify=False):
     df = df.copy()
     if len(df.columns) == 1:
-        return list(set(df[df.columns[0]].tolist()))
+        res = list(set(df[df.columns[0]].tolist()))
+        if delistify and len(res) == 1:
+            res = res[0]
+        return res
 
     res = {}
 
     for value, grp in df.groupby(df.columns[0]):
         grp.pop(df.columns[0])
         if recursive:
-            res[value] = df_to_tree(grp, recursive=True)
+            res[value] = df_to_tree(grp, recursive=True, delistify=delistify)
         else:
             res[value] = grp
     return res

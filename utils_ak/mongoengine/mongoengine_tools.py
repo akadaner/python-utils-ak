@@ -15,10 +15,10 @@ def cast_object_id(obj):
         raise Exception("Unknown object id type")
 
 
-def cast_model(obj, cls):
+def cast_model_object(obj, cls):
     if isinstance(obj, ObjectId) or isinstance(obj, str):
         object_id = cast_object_id(obj)
-        return cast_model({"_id": object_id}, cls)
+        return cast_model_object({"_id": object_id}, cls)
     elif isinstance(obj, dict):
         if "_id" in obj:
             # fetch and return updated version from server
