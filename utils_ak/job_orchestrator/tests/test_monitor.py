@@ -5,17 +5,12 @@ import multiprocessing
 
 from utils_ak.loguru import configure_loguru_stdout
 from utils_ak.simple_microservice import SimpleMicroservice, run_listener_async
-from utils_ak.job_orchestrator.worker.test import TestWorker
+from utils_ak.job_orchestrator.worker.test.test_worker import TestWorker
 from utils_ak.job_orchestrator.monitor import Monitor
 
-BROKER = "zmq"
-BROKER_CONFIG = {
-    "endpoints": {
-        "monitor_in": {"endpoint": "tcp://localhost:5555", "type": "sub"},
-        "monitor_out": {"endpoint": "tcp://localhost:5556", "type": "sub"},
-    }
-}
-MESSAGE_BROKER = (BROKER, BROKER_CONFIG)
+from utils_ak.job_orchestrator.tests.config import settings
+
+MESSAGE_BROKER = settings.as_dict()["TRANSPORT"]["message_broker"]
 
 
 def run_monitor():
@@ -26,7 +21,10 @@ def run_monitor():
 
 def run_worker():
     configure_loguru_stdout("DEBUG")
-    worker = TestWorker("WorkerId", {"type": "batch", "message_broker": MESSAGE_BROKER})
+    worker = TestWorker(
+        "WorkerId",
+        {"type": "batch", "message_broker": MESSAGE_BROKER},
+    )
     worker.run()
 
 

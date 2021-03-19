@@ -201,8 +201,9 @@ def pd_read(fn, index_column=None, **kwargs):
 def pd_write(df, fn, index_column=None, **kwargs):
     """NOTE: index is dropped when writing pandas dataframe."""
     if index_column:
+        prev_index_column = df.index.name or "index"
         df = df.reset_index()
-        df[index_column] = df.pop("index")
+        df[index_column] = df.pop(prev_index_column)
     ext = os.path.splitext(fn)[-1]
     if ".zip" in ext:
         ext = os.path.splitext(fn[:-4])[-1]

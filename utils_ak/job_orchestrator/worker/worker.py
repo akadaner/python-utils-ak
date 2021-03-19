@@ -32,7 +32,7 @@ class MicroserviceWorker(Worker):
         )
 
         self.microservice.add_timer(
-            self.process, interval=1.0, n_times=1, counter_type="left"
+            self.process, n_times=1, counter_type="left"
         )  # run once on init
 
     def send_state(self, status, state):
@@ -48,9 +48,6 @@ class MicroserviceWorker(Worker):
         self.microservice.run()
 
 
-def run_worker(worker_cls, config=None):
-    config = config or os.environ.get("CONFIG")
-    assert config is not None, "Config not specified"
-    config = cast_dict_or_list(config)
-    worker = worker_cls(config["worker_id"], config["payload"])
+def run_worker(worker_cls, worker_config):
+    worker = worker_cls(worker_config["worker_id"], worker_config["payload"])
     worker.run()

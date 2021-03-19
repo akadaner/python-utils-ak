@@ -1,6 +1,6 @@
 import asyncio
 from utils_ak.job_orchestrator.worker.worker import MicroserviceWorker
-from utils_ak.job_orchestrator.worker.worker_test import *
+from utils_ak.job_orchestrator.worker.test_worker import *
 
 
 class TestWorker(MicroserviceWorker):
@@ -27,65 +27,3 @@ class TestWorker(MicroserviceWorker):
                 time.sleep(3)
         else:
             raise Exception(f'Bad payload type {self.payload.get("type")}')
-
-
-def test_batch():
-    test_microservice_worker(
-        TestWorker,
-        {
-            "type": "batch",
-            "message_broker": (
-                "zmq",
-                {
-                    "endpoints": {
-                        "monitor_in": {
-                            "endpoint": "tcp://localhost:5555",
-                            "type": "sub",
-                        }
-                    }
-                },
-            ),
-        },
-        run_listener=False,
-    )
-
-
-def test_streaming():
-    test_microservice_worker(
-        TestWorker,
-        {
-            "type": "streaming",
-            "message_broker": (
-                "zmq",
-                {
-                    "endpoints": {
-                        "monitor_in": {
-                            "endpoint": "tcp://localhost:5555",
-                            "type": "sub",
-                        }
-                    }
-                },
-            ),
-        },
-        run_listener=False,
-    )
-
-
-def test_deployment():
-    test_microservice_worker_deployment(
-        "sample_deployment.yml",
-        message_broker=(
-            "zmq",
-            {
-                "endpoints": {
-                    "monitor_in": {"endpoint": "tcp://localhost:5555", "type": "sub"}
-                }
-            },
-        ),
-    )
-
-
-if __name__ == "__main__":
-    test_batch()
-    # test_streaming()
-    # test_deployment()

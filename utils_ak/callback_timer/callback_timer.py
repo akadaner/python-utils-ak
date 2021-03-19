@@ -16,7 +16,7 @@ class CallbackTimer:
     def __init__(
         self,
         callback,
-        interval,
+        interval=1.0,
         timer_type="right",
         n_times=None,
         counter_type="left",

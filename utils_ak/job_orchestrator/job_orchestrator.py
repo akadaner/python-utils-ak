@@ -6,8 +6,6 @@ from utils_ak.simple_microservice import SimpleMicroservice
 from utils_ak.dict import fill_template
 from utils_ak.coder.coders.json import cast_dict_or_list
 
-from utils_ak.job_orchestrator.config import BASE_DIR
-
 from .models import Job, Worker
 
 
@@ -80,7 +78,7 @@ class JobOrchestrator:
 
     def _create_deployment(self, worker_model):
         deployment = cast_dict_or_list(
-            os.path.join(BASE_DIR, "worker/deployment.yml.template")
+            os.path.join(os.path.dirname(__file__), "worker/deployment.yml.template")
         )
 
         params = {
