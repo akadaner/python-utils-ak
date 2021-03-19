@@ -3,7 +3,7 @@ containers:
   hello-world:
     image: akadaner/hello-world
     # test file for for processor_controller
-    main_file_path: C:\Users\Mi\Desktop\master\code\git\python-utils-ak\utils_ak\deployment\example\main.py
+    main_file_path: /Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/python-utils-ak/utils_ak/deployment/example/main.py
     command_line_arguments:
       name: Friend
       beep: True

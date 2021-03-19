@@ -34,6 +34,8 @@ class ProcessController(Controller):
                 js = js.replace('"', r"\"")
                 js = f'"{js}"'
                 cmd += js
+            elif isinstance(v, bool):
+                cmd += "True"
             else:
                 raise Exception("Unknown command line argument type")
 

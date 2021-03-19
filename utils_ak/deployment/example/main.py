@@ -7,9 +7,10 @@ from datetime import datetime
 
 # todo: make beep properly
 
+from utils_ak.deployment.example.config import settings
 
-def main(name=None, run_forever=True, beep=False):
-    telegram_bot_token = "<telegram_bot_token>"
+
+def main(name=None, run_forever=True, beep=True):
     telegram = get_notifier("telegram")
 
     name = name or os.environ.get("NAME") or "World"
@@ -19,8 +20,8 @@ def main(name=None, run_forever=True, beep=False):
         for i in range(5):
             telegram.notify(
                 message=f"Hi! from {datetime.now()}",
-                token=telegram_bot_token,
-                chat_id=160773045,
+                token=settings["telegram_bot_token"],
+                chat_id=settings["telegram_chat_id"],
             )
             time.sleep(2)
 

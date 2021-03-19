@@ -17,8 +17,10 @@ MESSAGE_BROKER = settings.as_dict()["TRANSPORT"]["message_broker"]
 
 
 def create_new_job(payload):
-    connect_to_mongodb(host="")
     configure_loguru_stdout("DEBUG")
+    connect_to_mongodb(
+        host=settings.job_queue.mongodb_host, db=settings.job_queue.mongodb_db
+    )
     logger.info("Connected to mongodb")
     time.sleep(2)
     logger.debug("Creating new job...")
