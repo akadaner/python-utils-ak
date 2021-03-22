@@ -107,7 +107,7 @@ class AxisPusher(IterativePusher):
         dispositions = [result.get("disposition", None) for result in results]
         dispositions = [d for d in dispositions if d is not None]
         disposition = min(dispositions) if len(dispositions) == len(results) else 1
-        logger.debug("Disposition", disposition=disposition)
+        # logger.debug("Disposition", disposition=disposition)
         self.cur_x[self.axis] += disposition
         self.block.props.update(x=self.cur_x)
 

@@ -38,7 +38,6 @@ class ProcessController(Controller):
                 cmd += "True"
             else:
                 raise Exception("Unknown command line argument type")
-
         self.processes[id] = execute(cmd, is_async=True)
 
     def stop(self, deployment_id):

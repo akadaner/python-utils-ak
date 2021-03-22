@@ -20,8 +20,10 @@ class PandasSplitCombineETL:
         df = combined
         df["_key"] = self.key_func(df)
         df.columns = [str(c) for c in df.columns]
+
         if not df.index.name:
             df.index.name = "index"
+
         df = df.reset_index()
         for key, split in df.groupby("_key"):
             yield key, split.drop(["_key"], axis=1)
@@ -79,8 +81,26 @@ class PandasSplitCombineETL:
         return self._combine(splits_dic)
 
 
+def write_pandas_granular(
+    df, path, key_func=None, prefix="", extension=".csv", merge_by=None
+):
+    return PandasSplitCombineETL(
+        path, key_func, prefix, extension, merge_by
+    ).split_and_load(df)
+
+
+def read_pandas_granular(
+    path, key_func=None, prefix="", extension=".csv", merge_by=None
+):
+    return PandasSplitCombineETL(
+        path, key_func, prefix, extension, merge_by
+    ).extract_and_combine()
+
+
 def test_pandas_split_combine_etl():
-    from utils_ak import cast_dt, remove_path
+    import time
+    from utils_ak.time import cast_dt
+    from utils_ak.os import remove_path
 
     df = pd.DataFrame(
         list(range(100)),
@@ -88,17 +108,18 @@ def test_pandas_split_combine_etl():
     )
 
     etl = PandasSplitCombineETL(
-        path="data/",
+        path="test-data/",
         extension=".parquet",
         key_func=lambda df: pd.Series(df.index, index=df.index).apply(
             lambda dt: cast_str(dt, "%Y%m")
         ),
     )
+
     etl.split_and_load(df)
+
     print(etl.extract_and_combine())
 
-    for key in etl._get_keys():
-        remove_path(etl._fn(key))
+    remove_path("test-data/")
 
 
 if __name__ == "__main__":
