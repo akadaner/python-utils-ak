@@ -16,7 +16,7 @@ def main(name=None, run_forever=True, beep=True):
     name = name or os.environ.get("NAME") or "World"
     logger.info(f"Hello {name}!")
 
-    if beep:
+    if beep and settings.get("telegram_bot_token"):
         for i in range(5):
             telegram.notify(
                 message=f"Hi! from {datetime.now()}",

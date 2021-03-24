@@ -7,25 +7,19 @@ from loguru import logger
 
 
 def validate_disjoint_by_axis(b1, b2, axis=0):
+    validate_disjoint_by_intervals((b1.x[axis], b1.y[axis]), (b2.x[axis], b2.y[axis]))
+
+
+def validate_disjoint_by_intervals(i1, i2):
     try:
-        disposition = int(b1.y[axis] - b2.x[axis])
+        disposition = int(i1[1] - i2[0])
     except:
         disposition = 1
 
-    i1 = cast_interval(b1.x[axis], b1.y[axis])
-    i2 = cast_interval(b2.x[axis], b2.y[axis])
+    i1 = cast_interval(*i1)
+    i2 = cast_interval(*i2)
 
     assert calc_interval_length(i1 & i2) == 0, cast_js({"disposition": disposition})
-
-    if disposition > 0:
-        logger.debug(
-            "Disposition",
-            result={
-                "disposition": disposition,
-                "cls1": b1.props["cls"],
-                "cls2": b2.props["cls"],
-            },
-        )
 
 
 def test_validate_disjoint_by_axis():
