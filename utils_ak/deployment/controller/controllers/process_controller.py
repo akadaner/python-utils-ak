@@ -19,12 +19,12 @@ class ProcessController(Controller):
         ), "Only one-container pods are supported for now"
 
         entity, container = delistify_single(deployment["containers"].items())
-        main_file_path = container["main_file_path"]
+        python_main_path = container["python_main"]
         command_line_arguments = {}
         for k, v in container["command_line_arguments"].items():
             command_line_arguments[k] = v
 
-        cmd = f'python "{main_file_path}"'
+        cmd = f'python "{python_main_path}"'
         for k, v in command_line_arguments.items():
             cmd += f" --{k} "
             if isinstance(v, str):

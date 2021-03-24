@@ -2,9 +2,10 @@ id: deployment_id
 containers:
   test-worker:
     image: akadaner/test-worker
+    python_main: /Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/python-utils-ak/utils_ak/job_orchestrator/worker/test/main.py
     command_line_arguments:
-      config:
+      worker_config:
         worker_id: deployment_id
         payload:
-            type: batch
-            message_broker: ["zmq", {'endpoints': {'monitor_in': {'endpoint': "tcp://host.docker.internal:5555", 'type': "sub"}}}]
+            type: streaming
+            message_broker: ["zmq", {'endpoints': {'monitor_in': {'endpoint': "tcp://localhost:5555", 'type': "sub"}}}]
