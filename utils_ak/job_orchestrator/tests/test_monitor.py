@@ -1,14 +1,13 @@
 import time
-import logging
 import multiprocessing
 
 
 from utils_ak.loguru import configure_loguru_stdout
-from utils_ak.simple_microservice import SimpleMicroservice, run_listener_async
+from utils_ak.simple_microservice import run_listener_async
 from utils_ak.job_orchestrator.worker.test.test_worker import TestWorker
 from utils_ak.job_orchestrator.monitor import Monitor
 
-from utils_ak.job_orchestrator.tests.config import settings
+from utils_ak.job_orchestrator.config import settings
 
 MESSAGE_BROKER = settings.as_dict()["TRANSPORT"]["message_broker"]
 

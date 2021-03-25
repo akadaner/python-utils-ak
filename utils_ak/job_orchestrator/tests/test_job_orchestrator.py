@@ -10,7 +10,7 @@ from utils_ak.loguru import configure_loguru_stdout
 from utils_ak.job_orchestrator.job_orchestrator import JobOrchestrator
 from utils_ak.job_orchestrator.models import *
 
-from utils_ak.job_orchestrator.tests.config import settings
+from utils_ak.job_orchestrator.config import settings
 from utils_ak.job_orchestrator.tests.test_monitor import run_monitor
 
 MESSAGE_BROKER = settings.as_dict()["TRANSPORT"]["message_broker"]
@@ -39,9 +39,9 @@ def create_new_job(payload):
         payload=payload,
         runnable={
             "image": "akadaner/test-worker",
-            "main_file_path": "/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/python-utils-ak/utils_ak/job_orchestrator/worker/test/main.py",
+            "python_main": "/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/python-utils-ak/utils_ak/job_orchestrator/worker/test/main.py",
         },
-        running_timeout=10,
+        running_timeout=15,
     )
     job.save()
 
@@ -84,8 +84,8 @@ def test_run():
 
 
 if __name__ == "__main__":
-    test_success()
+    # test_success()
     # test_stalled()
     # test_timeout()
     # test_failure()
-    # test_run()
+    test_run()

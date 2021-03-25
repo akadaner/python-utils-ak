@@ -2,8 +2,8 @@ id: "{deployment_id}"
 containers:
   test-worker:
     image: "{image}"
-    main_file_path: "{main_file_path}"
+    python_main: "{python_main}"
     command_line_arguments:
-      config:
+      worker_config:
         worker_id: "{deployment_id}"
         payload: "{payload}"

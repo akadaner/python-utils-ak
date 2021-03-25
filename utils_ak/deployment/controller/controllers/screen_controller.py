@@ -4,6 +4,8 @@ from utils_ak.os import *
 from utils_ak.builtin import *
 from utils_ak.deployment.controller.test_controller import test_controller
 
+""" NOTE: NOT WORKING PROPERLY FOR UNKNOWN REASONS (screen session missing/ process not killed after screen session is terminated. """
+
 
 class ScreenController(Controller):
     def start(self, deployment):

@@ -39,25 +39,77 @@ def format_as_json(record):
     return "{extra[_json]}\n"
 
 
-def format_with_trace(record):
-    format = "<green>{time:YYYY-MM-DD HH:mm:ss!UTC}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan> - <level>{message}</level>"
+def time_formatter(record):
+    return "<green>{time:YYYY-MM-DD HH:mm:ss!UTC}</green>"
 
-    if record["exception"]:
-        assert all(
-            key in record["extra"] for key in ["_stack", "_error", "_original_extra"]
-        )
-        assert all(key not in record["extra"] for key in ["_stack", "_error"])
 
-        record["extra"]["_stack"] = _get_stack(record["exception"])
-        record["extra"]["_error"] = record["extra"]["_stack"].split("\n")[-1]
-        original_extra = dict(record["extra"])
-        original_extra.pop("_stack")
-        original_extra.pop("_error")
-        record["extra"]["_original_extra"] = original_extra
-        format += " | <yellow>{extra[_original_extra]}</yellow> | <red>{extra[_error]}</red>\n<red>{extra[_stack]}</red>\n"
-    else:
-        format += " | <yellow>{extra}</yellow>\n"
-    return format
+def level_formatter(record):
+    return "<level>{level: <8}</level>"
+
+
+def name_formatter(record):
+    return "<cyan>{name}</cyan>"
+
+
+def message_formatter(record):
+    return "<level>{message}</level>"
+
+
+def module_formatter(record):
+    return "<cyan>{module}</cyan>"
+
+
+def extra_formatter(record, fancy=True):
+    if fancy:
+
+        values = []
+        for i, (k, v) in enumerate(record["extra"]["_extra"].items()):
+            values.append(
+                ": ".join(
+                    [
+                        f"<magenta>{{extra[_extra_{2 * i}]}}</magenta>",
+                        f"<yellow>{{extra[_extra_{2 * i + 1}]}}</yellow>",
+                    ]
+                )
+            )
+            record["extra"][f"_extra_{2 * i}"] = k
+            record["extra"][f"_extra_{2 * i + 1}"] = v
+        return ", ".join(values)
+
+    return "<yellow>{extra[_extra]}</yellow>"
+
+
+def exception_formatter(record):
+    if not record["exception"]:
+        return
+
+    assert all(key not in record["extra"] for key in ["_stack", "_error"])
+
+    record["extra"]["_stack"] = _get_stack(record["exception"])
+    record["extra"]["_error"] = record["extra"]["_stack"].split("\n")[-1]
+    _extra = dict(record["extra"])
+    _extra.pop("_stack")
+    _extra.pop("_error")
+    record["extra"]["_extra"] = _extra
+    return "<red>{extra[_error]}</red>\n<red>{extra[_stack]}</red>"
+
+
+def format_with_trace(
+    record,
+    formatters=(
+        time_formatter,
+        module_formatter,
+        message_formatter,
+        extra_formatter,
+        exception_formatter,
+    ),
+    separator=" | ",
+):
+    # workaround for custom extra
+    record["extra"]["_extra"] = dict(record["extra"])
+    values = [formatter(record) for formatter in formatters]
+    values = [value for value in values if value]
+    return separator.join(values) + "\n"
 
 
 def configure_loguru_stdout(

@@ -85,7 +85,7 @@ class JobOrchestrator:
             "deployment_id": str(worker_model.id),
             "payload": worker_model.job.payload,
             "image": worker_model.job.runnable.get("image", ""),
-            "main_file_path": worker_model.job.runnable.get("main_file_path", ""),
+            "python_main": worker_model.job.runnable.get("python_main", ""),
         }
         deployment = fill_template(deployment, **params)
         return deployment

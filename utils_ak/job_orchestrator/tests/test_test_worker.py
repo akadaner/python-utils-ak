@@ -1,5 +1,5 @@
 from utils_ak.job_orchestrator.worker.test.test_worker import *
-from utils_ak.job_orchestrator.tests.config import settings
+from utils_ak.job_orchestrator.config import settings
 from utils_ak.deployment import *
 
 MESSAGE_BROKER = settings.as_dict()["TRANSPORT"]["message_broker"]
@@ -22,7 +22,7 @@ def test_streaming():
 
 
 def test_deployment():
-    controller = ScreenController()
+    controller = ProcessController()
     test_microservice_worker_deployment(
         "../worker/test/sample_deployment.yml", controller, MESSAGE_BROKER
     )
@@ -30,5 +30,5 @@ def test_deployment():
 
 if __name__ == "__main__":
     # test_batch()
-    # test_streaming()
-    test_deployment()
+    test_streaming()
+    # test_deployment()
