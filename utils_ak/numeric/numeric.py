@@ -28,17 +28,21 @@ def decimal_round(a, b, rounding="nearest_half_even", precision=0, strip=False):
     n = a / b / D(".1") ** precision
     rounding = ROUND_DIC.get(rounding, rounding)
     n = n.quantize(D("1."), rounding=rounding)
-    res = n * b * D("0.1") ** precision
+    res = n * b * D(".1") ** precision
     if strip:
         res = strip_decimal(res)
     return res
 
 
 # be careful to use this for precise values: rounding 5. to 1. with floor method may result in 4 due to python floating system (5. == 4.99999999999) in python and stuff
-def custom_round(a, b, rounding="nearest_half_even", precision=0):
-    n = a / b / 0.1 ** precision
+def custom_round(
+    a, b, rounding="nearest_half_even", precision=0, pre_round_precision=0
+):
+    if pre_round_precision:
+        a = custom_round(a, b, "nearest_half_down", precision + pre_round_precision)
+    n = a / b * (10 ** precision)
     n = int(decimal_round(n, 1, rounding))
-    return n * b * 0.1 ** precision
+    return n * b / (10 ** precision)
 
 
 def cast_decimal(f, precision=15, strip=True):
@@ -58,7 +62,7 @@ def strip_zeros(s):
     return s.rstrip("0").rstrip(".") if "." in s else s
 
 
-if __name__ == "__main__":
+def test():
     roundings = [
         ROUND_HALF_DOWN,
         ROUND_DOWN,
@@ -86,3 +90,10 @@ if __name__ == "__main__":
     print(
         decimal_round(1.99, "0.0100", rounding="ROUND_FLOOR", precision=10, strip=True)
     )
+
+    print(custom_round(1.9999999, 1.0, rounding="floor"))
+    print(custom_round(1.99999999, 1.0, rounding="floor", pre_round_precision=1))
+
+
+if __name__ == "__main__":
+    test()

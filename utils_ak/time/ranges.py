@@ -54,10 +54,16 @@ def iter_range(beg, end, period):
         beg = next_beg
 
 
-def datetime_range(beg, end, period):
-    while beg < end:
-        yield beg
-        beg = min(beg + period, end)
+def datetime_range(beg, period=None, end=None, n=None):
+    if end:
+        while beg < end:
+            yield beg
+            beg = min(beg + period, end)
+    elif n:
+        for i in range(n):
+            yield beg + i * period
+    else:
+        raise Exception("end or n not specified")
 
 
 def test_ranges():
@@ -96,6 +102,19 @@ def test_ranges():
     )
 
     print(list(iter_quarters(cast_datetime("2020.02.15"), cast_datetime("2020.07.15"))))
+
+    print(
+        list(
+            datetime_range(
+                cast_datetime("2020.01.01"),
+                period=timedelta(days=1),
+                end=cast_datetime("2020.01.04"),
+            )
+        )
+    )
+    print(
+        list(datetime_range(cast_datetime("2020.01.01"), period=timedelta(days=1), n=3))
+    )
 
 
 if __name__ == "__main__":

@@ -32,7 +32,6 @@ def test_stack_push():
     logger.debug(root)
 
 
-@clockify()
 def simple_push(parent, block, validator=None, new_props=None):
     block.set_parent(parent)
 

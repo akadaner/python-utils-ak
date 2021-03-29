@@ -1,6 +1,7 @@
 import time
 from loguru import logger
 from utils_ak.simple_microservice import run_listener_async
+from utils_ak.job_orchestrator.worker.worker import run_worker
 
 
 def test_microservice_worker(worker_cls, payload, run_listener=True):
@@ -10,8 +11,7 @@ def test_microservice_worker(worker_cls, payload, run_listener=True):
     if run_listener:
         run_listener_async("monitor_in", message_broker=payload["message_broker"])
     time.sleep(2)
-    worker = worker_cls("worker_id", payload)
-    worker.run()
+    run_worker(worker_cls, {"worker_id": "worker_id", "payload": payload})
     logger.info("Finished batch")
 
 
