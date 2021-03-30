@@ -2,15 +2,19 @@ import pandas as pd
 import fnmatch
 import os
 
-from utils_ak.os import execute
+from utils_ak.os import *
 
 from loguru import logger
 
 
 class ScreenClient:
     def start(self, name, cmd):
+        makedirs("logs/")
         logger.info(f"Starting screen {name} with command {cmd}")
-        execute(f'screen -dm -S {name} bash -c "{cmd}"', is_async=True)
+        execute(
+            f'screen -dm -S {name} -L -Logfile logs/{name}.log bash -c "{cmd}"',
+            is_async=True,
+        )
 
     def start_python(self, name, path, **kwargs):
         if not os.path.exists(path):
@@ -75,13 +79,22 @@ class ScreenClient:
 
 
 def test():
+    import time
+
     cli = ScreenClient()
     cli.start("test", "sleep 10")
     print(cli.list())
     print(cli.list("t*"))
     print(cli.list("b*"))  # empty
+    time.sleep(1)
     cli.kill("t*")
     print(cli.list())
+
+    print(cli.start_python("hello-world", "tests/hello_world.py"))
+    print(cli.list("hello-world"))
+    time.sleep(1)
+    cli.kill("hello-world")
+    print(cli.list("hello-world"))
 
 
 if __name__ == "__main__":
