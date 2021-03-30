@@ -9,10 +9,10 @@ from loguru import logger
 
 class ScreenClient:
     def start(self, name, cmd):
-        makedirs("logs/")
+        makedirs("screen_logs/")
         logger.info(f"Starting screen {name} with command {cmd}")
         execute(
-            f'screen -dm -S {name} -L -Logfile logs/{name}.log bash -c "{cmd}"',
+            f'screen -dm -S {name} -L -Logfile screen_logs/{name}.log bash -c "{cmd}"',
             is_async=True,
         )
 
