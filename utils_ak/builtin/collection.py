@@ -109,6 +109,10 @@ def unfold_dic(dic, keys, get=False, default=None):
         return [dic[key] for key in keys]
 
 
+def recycle_list(lst, idx):
+    return (lst * 2)[idx % len(lst) :][: len(lst)]
+
+
 def test_collection():
     d1 = {"k1": {"k3": 4}}
     d2 = {"k1": {"k3": [2, 3]}}
@@ -146,6 +150,10 @@ def test_collection():
             ]
         )
     )
+
+    lst = [1, 2, 3, 4]
+    print(lst)
+    print(recycle_list(lst, 2))
 
 
 if __name__ == "__main__":

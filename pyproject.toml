@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "utils-ak"
-version = "0.1.6"
+version = "0.1.9"
 description = "Lots of small utils"
 authors = ["akadaner <arseniikadaner@gmail.com>"]
 license = "MIT"
@@ -40,7 +40,6 @@ loguru = "^0.5.3"
 pyperclip = "^1.8.1"
 msgpack = "^1.0.2"
 sortedcollections = "^2.1.0"
-PyYAML = "^5.4.1"
 openpyxl = "^3.0.6"
 portion = "^2.1.4"
 fire = "^0.4.0"
