@@ -4,7 +4,6 @@ import numpy as np
 import os
 import base64
 
-from PIL import Image
 from io import BytesIO
 
 from utils_ak.os import *
@@ -15,6 +14,7 @@ pd.set_option("display.max_colwidth", None)
 
 def display_with_image_thumbnails(df, shape=None):
     from IPython.display import HTML, display
+    from PIL import Image
 
     def _get_thumbnail(path, shape=None):
         if shape is None:
