@@ -1,5 +1,6 @@
 from .broker import Broker
-from utils_ak.message_queue.clients.kafka_client import KafkaClient
+
+# from utils_ak.message_queue.clients.kafka_client import KafkaClient
 
 import logging
 

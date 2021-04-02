@@ -1,4 +1,4 @@
-from utils_ak.kafka.kafka_adapter import KafkaAdapter
+from utils_ak.kafka.archive.kafka_adapter import KafkaAdapter
 
 import logging
 
