@@ -100,6 +100,11 @@ class CallbackTimer:
         return res
 
 
+# todo: may skip second run for some reason (example runs for 3 seconds)
+# 2021-04-03 14:37:05 | pipeline | Updating dataset | dataset: binance_timebars_1800
+# 2021-04-03 14:38:00 | pipeline | Updating dataset | dataset: binance_timebars_1800
+# does not work properly for long first runs -> queued
+
 class ScheduleTimer:
     """ Run callback function at schedule. """
 
