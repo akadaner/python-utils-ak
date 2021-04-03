@@ -210,6 +210,9 @@ def pd_write(df, fn, index_column=None, **kwargs):
         kwargs["compression"] = "zip"
     kwargs["index"] = False
 
+    if ext[1:] == "hdf" and "key" not in kwargs:
+        kwargs["key"] = "key"
+
     tmp_fn = fn + ".tmp"
     res = getattr(df, f"to_{ext[1:]}")(tmp_fn, **kwargs)
     if os.path.exists(fn):
@@ -335,6 +338,19 @@ def test_tree():
     print(df_to_ordered_tree(df, prune_last=False))
 
 
+def test_read_write():
+    df = pd.DataFrame.from_dict({"a": [1, 2, 3], "b": [4, 5, 6], "c": [1, 1, 1]})
+    for fn in ["tmp.parquet", "tmp.csv"]:
+        pd_write(df, fn)
+        print(pd_read(fn))
+        remove_path(fn)
+
+    pd_write(df, "tmp.hdf")
+    print(pd_read("tmp.hdf"))
+    remove_path("tmp.hdf")
+
+
 if __name__ == "__main__":
     test()
     test_tree()
+    test_read_write()
