@@ -192,7 +192,13 @@ def pd_read(fn, index_column=None, **kwargs):
     ext = os.path.splitext(fn)[-1]
     if ".zip" in ext:
         ext = os.path.splitext(fn[:-4])[-1]
-    df = getattr(pd, f"read_{ext[1:]}")(fn, **kwargs)
+
+    if ext == ".msgpack":
+        from mbf_pandas_msgpack import read_msgpack
+
+        df = read_msgpack(fn)
+    else:
+        df = getattr(pd, f"read_{ext[1:]}")(fn, **kwargs)
     if index_column:
         df = df.set_index(index_column)
     return df
@@ -208,13 +214,20 @@ def pd_write(df, fn, index_column=None, **kwargs):
     if ".zip" in ext:
         ext = os.path.splitext(fn[:-4])[-1]
         kwargs["compression"] = "zip"
+
     kwargs["index"] = False
 
-    if ext[1:] == "hdf" and "key" not in kwargs:
+    if ext == ".hdf" and "key" not in kwargs:
         kwargs["key"] = "key"
 
     tmp_fn = fn + ".tmp"
-    res = getattr(df, f"to_{ext[1:]}")(tmp_fn, **kwargs)
+
+    if ext == ".msgpack":
+        from mbf_pandas_msgpack import to_msgpack
+
+        res = to_msgpack(tmp_fn, df)
+    else:
+        res = getattr(df, f"to_{ext[1:]}")(tmp_fn, **kwargs)
     if os.path.exists(fn):
         remove_path(fn)
     rename_path(tmp_fn, fn)
@@ -339,8 +352,13 @@ def test_tree():
 
 
 def test_read_write():
-    df = pd.DataFrame.from_dict({"a": [1, 2, 3], "b": [4, 5, 6], "c": [1, 1, 1]})
-    for fn in ["tmp.parquet", "tmp.csv"]:
+    from datetime import datetime, timedelta
+
+    df = pd.DataFrame.from_dict(
+        {"a": [datetime(2020, 1, 1)] * 3, "b": [4, 5, 6], "c": [1, 1, 1]}
+    )
+
+    for fn in ["tmp.parquet", "tmp.csv", "tmp.msgpack"]:
         pd_write(df, fn)
         print(pd_read(fn))
         remove_path(fn)
