@@ -192,7 +192,6 @@ def pd_read(fn, index_column=None, **kwargs):
     ext = os.path.splitext(fn)[-1]
     if ".zip" in ext:
         ext = os.path.splitext(fn[:-4])[-1]
-    print(fn, ext)
     if ext == ".msgpack":
         from mbf_pandas_msgpack import read_msgpack
 
