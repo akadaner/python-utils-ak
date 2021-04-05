@@ -299,6 +299,19 @@ def df_to_ordered_tree(df, recursive=True, prune_last=True):
     return [(x[0], x[2]) for x in pre_res]
 
 
+def crop_invalid_edges(df, side="all"):
+    if side in ["prefix", "all"]:
+        first_idx = df.first_valid_index()
+    else:
+        first_idx = None
+
+    if side in ["suffix", "all"]:
+        last_idx = df.last_valid_index()
+    else:
+        last_idx = None
+    return df.loc[first_idx:last_idx]
+
+
 def test():
     df1 = pd.DataFrame.from_dict({"a": [1, 2, 3], "b": [4, 5, 6], "c": [1, 1, 1]})
     df1 = df1.set_index("c")
@@ -367,7 +380,26 @@ def test_read_write():
     remove_path("tmp.hdf")
 
 
+def test_crop_invalid_edges():
+    df = pd.DataFrame(
+        [
+            [np.nan, np.nan, np.nan],
+            ["A", np.nan, "a2"],
+            ["A", "c", "c2"],
+            ["A", "c", "c2"],
+            [np.nan, np.nan, np.nan],
+        ],
+        columns=["col1", "col2", "col3"],
+    )
+
+    print(df)
+    print(crop_invalid_edges(df, "all"))
+    print(crop_invalid_edges(df, "prefix"))
+    print(crop_invalid_edges(df, "suffix"))
+
+
 if __name__ == "__main__":
     test()
     test_tree()
     test_read_write()
+    test_crop_invalid_edges()
