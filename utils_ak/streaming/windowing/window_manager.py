@@ -1,4 +1,4 @@
-import logging
+from loguru import logger
 
 
 class WindowManager:
@@ -17,7 +17,7 @@ class BasicWindowManager:
 
         window = self.windows[key]
         if window.state == "closed":
-            logging.warning(f"Trying to add value to a closed window {key}")
+            logger.warning(f"Trying to add value to a closed window {key}")
 
         window.add(value)
 

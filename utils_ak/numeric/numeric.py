@@ -34,12 +34,17 @@ def decimal_round(a, b, rounding="nearest_half_even", precision=0, strip=False):
     return res
 
 
-# be careful to use this for precise values: rounding 5. to 1. with floor method may result in 4 due to python floating system (5. == 4.99999999999) in python and stuff
 def custom_round(
-    a, b, rounding="nearest_half_even", precision=0, pre_round_precision=0
+    a, b, rounding="nearest_half_even", precision=0, pre_round_precision=1
 ):
     if pre_round_precision:
-        a = custom_round(a, b, "nearest_half_down", precision + pre_round_precision)
+        a = custom_round(
+            a,
+            b,
+            "nearest_half_down",
+            precision + pre_round_precision,
+            pre_round_precision=0,
+        )
     n = a / b * (10 ** precision)
     n = int(decimal_round(n, 1, rounding))
     return n * b / (10 ** precision)
