@@ -55,6 +55,28 @@ class ParallelepipedBlock(Block):
     def y(self):
         return self.x + self.size
 
+    def to_dict(self, prop_keys=None, with_children=True):
+        prop_keys = prop_keys or []
+
+        res = {}
+        res["cls"] = self.props["cls"]
+
+        res["props"] = {}
+        for prop_key in prop_keys:
+            if isinstance(prop_key, str):
+                res["props"][prop_key] = self.props.get(prop_key)
+            elif isinstance(prop_key, (tuple, list)):
+                _prop_key, _prop_func = prop_key
+                if isinstance(_prop_func, str):
+                    _prop_func = lambda b: b.props.get(_prop_key)
+                res["props"][_prop_key] = _prop_func(self)
+
+        if with_children:
+            res["children"] = [
+                child.to_dict(prop_keys, with_children) for child in self.children
+            ]
+        return res
+
     def __str__(self):
         res = (
             self.props["cls"]
@@ -123,6 +145,16 @@ def test_parallelepiped_block():
     print(a["b"]["c"])
 
     print(a.__repr__())
+
+    print(a.to_dict())
+    print(
+        a.to_dict(
+            [
+                ("x", lambda b: list(b.props["x"])),
+                ("size", lambda b: list(b.props["size"])),
+            ]
+        )
+    )
 
 
 if __name__ == "__main__":
