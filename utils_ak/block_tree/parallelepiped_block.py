@@ -55,25 +55,34 @@ class ParallelepipedBlock(Block):
     def y(self):
         return self.x + self.size
 
-    def to_dict(self, prop_keys=None, with_children=True):
-        prop_keys = prop_keys or []
+    def to_dict(self, props=None, with_children=True):
+        props = props or []
 
         res = {}
         res["cls"] = self.props["cls"]
 
         res["props"] = {}
-        for prop_key in prop_keys:
-            if isinstance(prop_key, str):
-                res["props"][prop_key] = self.props.get(prop_key)
-            elif isinstance(prop_key, (tuple, list)):
-                _prop_key, _prop_func = prop_key
-                if isinstance(_prop_func, str):
-                    _prop_func = lambda b: b.props.get(_prop_key)
-                res["props"][_prop_key] = _prop_func(self)
+
+        for prop in props:
+            if isinstance(prop, str):
+                res["props"][prop] = self.props.get(prop)
+
+            elif isinstance(prop, dict):
+                if "cls" not in prop or (
+                    "cls" in prop and self.props["cls"] == prop["cls"]
+                ):
+                    key = prop["key"]
+                    value = prop["value"]
+                    if isinstance(value, str):
+                        res["props"][key] = self.props[key]
+                    elif callable(value):
+                        res["props"][key] = value(self)
+                    else:
+                        raise Exception("Value should be either callable or string")
 
         if with_children:
             res["children"] = [
-                child.to_dict(prop_keys, with_children) for child in self.children
+                child.to_dict(props, with_children) for child in self.children
             ]
         return res
 
@@ -147,14 +156,7 @@ def test_parallelepiped_block():
     print(a.__repr__())
 
     print(a.to_dict())
-    print(
-        a.to_dict(
-            [
-                ("x", lambda b: list(b.props["x"])),
-                ("size", lambda b: list(b.props["size"])),
-            ]
-        )
-    )
+    print(a.to_dict(["x", {"key": "size", "value": lambda b: list(b.props["size"])}]))
 
 
 if __name__ == "__main__":
