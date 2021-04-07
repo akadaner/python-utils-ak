@@ -32,15 +32,7 @@ class Pong(SimpleMicroservice):
 def run_ping():
     configure_loguru_stdout("TRACE")
     ping = Ping(
-        message_broker=(
-            "zmq",
-            {
-                "endpoints": {
-                    "ping": {"type": "sub", "endpoint": endpoint("localhost", 6554)},
-                    "pong": {"type": "sub", "endpoint": endpoint("localhost", 6555)},
-                }
-            },
-        ),
+        message_broker=("kafka", {}),
     )
 
     ping.run()
@@ -50,15 +42,7 @@ def run_pong():
     configure_loguru_stdout("TRACE")
 
     Pong(
-        message_broker=(
-            "zmq",
-            {
-                "endpoints": {
-                    "ping": {"type": "sub", "endpoint": endpoint("localhost", 6554)},
-                    "pong": {"type": "sub", "endpoint": endpoint("localhost", 6555)},
-                }
-            },
-        ),
+        message_broker=("kafka", {}),
     ).run()
 
 

@@ -46,6 +46,9 @@ class KafkaClient:
         self.producer.produce(topic, msg)
         self.producer.poll(0)
 
+    def flush(self, timeout=0):
+        self.producer.flush(timeout)
+
     def poll(self, timeout=0.0):
         self.start_listening()
         return self.consumer.poll(timeout)
@@ -54,4 +57,3 @@ class KafkaClient:
         if not self.init_subscriptions:
             self.consumer.subscribe(self.kafka_topics)
             self.init_subscriptions = True
-

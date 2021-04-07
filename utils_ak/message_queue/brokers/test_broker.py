@@ -1,10 +1,12 @@
-def test_broker(broker):
-    collection = "collection"
-    topic = "topic"
-    # message = "message".encode("utf-8")
-    # for i in range(100):
-    #     broker.publish(collection, topic, message)
+import time
 
+
+def test_broker(broker, collection="collection", topic=""):
+    message = "message".encode("utf-8")
+    for i in range(100):
+        broker.publish(collection, topic, message)
+
+    time.sleep(1)
     broker.subscribe(collection, topic)
 
     i = 0
@@ -27,9 +29,10 @@ def test_kafka_broker():
     test_broker(
         KafkaBroker(
             consumer_config={"default.topic.config": {"auto.offset.reset": "smallest"}}
-        )
+        ),
+        topic="",
     )
 
 
-if __name__ == "__main__":
+if __name__ == "__main_ _":
     test_kafka_broker()
