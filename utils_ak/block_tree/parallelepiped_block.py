@@ -72,7 +72,7 @@ class ParallelepipedBlock(Block):
                     "cls" in prop and self.props["cls"] == prop["cls"]
                 ):
                     key = prop["key"]
-                    value = prop["value"]
+                    value = prop.get("value", key)
                     if isinstance(value, str):
                         res["props"][key] = self.props[key]
                     elif callable(value):
