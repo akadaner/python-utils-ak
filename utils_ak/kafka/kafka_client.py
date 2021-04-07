@@ -1,4 +1,5 @@
-from confluent_kafka import Producer, Consumer
+import kafka  # todo: move to kafka fully
+
 import uuid
 
 from utils_ak.builtin import update_dic
@@ -6,19 +7,19 @@ from copy import deepcopy
 
 
 DEFAULT_CONSUMER_CONFIG = {
-    "bootstrap.servers": "localhost:9092",
-    "group.id": str(uuid.uuid4()),  # todo: make properly
-    "default.topic.config": {"auto.offset.reset": "largest"},
-    "enable.auto.commit": False,
-    "enable.partition.eof": False,
+    "bootstrap_servers": "localhost:9092",
+    "group_id": str(uuid.uuid4()),  # todo: make properly
+    # "default.topic.config": {"auto.offset.reset": "largest"},
+    # "enable.auto.commit": False,
+    # "enable.partition.eof": False,
 }
 
 DEFAULT_PRODUCER_CONFIG = {
-    "bootstrap.servers": "localhost:9092",
-    "queue.buffering.max.ms": 1,
-    "queue.buffering.max.messages": 1000000,
-    "max.in.flight.requests.per.connection": 1,
-    "default.topic.config": {"acks": "all"},
+    "bootstrap_servers": "localhost:9092",
+    # "queue.buffering.max.ms": 1,
+    # "queue.buffering.max.messages": 1000000,
+    # "max.in.flight.requests.per.connection": 1,
+    # "default.topic.config": {"acks": "all"},
 }
 
 
@@ -29,12 +30,12 @@ class KafkaClient:
         consumer_config = consumer_config or {}
         self.consumer_config = deepcopy(DEFAULT_CONSUMER_CONFIG)
         self.consumer_config = update_dic(self.consumer_config, consumer_config)
-        self.consumer = Consumer(self.consumer_config)
+        self.consumer = kafka.KafkaConsumer(**self.consumer_config)
 
         producer_config = producer_config or {}
         self.producer_config = deepcopy(DEFAULT_PRODUCER_CONFIG)
         self.producer_config = update_dic(self.producer_config, producer_config)
-        self.producer = Producer(self.producer_config)
+        self.producer = kafka.KafkaProducer(**self.producer_config)
 
         self.init_subscriptions = False
 
@@ -43,11 +44,11 @@ class KafkaClient:
             self.kafka_topics.append(topic)
 
     def publish(self, topic, msg):
-        self.producer.produce(topic, msg)
-        self.producer.poll(0)
+        self.producer.send(topic, msg)
 
     def flush(self, timeout=0):
-        self.producer.flush(timeout)
+        # self.producer.flush(timeout)
+        pass
 
     def poll(self, timeout=0.0):
         self.start_listening()
@@ -55,5 +56,14 @@ class KafkaClient:
 
     def start_listening(self):
         if not self.init_subscriptions:
+            # current_kafka_topics = self._get_kafka_topics()
+            # for topic in self.kafka_topics:
+            #     if topic not in current_kafka_topics:
             self.consumer.subscribe(self.kafka_topics)
             self.init_subscriptions = True
+
+    def _get_kafka_topics(self):
+        consumer = kafka.KafkaConsumer(
+            group_id=str(uuid.uuid4()), bootstrap_servers="localhost:9092"
+        )
+        return consumer.topics()

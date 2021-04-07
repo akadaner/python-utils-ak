@@ -8,9 +8,7 @@ from utils_ak.kafka.kafka_client import KafkaClient
 
 
 def test():
-    cli = KafkaClient(
-        consumer_config={"default.topic.config": {"auto.offset.reset": "smallest"}}
-    )
+    cli = KafkaClient(consumer_config={"auto_offset_reset": "smallest"})
 
     for i in range(10):
         cli.publish("collection", b"this is my message to youuu")
@@ -26,9 +24,8 @@ def test():
         msg = cli.poll()
         if not msg:
             continue
-        print(msg, msg.offset(), msg.value())
+        print(msg)
         print(i)
-
         i += 1
 
 

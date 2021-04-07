@@ -11,12 +11,12 @@ def test_broker(broker, collection="collection", topic=""):
 
     i = 0
     while True:
-        msg = broker.poll()
+        messages = broker.poll()
 
-        if not msg:
+        if not messages:
             continue
 
-        print(i, msg)
+        print(i, messages)
 
         i += 1
         if i == 100:
@@ -27,12 +27,10 @@ def test_kafka_broker():
     from utils_ak.message_queue.brokers import KafkaBroker
 
     test_broker(
-        KafkaBroker(
-            consumer_config={"default.topic.config": {"auto.offset.reset": "smallest"}}
-        ),
+        KafkaBroker(consumer_config={"auto_offset_reset": "smallest"}),
         topic="",
     )
 
 
-if __name__ == "__main_ _":
+if __name__ == "__main__":
     test_kafka_broker()

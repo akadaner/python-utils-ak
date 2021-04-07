@@ -29,22 +29,12 @@ class KafkaBroker(Broker):
         self.cli.subscribe(self._get_kafka_topic(collection, topic))
 
     def poll(self, timeout=0.0):
-        received_message = self.cli.poll(timeout)
-
-        if not received_message:
+        response = self.cli.poll(timeout)
+        if not response:
             return
-
-        kafka_topic, msg = received_message.topic(), received_message.value()
-
-        if not kafka_topic:
-            logger.error(
-                f"Empty kafka_topic received: kafka_topic={kafka_topic}, msg={msg}"
-            )
-            raise Exception("Empty kafka_topic received")
-
-        # todo: kafka_topic can be emtpy. Why?
-        # print(received_message.offset())
-        # msg["__kafka_offset"] = received_message.offset()
-
-        collection, topic = self._split_kafka_topic(kafka_topic)
-        return collection, topic, msg
+        records = sum(response.values(), [])
+        # todo: optimize
+        return [
+            list(self._split_kafka_topic(record.topic)) + [record.value]
+            for record in records
+        ]

@@ -61,4 +61,4 @@ class ZMQBroker(Broker):
         if not msg:
             return
         endpoint, topic, msg = msg
-        return self.collections[endpoint], topic, msg
+        return [[self.collections[endpoint], topic, msg]]
