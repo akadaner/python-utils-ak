@@ -1,5 +1,6 @@
 import time
 import asyncio
+import itertools
 
 from utils_ak.callback_timer import CallbackTimer, ScheduleTimer, CallbackTimers
 from utils_ak.architecture.func import PrefixHandler
@@ -160,24 +161,27 @@ class SimpleMicroservice:
                         received = self.broker.poll(timeout)
 
                     if received:
-                        collection, topic, msg = received
+                        for record in received:
+                            collection, topic, msg = record
 
-                        try:
-                            self.logger.trace(
-                                f"Received new message",
-                                topic=str(topic),
-                                msg=str(msg),
-                            )
-                            await self.callbacks[collection].call_async(topic, msg)
-
-                            if self.fail_count != 0:
-                                self.logger.info(
-                                    "Success. Resetting the failure counter"
+                            try:
+                                self.logger.trace(
+                                    f"Received new message",
+                                    topic=str(topic),
+                                    msg=str(msg),
                                 )
-                                self.fail_count = 0
+                                await self.callbacks[collection].call_async(topic, msg)
 
-                        except Exception as e:
-                            self.on_exception(e, "Exception occurred at the callback")
+                                if self.fail_count != 0:
+                                    self.logger.info(
+                                        "Success. Resetting the failure counter"
+                                    )
+                                    self.fail_count = 0
+
+                            except Exception as e:
+                                self.on_exception(
+                                    e, "Exception occurred at the callback"
+                                )
                 except Exception as e:
                     self.on_exception(e, "Failed to receive the message")
 
