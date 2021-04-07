@@ -69,39 +69,42 @@ class FieldsCollectorWindow(Window):
 
 class CollectorWindow(Window):
     def __init__(
-        self, timestamp_extractor=lambda msg: msg["values"][0], window_size=300
+        self,
+        window_size,
+        timestamp_extractor=lambda msg: msg["value"][0],
     ):
         super().__init__()
         self.timestamp_extractor = timestamp_extractor
         self.buffer = SortedList(key=timestamp_extractor)
         self.window_size = window_size
 
-        self.cur_ts = None
-        self.last_ts = None
+        self.cur_dt = None
+        self.last_dt = None
 
     def add(self, values):
-        if self.cur_ts is None:
-            self.cur_ts = custom_round(
+        if self.cur_dt is None:
+            self.cur_dt = round_datetime(
                 self.timestamp_extractor(values[0]), self.window_size, "floor"
             )
 
         for value in values:
             self.buffer.add(value)
 
-        self.last_ts = self.timestamp_extractor(values[-1])
+        self.last_dt = self.timestamp_extractor(values[-1])
 
     def is_emitable(self):
-        if self.cur_ts is None:
+        if self.cur_dt is None:
             return False
-        return (self.last_ts - self.cur_ts) >= self.window_size
+        return (self.last_dt - self.cur_dt) >= self.window_size
 
     def emit(self):
-        next_ts = self.cur_ts + self.window_size
-        index = self.buffer.bisect_left({"values": [next_ts]})
+        next_ts = self.cur_dt + self.window_size
+        index = self.buffer.bisect_left({"value": [next_ts]})
         values = self.buffer[:index]
         del self.buffer[:index]
-        self.cur_ts = next_ts
-        return values
+        res = {"begin": self.cur_dt, "end": next_ts, "period": self.window_size}, values
+        self.cur_dt = next_ts
+        return res
 
 
 def test():
@@ -130,11 +133,11 @@ def test():
 
 
 def test_collector_window():
-    message = {"source": "binance_timebars_1800", "values": [1617724522.346, 1, 2, 3]}
+    dt = cast_datetime("2020.01.01")
     messages = [
         {
             "source": "binance_timebars_1800",
-            "values": [i * 60, 1, 2, 3],
+            "value": [dt + i * timedelta(minutes=1), 1, 2, 3],
         }
         for i in range(10)
     ]

@@ -1,14 +1,13 @@
-# from confluent_kafka import Producer, Consumer
+from confluent_kafka import Producer, Consumer
 import uuid
 
 from utils_ak.builtin import update_dic
 from copy import deepcopy
 
-# todo: make group_id properly
 
 DEFAULT_CONSUMER_CONFIG = {
     "bootstrap.servers": "localhost:9092",
-    "group.id": str(uuid.uuid4()),
+    "group.id": str(uuid.uuid4()),  # todo: make properly
     "default.topic.config": {"auto.offset.reset": "largest"},
     "enable.auto.commit": False,
     "enable.partition.eof": False,
@@ -42,7 +41,6 @@ class KafkaClient:
     def subscribe(self, topic):
         if topic not in self.kafka_topics:
             self.kafka_topics.append(topic)
-            # self.consumer.subscribe(self.kafka_topics)
 
     def publish(self, topic, msg):
         self.producer.produce(topic, msg)
@@ -57,19 +55,3 @@ class KafkaClient:
             self.consumer.subscribe(self.kafka_topics)
             self.init_subscriptions = True
 
-
-if __name__ == "__main__":
-    cli = KafkaClient(
-        consumer_config={"default.topic.config": {"auto.offset.reset": "smallest"}}
-    )
-    cli.subscribe("binance_trades")
-
-    i = 0
-    while True:
-        msg = cli.poll()
-        if not msg:
-            continue
-        print(msg, msg.offset(), msg.value())
-        print(i)
-
-        i += 1

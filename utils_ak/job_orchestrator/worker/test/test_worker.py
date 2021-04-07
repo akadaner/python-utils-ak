@@ -6,7 +6,7 @@ from utils_ak.job_orchestrator.worker.test_worker import *
 
 
 class TestWorker(MicroserviceWorker):
-    async def process(self):
+    async def on_init(self):
         self.started = datetime.now()
 
         running_timeout = self.payload.get("running_timeout", 0)

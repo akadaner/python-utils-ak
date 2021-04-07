@@ -1,6 +1,5 @@
 from .broker import Broker
-from .kafka_broker import KafkaBroker
-from .zmq_broker import ZMQBroker
+from .brokers import *
 
 
 def cast_message_broker(obj):

@@ -1,4 +1,4 @@
-from .broker import Broker
+from utils_ak.message_queue.brokers.broker import Broker
 from utils_ak.message_queue.clients.zmq_client import ZMQClient
 
 ENDPOINT_TYPES = ["sub", "pub"]

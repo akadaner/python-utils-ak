@@ -1,16 +1,14 @@
-from .broker import Broker
+from utils_ak.message_queue.brokers.broker import Broker
 
-# from utils_ak.message_queue.clients.kafka_client import KafkaClient
+from utils_ak.kafka import KafkaClient
 
-import logging
-
-logger = logging.getLogger(__name__)
+from loguru import logger
 
 
 class KafkaBroker(Broker):
-    def __init__(self):
-        self.cli = KafkaClient()
-        self.async_supported = False  # todo: swithc to True?
+    def __init__(self, *args, **kwargs):
+        self.cli = KafkaClient(*args, **kwargs)
+        self.async_supported = False  # todo: switch to True?
 
     def _get_kafka_topic(self, collection, topic):
         if topic:
@@ -39,7 +37,7 @@ class KafkaBroker(Broker):
         kafka_topic, msg = received_message.topic(), received_message.value()
 
         if not kafka_topic:
-            logging.error(
+            logger.error(
                 f"Empty kafka_topic received: kafka_topic={kafka_topic}, msg={msg}"
             )
             raise Exception("Empty kafka_topic received")
