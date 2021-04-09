@@ -24,17 +24,21 @@ DEFAULT_PRODUCER_CONFIG = {
 
 
 class KafkaClient:
-    def __init__(self, consumer_config=None, producer_config=None):
+    def __init__(self, host=None, consumer_config=None, producer_config=None):
         self.kafka_topics = []
 
         consumer_config = consumer_config or {}
         self.consumer_config = deepcopy(DEFAULT_CONSUMER_CONFIG)
         self.consumer_config = update_dic(self.consumer_config, consumer_config)
+        if host:
+            self.consumer_config["bootstrap_servers"] = host
         self.consumer = kafka.KafkaConsumer(**self.consumer_config)
 
         producer_config = producer_config or {}
         self.producer_config = deepcopy(DEFAULT_PRODUCER_CONFIG)
         self.producer_config = update_dic(self.producer_config, producer_config)
+        if host:
+            self.producer_config["bootstrap_servers"] = host
         self.producer = kafka.KafkaProducer(**self.producer_config)
 
         self.init_subscriptions = False

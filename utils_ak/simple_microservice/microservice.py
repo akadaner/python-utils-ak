@@ -99,8 +99,10 @@ class SimpleMicroservice:
         formatter="default",
         filter=None,
         topic_formatter=cast_unicode,
+        subscribe=True,
     ):
-        self.broker.subscribe(collection, topic)
+        if subscribe:
+            self.broker.subscribe(collection, topic)
         self._add_callback(
             collection, topic, callback, formatter, filter, topic_formatter
         )
