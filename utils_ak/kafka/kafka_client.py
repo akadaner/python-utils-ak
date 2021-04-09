@@ -45,9 +45,9 @@ class KafkaClient:
 
         self.init_subscriptions = False
 
-    def subscribe(self, topic, start_offset=None, start_timestamp=None):
+    def subscribe(self, topic, start_offset=None, start_dt=None):
         if topic not in self.start_offsets:
-            self.start_offsets[topic] = (start_offset, start_timestamp)
+            self.start_offsets[topic] = (start_offset, start_dt)
 
     def publish(self, topic, msg):
         self.producer.send(topic, msg)
@@ -63,12 +63,11 @@ class KafkaClient:
     def start_listening(self):
         if not self.init_subscriptions and self.start_offsets:
             self.consumer.subscribe(list(self.start_offsets.keys()))
-            for topic, (start_offset, start_timestamp) in self.start_offsets.items():
-                if start_timestamp is not None:
+            for topic, (start_offset, start_dt) in self.start_offsets.items():
+                if start_dt is not None:
                     start_offset = kafka_bisect_left(
-                        self.consumer, topic, start_timestamp
+                        self.consumer, topic, int(start_dt.timestamp() * 1000)
                     )
-                print(start_offset)
                 if start_offset is not None:
                     partition = get_single_topic_partition(self.consumer, topic)
                     self.consumer.seek(partition, start_offset)

@@ -2,6 +2,7 @@ from confluent_kafka import Producer, Consumer
 import uuid
 from datetime import datetime, timedelta
 from utils_ak.builtin import update_dic
+from utils_ak.time import *
 from copy import deepcopy
 import time
 from utils_ak.kafka.kafka_client import KafkaClient
@@ -21,7 +22,7 @@ def test():
     cli.subscribe(
         "collection",
         # start_offset=689,
-        start_timestamp=int((end_dt.timestamp() + start_dt.timestamp()) / 2 * 1000),
+        start_dt=start_dt + (end_dt - start_dt) / 2,
     )
 
     i = 0
