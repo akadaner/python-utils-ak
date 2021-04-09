@@ -55,7 +55,7 @@ class KafkaClient:
         return self.consumer.poll(timeout)
 
     def start_listening(self):
-        if not self.init_subscriptions:
+        if not self.init_subscriptions and self.kafka_topics:
             # current_kafka_topics = self._get_kafka_topics()
             # for topic in self.kafka_topics:
             #     if topic not in current_kafka_topics:

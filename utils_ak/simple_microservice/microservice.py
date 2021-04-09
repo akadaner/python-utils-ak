@@ -2,11 +2,11 @@ import time
 import asyncio
 import itertools
 
-from utils_ak.callback_timer import CallbackTimer, ScheduleTimer, CallbackTimers
-from utils_ak.architecture.func import PrefixHandler
-from utils_ak.coder import JsonCoder, MsgPackCoder
-from utils_ak.message_queue import cast_message_broker
-from utils_ak.str import cast_unicode
+from utils_ak.callback_timer import *
+from utils_ak.architecture.func import *
+from utils_ak.coder import *
+from utils_ak.message_queue import *
+from utils_ak.str import *
 
 from loguru import logger as global_logger
 
@@ -58,8 +58,8 @@ class SimpleMicroservice:
         self.is_active = False
 
     def register_publishers(self, collections):
-        for collection in collections:
-            if self.message_broker[0] == "zmq":
+        if isinstance(self.broker, ZMQBroker):
+            for collection in collections:
                 self.add_timer(
                     self.publish,
                     interval=1,
@@ -68,6 +68,7 @@ class SimpleMicroservice:
                 )
 
     def _args_formatter(self, topic, msg):
+        # convert msg to kwargs
         return (cast_unicode(topic),), self.coder.decode(msg)
 
     def add_timer(self, *args, **kwargs):
@@ -204,62 +205,8 @@ class SimpleMicroservice:
         self.tasks = [asyncio.ensure_future(task) for task in self.tasks]
         self.loop.run_until_complete(asyncio.wait(self.tasks))
 
-    def _run(self, timeout=0.01):
-        self.logger.info("Microservice started")
-
-        self.callback_timers = CallbackTimers()
-        for timer in self.timers:
-            self.callback_timers.add_timer(timer)
-
-        while True:
-            success = False
-            try:
-                if len(self.timers) > 0:
-                    if time.time() > self.callback_timers.next_call:
-                        # some timer is ready
-                        for timer in self.callback_timers.timers:
-                            try:
-                                timer.run_if_possible()
-                            except Exception as e:
-                                self.on_exception(
-                                    e, "Exception occurred at the timer callback"
-                                )
-                            else:
-                                success = True
-
-                try:
-                    received = self.broker.poll(timeout)
-                    if not received:
-                        continue
-                    collection, topic, msg = received
-
-                    try:
-                        self.logger.debug("Received new message", topic=topic, msg=msg)
-                        self.callbacks[collection].call(topic, msg)
-                    except Exception as e:
-                        self.on_exception(e, "Exception occurred")
-                    else:
-                        success = True
-
-                except Exception as e:
-                    self.on_exception(e, "Failed to receive the message")
-
-                if not self.is_active:
-                    self.logger.info("Microservice not active. Stopping")
-                    break
-
-            except Exception as e:
-                self.on_exception(e, "Global exception occurred")
-
-            if success and self.fail_count != 0:
-                self.logger.info("Success. Resetting the failure counter")
-                self.fail_count = 0
-
-    def run(self, asyncio=True):
-        if asyncio:
-            return self._run_async()
-        else:
-            return self._run()
+    def run(self):
+        return self._run_async()
 
     def on_exception(self, e, msg):
         self.logger.exception("Generic microservice error")

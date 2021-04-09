@@ -32,7 +32,7 @@ class MicroserviceWorker(Worker):
         )
 
         self.microservice.add_timer(
-            self.on_init, n_times=1, counter_type="left"
+            self.on_start, n_times=1, counter_type="left"
         )  # run once on init
 
     def send_state(self, status, state):
@@ -41,10 +41,10 @@ class MicroserviceWorker(Worker):
             "monitor_in", "state", id=self.id, status=status, state=state
         )
 
-    async def on_init(self):
-        raise NotImplementedError
+    async def on_start(self):
+        pass
 
-    async def on_inputs(self, messages):
+    async def on_input(self, topic, msg):
         raise NotImplementedError
 
     def run(self):

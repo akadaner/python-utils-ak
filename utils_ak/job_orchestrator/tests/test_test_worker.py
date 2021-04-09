@@ -6,7 +6,7 @@ MESSAGE_BROKER = settings.as_dict()["TRANSPORT"]["message_broker"]
 
 
 def test_batch():
-    test_microservice_worker(
+    test_batch_microservice_worker(
         TestWorker,
         {"type": "batch", "message_broker": MESSAGE_BROKER},
         run_listener=True,
@@ -14,7 +14,7 @@ def test_batch():
 
 
 def test_streaming():
-    test_microservice_worker(
+    test_batch_microservice_worker(
         TestWorker,
         {"type": "streaming", "message_broker": MESSAGE_BROKER},
         run_listener=True,

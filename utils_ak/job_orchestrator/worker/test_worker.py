@@ -4,7 +4,7 @@ from utils_ak.simple_microservice import run_listener_async
 from utils_ak.job_orchestrator.worker.worker import run_worker
 
 
-def test_microservice_worker(worker_cls, payload, run_listener=True):
+def test_batch_microservice_worker(worker_cls, payload, run_listener=True):
     from utils_ak.loguru import configure_loguru_stdout
 
     configure_loguru_stdout("DEBUG")
@@ -12,7 +12,7 @@ def test_microservice_worker(worker_cls, payload, run_listener=True):
         run_listener_async("monitor_in", message_broker=payload["message_broker"])
     time.sleep(2)
     run_worker(worker_cls, {"worker_id": "worker_id", "payload": payload})
-    logger.info("Finished batch")
+    logger.info("Finished")
 
 
 def test_microservice_worker_deployment(

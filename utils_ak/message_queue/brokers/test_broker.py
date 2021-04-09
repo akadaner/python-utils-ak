@@ -32,5 +32,17 @@ def test_kafka_broker():
     )
 
 
+def test_multi_broker():
+    from utils_ak.message_queue.brokers import KafkaBroker, MultiBroker
+
+    kb1 = KafkaBroker(consumer_config={"auto_offset_reset": "smallest"})
+    kb2 = KafkaBroker(consumer_config={"auto_offset_reset": "smallest"})
+
+    mb = MultiBroker([kb1, kb2], kb1, kb2)
+
+    test_broker(mb)
+
+
 if __name__ == "__main__":
-    test_kafka_broker()
+    # test_kafka_broker()
+    test_multi_broker()
