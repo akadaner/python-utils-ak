@@ -5,6 +5,8 @@ import uuid
 from utils_ak.builtin import update_dic
 from copy import deepcopy
 
+from utils_ak.kafka.kafka_binary_search import *
+
 
 DEFAULT_CONSUMER_CONFIG = {
     "bootstrap_servers": "localhost:9092",
@@ -25,7 +27,7 @@ DEFAULT_PRODUCER_CONFIG = {
 
 class KafkaClient:
     def __init__(self, host=None, consumer_config=None, producer_config=None):
-        self.kafka_topics = []
+        self.start_offsets = {}
 
         consumer_config = consumer_config or {}
         self.consumer_config = deepcopy(DEFAULT_CONSUMER_CONFIG)
@@ -43,9 +45,9 @@ class KafkaClient:
 
         self.init_subscriptions = False
 
-    def subscribe(self, topic, start_offset=None):
-        if topic not in self.kafka_topics:
-            self.kafka_topics.append(topic)
+    def subscribe(self, topic, start_offset=None, start_timestamp=None):
+        if topic not in self.start_offsets:
+            self.start_offsets[topic] = (start_offset, start_timestamp)
 
     def publish(self, topic, msg):
         self.producer.send(topic, msg)
@@ -59,11 +61,17 @@ class KafkaClient:
         return self.consumer.poll(timeout)
 
     def start_listening(self):
-        if not self.init_subscriptions and self.kafka_topics:
-            # current_kafka_topics = self._get_kafka_topics()
-            # for topic in self.kafka_topics:
-            #     if topic not in current_kafka_topics:
-            self.consumer.subscribe(self.kafka_topics)
+        if not self.init_subscriptions and self.start_offsets:
+            self.consumer.subscribe(list(self.start_offsets.keys()))
+            for topic, (start_offset, start_timestamp) in self.start_offsets.items():
+                if start_timestamp is not None:
+                    start_offset = kafka_bisect_left(
+                        self.consumer, topic, start_timestamp
+                    )
+                print(start_offset)
+                if start_offset is not None:
+                    partition = get_single_topic_partition(self.consumer, topic)
+                    self.consumer.seek(partition, start_offset)
             self.init_subscriptions = True
 
     def _get_kafka_topics(self):

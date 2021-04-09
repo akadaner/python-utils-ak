@@ -25,10 +25,7 @@ class KafkaBroker(Broker):
         self.cli.publish(self._get_kafka_topic(collection, topic), msg)
 
     def subscribe(self, collection, topic, start_offset=None, start_timestamp=None):
-        if start_timestamp:
-            start_offset = kafka_bisect_left(self.cli.consumer, start_timestamp)
-
-        self.cli.subscribe(self._get_kafka_topic(collection, topic))
+        self.cli.subscribe(self._get_kafka_topic(collection, topic), start_offset, start_timestamp)
 
     def poll(self, timeout=0.0):
         response = self.cli.poll(timeout)

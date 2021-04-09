@@ -8,8 +8,18 @@ from utils_ak.dict import *
 # todo: implement kafka consumer as a list
 
 
-def _get_single_topic_partition(kafka_consumer, topic):
-    next(kafka_consumer)
+def get_single_topic_partition(kafka_consumer, topic):
+    if len(kafka_consumer.assignment()) == 0:
+        # init kafka and reset offsets
+
+        record = next(kafka_consumer)
+        partitions = list(kafka_consumer.assignment())
+        record_partition = [
+            p
+            for p in partitions
+            if p.topic == record.topic and p.partition == record.partition
+        ][0]
+        kafka_consumer.seek(record_partition, max(record.offset - 1, 0))
     partitions = list(kafka_consumer.assignment())
     topic_partitions = [p for p in partitions if p.topic == topic]
     assert len(topic_partitions) == 1
@@ -21,13 +31,14 @@ def get_record_by_offset(kafka_consumer, topic, offset):
     if offset < 0:
         offset = offset % get_end_offset(kafka_consumer, topic)
 
-    partition = _get_single_topic_partition(kafka_consumer, topic)
+    partition = get_single_topic_partition(kafka_consumer, topic)
     kafka_consumer.seek(partition, offset)
     return next(kafka_consumer)
 
 
 def get_end_offset(kafka_consumer, topic):
-    partition = _get_single_topic_partition(kafka_consumer, topic)
+    partition = get_single_topic_partition(kafka_consumer, topic)
+
     return kafka_consumer.end_offsets(kafka_consumer.assignment())[partition]
 
 
@@ -57,9 +68,7 @@ def kafka_bisect_left(
 
     _kafka_getter = _KafkaGetter()
     _value_record = _KafkaRecord(dotdict({"timestamp": timestamp}))
-    offset = bisect.bisect_left(_kafka_getter, _value_record, low, high)
-    print(offset)
-    print(get_record_by_offset(kafka_consumer, topic, offset))
+    return bisect.bisect_left(_kafka_getter, _value_record, low, high)
 
 
 TOPIC = "datasets__60705b5edaf0f2d1693a39c6"
