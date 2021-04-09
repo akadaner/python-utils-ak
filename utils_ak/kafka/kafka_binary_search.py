@@ -5,9 +5,14 @@ from utils_ak.dict import *
 
 # NOTE: WORKING WITH SINGLE-PARTITIONED KAFKA TOPICS
 
+# todo: implement kafka consumer as a list
+
 
 def get_record_by_offset(kafka_consumer, offset):
     # fetch first to init
+    if offset < 0:
+        offset = offset % get_end_offset(kafka_consumer)
+
     next(kafka_consumer)
     partition = list(kafka_consumer.assignment())[0]
     kafka_consumer.seek(partition, offset)
@@ -43,6 +48,7 @@ def kafka_bisect_left(
     _value_record = _KafkaRecord(dotdict({"timestamp": timestamp}))
     offset = bisect.bisect_left(_kafka_getter, _value_record, low, high)
     print(offset)
+    print(get_record_by_offset(kafka_consumer, offset))
 
 
 def test():
@@ -58,6 +64,7 @@ def test():
     print(get_record_by_offset(consumer, 0))
     print(get_record_by_offset(consumer, 1))
     print(get_record_by_offset(consumer, 0))
+    print(get_record_by_offset(consumer, -1))
 
 
 def test_kafka_bisect_left():
@@ -76,5 +83,5 @@ def test_kafka_bisect_left():
 
 
 if __name__ == "__main__":
-    # test()
+    test()
     test_kafka_bisect_left()
