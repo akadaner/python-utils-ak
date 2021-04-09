@@ -43,7 +43,7 @@ class KafkaClient:
 
         self.init_subscriptions = False
 
-    def subscribe(self, topic):
+    def subscribe(self, topic, start_offset=None):
         if topic not in self.kafka_topics:
             self.kafka_topics.append(topic)
 

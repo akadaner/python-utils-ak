@@ -1,7 +1,7 @@
 class Broker:
     async_supported = False
 
-    def subscribe(self, collection, topic):
+    def subscribe(self, collection, topic, *args, **kwargs):
         raise NotImplementedError
 
     def publish(self, collection, topic, msg):

@@ -1,7 +1,6 @@
 from utils_ak.message_queue.brokers.broker import Broker
 
-from utils_ak.kafka import KafkaClient
-
+from utils_ak.kafka import *
 from loguru import logger
 
 
@@ -25,7 +24,10 @@ class KafkaBroker(Broker):
     def publish(self, collection, topic, msg):
         self.cli.publish(self._get_kafka_topic(collection, topic), msg)
 
-    def subscribe(self, collection, topic):
+    def subscribe(self, collection, topic, start_offset=None, start_timestamp=None):
+        if start_timestamp:
+            start_offset = kafka_bisect_left(self.cli.consumer, start_timestamp)
+
         self.cli.subscribe(self._get_kafka_topic(collection, topic))
 
     def poll(self, timeout=0.0):
