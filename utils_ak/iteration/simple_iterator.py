@@ -1,10 +1,13 @@
 STUB = "__stub"
 
+# todo: make a python iterator
+
 
 class SimpleIterator:
     def __init__(self, lst, start_from=0):
         self.lst = lst
         self.current_index = start_from
+        self._iteration_finished = False
 
     def current(self):
         return self.lst[self.current_index]
@@ -12,14 +15,34 @@ class SimpleIterator:
     def __len__(self):
         return len(self.lst)
 
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if self._iteration_finished:
+            self._iteration_finished = False
+            raise StopIteration
+
+        if self.current_index >= len(self.lst) - 1:
+            self._iteration_finished = True
+        res = self.current()
+        self.next()
+        return res
+
     def forward(
-        self, step=1, return_last_if_out=False, update_index=True, out_value=None
+        self,
+        step=1,
+        return_out_strategy="default",
+        update_index=True,
+        default=None,
     ):
         if self.current_index >= len(self.lst) - step:
-            if return_last_if_out:
+            if return_out_strategy == "last":
                 res = self.lst[-1]
+            elif return_out_strategy == "default":
+                res = default
             else:
-                res = out_value
+                raise Exception("Unknown return out strategy")
         else:
             res = self.lst[self.current_index + step]
 
@@ -27,17 +50,19 @@ class SimpleIterator:
             self.current_index = min(self.current_index + step, len(self.lst) - 1)
         return res
 
-    def next(self, return_last_if_out=False, update_index=True):
-        return self.forward(1, return_last_if_out, update_index)
+    def next(self, return_out_strategy="default", update_index=True, default=None):
+        return self.forward(1, return_out_strategy, update_index, default=default)
 
     def backward(
-        self, step=1, return_first_if_out=False, update_index=True, out_value=None
+        self, step=1, return_out_strategy="default", update_index=True, default=None
     ):
         if self.current_index <= step - 1:
-            if return_first_if_out:
+            if return_out_strategy == "first":
                 res = self.lst[0]
+            elif return_out_strategy == "default":
+                res = default
             else:
-                res = out_value
+                raise Exception("Unknown return out strategy")
         else:
             res = self.lst[self.current_index - 1]
 
@@ -45,8 +70,8 @@ class SimpleIterator:
             self.current_index = max(self.current_index - step, 0)
         return res
 
-    def prev(self, return_first_if_out=False, update_index=True):
-        return self.backward(1, return_first_if_out, update_index)
+    def prev(self, return_out_strategy="default", update_index=True):
+        return self.backward(1, return_out_strategy, update_index)
 
     def iter(self, direction="up", step=1, limit=None):
         yield self.current()
@@ -56,9 +81,9 @@ class SimpleIterator:
                 break
 
             if direction == "up":
-                next = self.forward(step, out_value=STUB)
+                next = self.forward(step, default=STUB)
             elif direction == "down":
-                next = self.backward(step, out_value=STUB)
+                next = self.backward(step, default=STUB)
 
             if next == STUB:
                 break
@@ -100,22 +125,27 @@ def iter_pairs(lst, *args, **kwargs):
     yield from iter_sequences(lst, 2, *args, **kwargs)
 
 
-def test_simple_bounded_iterator():
+def test_simple_iterator():
+    print("Iterator")
     lst = [1, 2, 3, 4]
     it = SimpleIterator(lst)
+    for v in it:
+        print(v)
 
+    lst = [1, 2, 3, 4]
+    it = SimpleIterator(lst)
     print("Iter up")
     for v in it.iter("up"):
         print(v)
     print("Iter down")
     for v in it.iter("down"):
         print(v)
-    print("return_last_if_out: false")
+    print("return_out_strategy: default")
     for i in range(5):
-        print(it.next(return_last_if_out=False))
-    print("return_last_if_out: true")
+        print(it.next(return_out_strategy="default"))
+    print("return_out_strategy: first")
     for i in range(5):
-        print(it.prev(return_first_if_out=True))
+        print(it.prev(return_out_strategy="first"))
 
     print("Sequences")
     print("all-2")
@@ -166,4 +196,4 @@ def test_simple_bounded_iterator():
 
 
 if __name__ == "__main__":
-    test_simple_bounded_iterator()
+    test_simple_iterator()
