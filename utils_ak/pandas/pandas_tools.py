@@ -8,6 +8,7 @@ from io import BytesIO
 
 from utils_ak.os import *
 from utils_ak.builtin import iter_get, remove_neighbor_duplicates
+from utils_ak.iteration import *
 
 pd.set_option("display.max_colwidth", None)
 
@@ -312,6 +313,49 @@ def crop_invalid_edges(df, side="all"):
     return df.loc[first_idx:last_idx]
 
 
+# todo: better naming
+def split_into_sum_groups(df, values, column, group_column):
+    df = df.copy()
+    assert abs(sum(values) - df[column].sum()) < 1e-5
+
+    values_iterator = SimpleIterator(values)
+    rows_iterator = iter(iter_pairs(list(df.iterrows()), "any_suffix"))
+
+    cur_needed = next(values_iterator)
+    cur_row_pair, next_row_pair = next(rows_iterator)
+    cur_available = cur_row_pair[-1][column]
+
+    res = []
+    i = 0
+    while True:
+        cur_value = min(cur_needed, cur_available)
+        cur_needed -= cur_value
+        cur_available -= cur_value
+
+        row = pd.Series(cur_row_pair[-1])
+        row[column] = cur_value
+        row[group_column] = i
+        res.append(dict(row))
+
+        if cur_needed < 1e-5:
+            if cur_available < 1e-5 and next_row_pair is None:
+                # finished
+                break
+            else:
+                # go to next value
+                cur_needed = next(values_iterator)
+                i += 1
+
+        if cur_available < 1e-5:
+            # go to next row
+            cur_row_pair, next_row_pair = next(rows_iterator)
+            cur_available = cur_row_pair[-1][column]
+
+    df = pd.DataFrame(res)
+    df[group_column] = df[group_column].astype(int)
+    return df
+
+
 def test():
     df1 = pd.DataFrame.from_dict({"a": [1, 2, 3], "b": [4, 5, 6], "c": [1, 1, 1]})
     df1 = df1.set_index("c")
@@ -398,8 +442,14 @@ def test_crop_invalid_edges():
     print(crop_invalid_edges(df, "suffix"))
 
 
+def test_split_into_sum_groups():
+    df = pd.DataFrame.from_dict({"a": [1.0, 2.0, 3.0], "b": ["<1>", "<2>", "<3>"]})
+    print(split_into_sum_groups(df, [1.0, 1.5, 1.5, 2.0], "a", "group"))
+
+
 if __name__ == "__main__":
-    test()
-    test_tree()
-    test_read_write()
-    test_crop_invalid_edges()
+    # test()
+    # test_tree()
+    # test_read_write()
+    # test_crop_invalid_edges()
+    test_split_into_sum_groups()

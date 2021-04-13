@@ -63,7 +63,7 @@ class Queue(Actor, PipeMixin):
                     continue
                 old = self.current(orient)
                 new = self.df.at[orient, "iterator"].next(
-                    return_last_if_out=True, update_index=False
+                    return_out_strategy="last", update_index=False
                 )
                 break_period = self.df.at[orient, "break_func"](old, new)
 
@@ -79,7 +79,7 @@ class Queue(Actor, PipeMixin):
                     else:
                         pipe_switch(old, new, orient)
                         self.df.at[orient, "iterator"].next(
-                            return_last_if_out=True, update_index=True
+                            return_out_strategy="last", update_index=True
                         )
 
             # todo: del
@@ -90,7 +90,7 @@ class Queue(Actor, PipeMixin):
         self.df.at[event["orient"], "paused"] = False
         old = self.current(event["orient"])
         new = self.df.at[event["orient"], "iterator"].next(
-            return_last_if_out=True, update_index=True
+            return_out_strategy="last", update_index=True
         )
         pipe_switch(old, new, event["orient"])
 
