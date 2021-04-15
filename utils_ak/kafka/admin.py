@@ -46,5 +46,23 @@ def test():
     assert new_topic not in cli.list_topics()
 
 
+def test_print_topics():
+    cli = KafkaAdminClient("localhost:9092")
+    print(cli.list_topics())
+
+
+def test_delete_by_pattern(pattern):
+    from fnmatch import fnmatch
+
+    cli = KafkaAdminClient("localhost:9092")
+    topics = cli.list_topics()
+    topics = [topic for topic in topics if fnmatch(topic, pattern)]
+    cli.delete_topics(topics)
+    new_topics = cli.list_topics()
+    assert all([topic not in topics for topic in new_topics])
+
+
 if __name__ == "__main__":
-    test()
+    # test()
+    test_print_topics()
+    # test_delete_by_pattern("datasets__*")
