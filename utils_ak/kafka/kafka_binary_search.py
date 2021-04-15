@@ -7,7 +7,6 @@ from loguru import logger
 # NOTE: WORKING WITH SINGLE-PARTITIONED KAFKA TOPICS
 
 
-@log_function()
 def get_single_topic_partition(kafka_consumer, topic):
     if len(kafka_consumer.assignment()) == 0:
         # init kafka and reset offsets
@@ -28,7 +27,6 @@ def get_single_topic_partition(kafka_consumer, topic):
     return topic_partitions[0]
 
 
-@log_function()
 def get_record_by_offset(kafka_consumer, topic, offset):
     # fetch first to init
     if offset < 0:
@@ -39,7 +37,6 @@ def get_record_by_offset(kafka_consumer, topic, offset):
     return next(kafka_consumer)
 
 
-@log_function()
 def get_end_offset(kafka_consumer, topic):
     partition = get_single_topic_partition(kafka_consumer, topic)
     return kafka_consumer.end_offsets(kafka_consumer.assignment())[partition]
@@ -64,18 +61,14 @@ class KafkaConsumerAsList:
 
     def __len__(self):
         if not self._length:
-            logger.debug("Calculating length")
             self._length = get_end_offset(self.kafka_consumer, self.topic)
-            logger.debug("Length", length=self._length)
         return self._length
 
     def __getitem__(self, item):
         if not isinstance(item, int):
             raise KeyError
         item = item % len(self)
-        logger.debug("Getting element", kafka_topic=self.topic, item=item)
         record = get_record_by_offset(self.kafka_consumer, self.topic, item)
-        logger.debug("Got item", record=record.offset)
         return self.cast_list_record(record)
 
     def cast_list_record(self, record):
