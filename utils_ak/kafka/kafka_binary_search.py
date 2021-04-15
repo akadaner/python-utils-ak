@@ -5,13 +5,10 @@ from utils_ak.dict import *
 
 # NOTE: WORKING WITH SINGLE-PARTITIONED KAFKA TOPICS
 
-# todo: implement kafka consumer as a list
-
 
 def get_single_topic_partition(kafka_consumer, topic):
     if len(kafka_consumer.assignment()) == 0:
         # init kafka and reset offsets
-
         record = next(kafka_consumer)
         partitions = list(kafka_consumer.assignment())
         record_partition = [
@@ -38,37 +35,43 @@ def get_record_by_offset(kafka_consumer, topic, offset):
 
 def get_end_offset(kafka_consumer, topic):
     partition = get_single_topic_partition(kafka_consumer, topic)
-
     return kafka_consumer.end_offsets(kafka_consumer.assignment())[partition]
 
 
-def kafka_bisect_left(
-    kafka_consumer,
-    topic,
-    timestamp,
-    key=lambda record: record.timestamp,
-    low=0,
-    high=None,
-):
+@functools.total_ordering
+class _KafkaRecord:
+    def __init__(self, record, lt_key):
+        self.record = record
+        self.lt_key = lt_key
 
-    if not high:
-        high = get_end_offset(kafka_consumer, topic)
+    def __lt__(self, other):
+        return self.lt_key(self.record) < self.lt_key(other.record)
 
-    @functools.total_ordering
-    class _KafkaRecord:
-        def __init__(self, record):
-            self.record = record
 
-        def __lt__(self, other):
-            return key(self.record) < key(other.record)
+class KafkaConsumerAsList:
+    def __init__(self, kafka_consumer, topic, lt_key):
+        self.kafka_consumer = kafka_consumer
+        self.topic = topic
+        self._length = None
+        self.lt_key = lt_key
 
-    class _KafkaGetter:
-        def __getitem__(self, item):
-            return _KafkaRecord(get_record_by_offset(kafka_consumer, topic, item))
+    def __len__(self):
+        if not self._length:
+            self._length = get_end_offset(self.kafka_consumer, self.topic)
+        return self._length
 
-    _kafka_getter = _KafkaGetter()
-    _value_record = _KafkaRecord(dotdict({"timestamp": timestamp}))
-    return bisect.bisect_left(_kafka_getter, _value_record, low, high)
+    def __getitem__(self, item):
+        if not isinstance(item, int):
+            raise KeyError
+        item = item % len(self)
+        return self.cast_list_record(
+            get_record_by_offset(self.kafka_consumer, self.topic, item)
+        )
+
+    def cast_list_record(self, record):
+        if isinstance(record, dict):
+            record = dotdict(record)
+        return _KafkaRecord(record, self.lt_key)
 
 
 TOPIC = "datasets__60705b5edaf0f2d1693a39c6"
@@ -100,9 +103,14 @@ def test_kafka_bisect_left():
         enable_auto_commit=True,
     )
 
+    consumer_as_list = KafkaConsumerAsList(
+        consumer, TOPIC, lt_key=lambda record: record.timestamp
+    )
+
     print(
-        kafka_bisect_left(
-            consumer, TOPIC, 1617976164019, key=lambda record: record.timestamp
+        bisect.bisect_left(
+            consumer_as_list,
+            consumer_as_list.cast_list_record({"timestamp": 1617976164019}),
         )
     )
 

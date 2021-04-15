@@ -11,7 +11,7 @@ from utils_ak.kafka.kafka_binary_search import *
 DEFAULT_CONSUMER_CONFIG = {
     "bootstrap_servers": "localhost:9092",
     "group_id": str(uuid.uuid4()),  # todo: make properly
-    # "default.topic.config": {"auto.offset.reset": "largest"},
+    # "auto_offset_reset": "earliest",
     # "enable.auto.commit": False,
     # "enable.partition.eof": False,
 }
@@ -45,9 +45,9 @@ class KafkaClient:
 
         self.init_subscriptions = False
 
-    def subscribe(self, topic, start_offset=None, start_dt=None):
+    def subscribe(self, topic, start_offset=None):
         if topic not in self.start_offsets:
-            self.start_offsets[topic] = (start_offset, start_dt)
+            self.start_offsets[topic] = start_offset
 
     def publish(self, topic, msg):
         self.producer.send(topic, msg)
@@ -63,11 +63,7 @@ class KafkaClient:
     def start_listening(self):
         if not self.init_subscriptions and self.start_offsets:
             self.consumer.subscribe(list(self.start_offsets.keys()))
-            for topic, (start_offset, start_dt) in self.start_offsets.items():
-                if start_dt is not None:
-                    start_offset = kafka_bisect_left(
-                        self.consumer, topic, int(start_dt.timestamp() * 1000)
-                    )
+            for topic, start_offset in self.start_offsets.items():
                 if start_offset is not None:
                     partition = get_single_topic_partition(self.consumer, topic)
                     self.consumer.seek(partition, start_offset)
