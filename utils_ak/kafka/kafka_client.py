@@ -10,7 +10,6 @@ from utils_ak.kafka.kafka_binary_search import *
 
 DEFAULT_CONSUMER_CONFIG = {
     "bootstrap_servers": "localhost:9092",
-    "group_id": str(uuid.uuid4()),  # todo: make properly
     # "auto_offset_reset": "earliest",
     # "enable.auto.commit": False,
     # "enable.partition.eof": False,
@@ -34,6 +33,8 @@ class KafkaClient:
         self.consumer_config = update_dic(self.consumer_config, consumer_config)
         if host:
             self.consumer_config["bootstrap_servers"] = host
+        if "group_id" not in self.consumer_config:
+            self.consumer_config["group_id"] = str(uuid.uuid4())
         self.consumer = kafka.KafkaConsumer(**self.consumer_config)
 
         producer_config = producer_config or {}
