@@ -37,10 +37,7 @@ class PandasSplitCombineETL:
         fn = self._fn(key)
         if os.path.exists(fn):
             current_df = self._extract(key)
-            if self.merge_by:
-                split = merge([current_df, split], by=self.merge_by)
-            else:
-                split = pd.concat([current_df, split], axis=0)
+            split = merge([current_df, split], by=self.merge_by)
         pd_write(split, fn, index=False)
 
     def _get_keys(self):

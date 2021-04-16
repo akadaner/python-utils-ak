@@ -146,6 +146,9 @@ def merge(dfs, by, keep="last", sort_index=True):
 
     :return:
     """
+    if by is None:
+        return pd.concat(dfs, axis=0)
+
     if isinstance(by, str):
         by = [by]
 
