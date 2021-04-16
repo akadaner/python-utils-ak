@@ -7,7 +7,7 @@ import base64
 from io import BytesIO
 
 from utils_ak.os import *
-from utils_ak.builtin import iter_get, remove_neighbor_duplicates
+from utils_ak.builtin import iter_get, remove_neighbor_duplicates, delistify
 from utils_ak.iteration import *
 
 pd.set_option("display.max_colwidth", None)
@@ -138,30 +138,27 @@ def merge_by_columns(dfs):
     return res_df
 
 
-def merge(dfs, by=None, by_index=False, keep="last", sort_index=True):
+def merge(dfs, by, keep="last", sort_index=True):
     """
     :param dfs: list(`pd.DataFrame`)
     :param by: name of column or list of columns names. 'all' for all columns. 'columns' for merge_by_columns method
-    :param by_index: include index or not (bool value)
     :param keep: 'last' or 'first'
 
     :return:
     """
-    if not by and not by_index:
-        raise TypeError("Either by or index should by non-trivial")
-
-    if by is None:
-        by = []
-    elif by == "all":
-        pass
-    elif by == "columns":
-        return merge_by_columns(dfs)
-    elif isinstance(by, str):
+    if isinstance(by, str):
         by = [by]
-    elif isinstance(by, list):
-        pass
-    else:
-        raise TypeError("By should be list, str or None")
+
+    by_index = False
+
+    if isinstance(by, list) and "index" in by:
+        by.remove("index")
+        by_index = True
+        by = delistify(by)
+
+    if by == "columns":
+        assert not by_index, "Merging by columns only"
+        return merge_by_columns(dfs)
 
     df = pd.concat(dfs, axis=0)
 
@@ -356,7 +353,7 @@ def split_into_sum_groups(df, values, column, group_column):
     return df
 
 
-def test():
+def test_merge():
     df1 = pd.DataFrame.from_dict({"a": [1, 2, 3], "b": [4, 5, 6], "c": [1, 1, 1]})
     df1 = df1.set_index("c")
     df2 = pd.DataFrame.from_dict({"a": [3, 4, 5], "b": [7, 8, 9]})
@@ -369,22 +366,16 @@ def test():
 
     dfs = [df1, df2]
 
-    print(merge(dfs, by_index=False, by="a"))
-    print()
-    print(merge(dfs, by_index=True, by="a"))
-    print()
-    print(merge(dfs, by_index=True, by=None))
-    print()
-    print(merge(dfs, by_index=True, by=None, keep="first"))
-    print()
-    print(merge(dfs, by_index=True, by="all", keep="first"))
-
-    try:
-        print(merge(dfs, by_index=False, by=None))
-    except Exception as e:
-        print(e)
-    else:
-        raise Exception("Should not happen")
+    print("Merge by a")
+    print(merge(dfs, by="a"))
+    print("Merge by index and a")
+    print(merge(dfs, by=["index", "a"]))
+    print("Merge by index")
+    print(merge(dfs, by="index"))
+    print("Merge by index, keep first")
+    print(merge(dfs, by="index", keep="first"))
+    print("Merge by all and index, keep first")
+    print(merge(dfs, by=["all", "index"], keep="first"))
 
 
 def test_tree():
@@ -448,8 +439,8 @@ def test_split_into_sum_groups():
 
 
 if __name__ == "__main__":
-    # test()
+    test_merge()
     # test_tree()
     # test_read_write()
     # test_crop_invalid_edges()
-    test_split_into_sum_groups()
+    # test_split_into_sum_groups()
