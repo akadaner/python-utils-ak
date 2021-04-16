@@ -11,10 +11,16 @@ from decimal import (
     Decimal as D,
 )
 
+
+CEIL_UP = "ceil_up"
+FLOOW_DOWN = "floor_down"
+
 ROUND_DIC = {
     "nearest_half_even": ROUND_HALF_EVEN,
     "floor": ROUND_FLOOR,
     "ceil": ROUND_CEILING,
+    "ceil_up": ROUND_CEILING,
+    "floor_down": ROUND_FLOOR,
     "down": ROUND_DOWN,
     "up": ROUND_UP,
     "nearest_half_up": ROUND_HALF_UP,
@@ -26,9 +32,15 @@ ROUND_DIC = {
 def decimal_round(a, b, rounding="nearest_half_even", precision=0, strip=False):
     a, b = D(a), D(b)
     n = a / b / D(".1") ** precision
-    rounding = ROUND_DIC.get(rounding, rounding)
-    n = n.quantize(D("1."), rounding=rounding)
-    res = n * b * D(".1") ** precision
+    _rounding = ROUND_DIC.get(rounding, rounding)
+    n_rounded = n.quantize(D("1."), rounding=_rounding)
+
+    if rounding == "ceil_up" and float(n) == float(n_rounded):
+        n_rounded = D(int(n_rounded) + 1)
+    elif rounding == "floor_down" and float(n) == float(n_rounded):
+        n_rounded = D(int(n_rounded) - 1)
+
+    res = n_rounded * b * D(".1") ** precision
     if strip:
         res = strip_decimal(res)
     return res
@@ -98,6 +110,9 @@ def test():
 
     print(custom_round(1.9999999, 1.0, rounding="floor"))
     print(custom_round(1.99999999, 1.0, rounding="floor", pre_round_precision=1))
+
+    print(custom_round(1.01, 1.0, rounding="floor_down", pre_round_precision=0))
+    print(custom_round(1.0, 1.0, rounding="floor_down", pre_round_precision=0))
 
 
 if __name__ == "__main__":
