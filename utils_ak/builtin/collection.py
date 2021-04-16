@@ -4,8 +4,10 @@ import numpy
 import itertools
 
 
-def delistify(lst_obj):
+def delistify(lst_obj, single=False):
     if isinstance(lst_obj, list):
+        if single:
+            assert len(lst_obj) == 1
         return lst_obj if (len(lst_obj) > 1 or not lst_obj) else lst_obj[0]
     else:
         return lst_obj
