@@ -5,7 +5,6 @@ from utils_ak.deployment import *
 from utils_ak.simple_microservice import SimpleMicroservice
 from utils_ak.dict import fill_template
 from utils_ak.coder.coders.json import cast_dict_or_list
-
 from .models import Job, Worker
 
 
@@ -76,19 +75,14 @@ class JobOrchestrator:
         job.save()
         return worker_model
 
-    def _create_deployment(self, worker_model):
-        deployment = cast_dict_or_list(
-            os.path.join(os.path.dirname(__file__), "worker/deployment.yml.template")
-        )
-
+    def _gen_deployment(self, worker_model):
         params = {
             "deployment_id": str(worker_model.id),
             "payload": worker_model.job.payload,
             "image": worker_model.job.runnable.get("image", ""),
             "python_main": worker_model.job.runnable.get("python_main", ""),
         }
-        deployment = fill_template(deployment, **params)
-        return deployment
+        return gen_deployment(**params)
 
     def _process_pending(self):
         jobs = Job.objects(status="pending").all()
@@ -99,7 +93,7 @@ class JobOrchestrator:
         for job in jobs:
             worker_model = self._create_worker_model(job)
             self._update_worker_status(worker_model, "initializing")
-            deployment = self._create_deployment(worker_model)
+            deployment = self._gen_deployment(worker_model)
             self.controller.start(deployment)
 
     def _process_initializing(self):

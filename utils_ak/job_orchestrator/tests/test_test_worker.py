@@ -24,11 +24,13 @@ def test_streaming():
 def test_deployment():
     controller = ProcessController()
     test_microservice_worker_deployment(
-        "../worker/test/sample_deployment.yml", controller, MESSAGE_BROKER
+        {"type": "batch", "message_broker": MESSAGE_BROKER},
+        "/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/python-utils-ak/utils_ak/job_orchestrator/worker/test/main.py",
+        controller,
     )
 
 
 if __name__ == "__main__":
-    test_batch()
+    # test_batch()
     # test_streaming()
-    # test_deployment()
+    test_deployment()

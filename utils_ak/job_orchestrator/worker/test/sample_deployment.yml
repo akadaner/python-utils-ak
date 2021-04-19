@@ -7,5 +7,5 @@ containers:
       worker_config:
         worker_id: deployment_id
         payload:
-            type: streaming
+            type: batch
             message_broker: ["zmq", {'endpoints': {'monitor_in': {'endpoint': "tcp://localhost:5555", 'type': "sub"}}}]
