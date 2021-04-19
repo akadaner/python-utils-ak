@@ -356,6 +356,28 @@ def split_into_sum_groups(df, values, column, group_column):
     return df
 
 
+def loc_non_inclusive(df, slice):
+    df = df.loc[slice]
+    mask = df.index.where(df.index != slice.stop)
+    mask = pd.Series(mask, index=df.index)
+    mask = mask.fillna(method="bfill")
+    mask = ~mask.isnull()
+
+    if not mask.any():
+        return pd.DataFrame()
+
+    df = df[mask]
+    return df
+
+
+def test_loc_non_inclusive():
+    df = pd.DataFrame(dict(A=range(4)), index=[1, 2, 2, 3])
+    print(loc_non_inclusive(df, slice(None, 1, None)))
+    print(loc_non_inclusive(df, slice(None, 2, None)))
+    print(loc_non_inclusive(df, slice(None, 3, None)))
+    print(loc_non_inclusive(df, slice(None, 4, None)))
+
+
 def test_merge():
     df1 = pd.DataFrame.from_dict({"a": [1, 2, 3], "b": [4, 5, 6], "c": [1, 1, 1]})
     df1 = df1.set_index("c")
@@ -442,8 +464,9 @@ def test_split_into_sum_groups():
 
 
 if __name__ == "__main__":
-    test_merge()
+    # test_merge()
     # test_tree()
     # test_read_write()
     # test_crop_invalid_edges()
     # test_split_into_sum_groups()
+    test_loc_non_inclusive()
