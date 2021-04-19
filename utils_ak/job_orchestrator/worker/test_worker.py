@@ -25,11 +25,12 @@ def test_microservice_worker_deployment(
     deployment = gen_deployment("<deployment_id>", payload, python_main=python_main)
 
     from utils_ak.loguru import configure_loguru_stdout
+
     configure_loguru_stdout("DEBUG")
     if run_listener:
         run_listener_async("monitor_in", message_broker=payload["message_broker"])
 
     controller.stop(deployment["id"])
     controller.start(deployment)
-    time.sleep(5)
+    time.sleep(60)
     controller.stop(deployment["id"])

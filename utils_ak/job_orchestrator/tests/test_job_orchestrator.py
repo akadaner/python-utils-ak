@@ -15,8 +15,10 @@ from utils_ak.job_orchestrator.tests.test_monitor import run_monitor
 
 MESSAGE_BROKER = settings.as_dict()["TRANSPORT"]["message_broker"]
 
+TEST_MAIN = "/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/python-utils-ak/utils_ak/job_orchestrator/worker/test/main.py"
 
-def create_new_job(payload):
+
+def create_new_job(payload, python_main=TEST_MAIN):
     configure_loguru_stdout("DEBUG")
     connect_to_mongodb(
         host=settings.job_queue.mongodb_host, db=settings.job_queue.mongodb_db
@@ -39,9 +41,9 @@ def create_new_job(payload):
         payload=payload,
         runnable={
             "image": "akadaner/test-worker",
-            "python_main": "/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/python-utils-ak/utils_ak/job_orchestrator/worker/test/main.py",
+            "python_main": python_main,
         },
-        running_timeout=15,
+        running_timeout=60,
     )
     job.save()
 
