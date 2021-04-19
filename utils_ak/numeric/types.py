@@ -26,9 +26,38 @@ def is_int_like(obj):
         return False
 
 
+def cast_int(obj, allow_none=False):
+    if is_none(obj) and allow_none:
+        return obj
+    assert is_int_like(obj)
+
+    return int(float(obj))
+
+
 def test_is_int_like():
     print(is_int_like(1))
     print(is_int_like("1"))
     print(is_int_like("1.0"))
     print(is_int_like("1.2"))
     print(is_int_like("1.2;;"))
+    print(cast_int("1.0"))
+    print(cast_int(1.0))
+    print(cast_int(1))
+    print(cast_int(np.int64(1)))
+
+
+def is_none(obj):
+    if obj is None:
+        return True
+    else:
+        try:
+            if np.isnan(obj):
+                return True
+        except:
+            pass
+
+    return False
+
+
+if __name__ == "__main__":
+    test_is_int_like()

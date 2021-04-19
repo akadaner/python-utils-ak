@@ -34,6 +34,12 @@ def test_validate_disjoint_by_axis():
             print("AssertionError on disposition", e)
 
 
+def disjoint_validator(parent, block):
+    axis = parent.props["axis"]
+    for c in parent.children:
+        validate_disjoint_by_axis(c, block, axis)
+
+
 class ClassValidator:
     def __init__(self, window=2, window_by_classes=None):
         self.validators = {}
