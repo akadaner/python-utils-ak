@@ -3,7 +3,7 @@ import os
 from utils_ak.pandas import pd_write, pd_read
 from utils_ak.os import makedirs, list_files, remove_path
 from utils_ak.time import cast_dt, cast_str, cast_datetime_series
-from utils_ak.pandas import merge
+from utils_ak.pandas import merge as _merge
 
 
 class PandasSplitCombineETL:
@@ -33,16 +33,17 @@ class PandasSplitCombineETL:
         values = [v for v in values if v]
         return os.path.join(self.path, "-".join(values) + self.extension)
 
-    def _load(self, key, split):
+    def _load(self, key, split, merge=True):
         fn = self._fn(key)
-        if os.path.exists(fn):
+        if os.path.exists(fn) and merge:
             current_df = self._extract(key)
-            split = merge([current_df, split], by=self.merge_by)
+            split = _merge([current_df, split], by=self.merge_by, sort_index=False)
         pd_write(split, fn, index=False)
 
     def _get_keys(self):
         fns = list_files(self.path, pattern="*" + self.extension, recursive=True)
         keys = [os.path.splitext(os.path.basename(fn))[0] for fn in fns]
+        keys = [key if "-" in key else "" for key in keys]
         # remove prefix if needed
         keys = [
             key[len(self.prefix + "-") :] if key.startswith(self.prefix + "-") else key
@@ -57,25 +58,33 @@ class PandasSplitCombineETL:
         df.columns = [str(c) for c in df.columns]
         return df
 
-    def _combine(self, splits_dic):
+    def _combine(self, splits_dic, sort_index=True):
         """
         :param splits_dic: {key: split}
         """
-        dfs = list(splits_dic.values())
+        kvs = list(sorted(list(splits_dic.items()), key=lambda kv: kv[0]))
+        dfs = [kv[1] for kv in kvs]
         df = pd.concat(dfs, axis=0)
         index_column = df.columns[0]
         df = df.set_index(index_column)
-        df = df.sort_index()
+        if sort_index:
+            df = df.sort_index()
         return df
 
-    def split_and_load(self, combined):
+    def split_and_load(self, combined, merge=True):
+        if not merge:
+            remove_path(self.path)
+            makedirs(self.path)
         for key, split in self._split(combined):
-            self._load(key, split)
+            self._load(key, split, merge=merge)
 
-    def extract_and_combine(self):
+    def extract_and_combine(self, sort_index=True):
         keys = self._get_keys()
         splits_dic = {key: self._extract(key) for key in keys}
-        return self._combine(splits_dic)
+        return self._combine(splits_dic, sort_index=sort_index)
+
+    def remove(self):
+        remove_path(self.path)
 
 
 def write_pandas_granular(
