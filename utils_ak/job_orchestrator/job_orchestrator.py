@@ -6,7 +6,7 @@ from utils_ak.simple_microservice import SimpleMicroservice
 from utils_ak.dict import fill_template
 from utils_ak.coder.coders.json import cast_dict_or_list
 from .models import Job, Worker
-
+from datetime import datetime
 
 # todo: retry
 
@@ -86,7 +86,6 @@ class JobOrchestrator:
 
     def _process_pending(self):
         jobs = Job.objects(status="pending").all()
-
         if jobs:
             self.microservice.logger.info("Processing: pending", n=len(jobs))
 
@@ -98,7 +97,6 @@ class JobOrchestrator:
 
     def _process_initializing(self):
         jobs = Job.objects(status="initializing").all()
-
         if jobs:
             self.microservice.logger.info("Processing: initializing", n=len(jobs))
 
@@ -149,6 +147,7 @@ class JobOrchestrator:
     def _on_monitor(self, topic, id, old_status, new_status, state):
         try:
             worker = Worker.objects(pk=id).first()  # todo: check if missing
+            assert worker is not None
         except:
             logger.error("Failed to fetch worker", id=id)
             return

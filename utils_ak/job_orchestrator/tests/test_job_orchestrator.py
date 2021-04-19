@@ -18,11 +18,12 @@ MESSAGE_BROKER = settings.as_dict()["TRANSPORT"]["message_broker"]
 TEST_MAIN = "/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/python-utils-ak/utils_ak/job_orchestrator/worker/test/main.py"
 
 
-def create_new_job(payload, python_main=TEST_MAIN):
+def create_new_job(payload, python_main=TEST_MAIN, connect_to_mongo=True):
     configure_loguru_stdout("DEBUG")
-    connect_to_mongodb(
-        host=settings.job_queue.mongodb_host, db=settings.job_queue.mongodb_db
-    )
+    if connect_to_mongo:
+        connect_to_mongodb(
+            host=settings.job_queue.mongodb_host, db=settings.job_queue.mongodb_db
+        )
     logger.info("Connected to mongodb")
     time.sleep(2)
     logger.debug("Creating new job...")
