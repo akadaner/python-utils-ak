@@ -51,7 +51,7 @@ def create_new_job(payload, python_main=TEST_MAIN):
 def test_job_orchestrator(payload=None):
     configure_loguru_stdout("DEBUG")
     connect_to_mongodb(
-        host=settings.job_queue.mongodb_host, db=settings.job_queue.mongodb_db
+        host=settings.repository.mongodb_host, db=settings.repository.mongodb_db
     )
     logger.info("Connected to mongodb")
 
