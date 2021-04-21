@@ -266,8 +266,16 @@ def df_to_tree(df, recursive=True, delistify=False):
     return res
 
 
-def df_to_ordered_tree(df, recursive=True, prune_last=True):
+def df_to_ordered_tree(df, column=None, recursive=True, prune_last=True):
     df = df.copy()
+    column = column or df.columns[0]
+    assert column in df.columns
+
+    if column != df.columns[0]:
+        other_columns = list(df.columns)
+        other_columns.remove(column)
+        df = df[[column] + other_columns]
+
     if len(df.columns) == 1:
         res = df[df.columns[0]].tolist()
         if prune_last:
@@ -277,11 +285,10 @@ def df_to_ordered_tree(df, recursive=True, prune_last=True):
     res = []
     pre_res = []
 
-    col = df.columns[0]
-    mark_consecutive_groups(df, col, "__key")
+    mark_consecutive_groups(df, column, "__key")
 
-    for value, grp in df.groupby([col, "__key"]):
-        grp.pop(col)
+    for value, grp in df.groupby([column, "__key"]):
+        grp.pop(column)
         grp.pop("__key")
         if recursive:
             child = df_to_ordered_tree(grp, recursive=True, prune_last=prune_last)
@@ -292,9 +299,9 @@ def df_to_ordered_tree(df, recursive=True, prune_last=True):
     pre_res = list(
         sorted(
             pre_res,
-            key=lambda obj: df[(df[col] == obj[0]) & (df["__key"] == obj[1])].iloc[0][
-                "__key"
-            ],
+            key=lambda obj: df[(df[column] == obj[0]) & (df["__key"] == obj[1])].iloc[
+                0
+            ]["__key"],
         )
     )
     return [(x[0], x[2]) for x in pre_res]
