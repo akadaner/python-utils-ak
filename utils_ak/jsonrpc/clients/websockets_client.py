@@ -4,22 +4,37 @@ from utils_ak.coder import JsonCoder
 
 
 class WebSocketsClient:
-    def __init__(self, websocket_client):
+    def __init__(self, websocket_client, id_generator):
         self.websocket_client = websocket_client
         self.responses = {}  # {<id>: response}
         self.coder = JsonCoder(encoding=None)
 
         self.active = True
+        self.id_generator = id_generator
 
-    async def execute(self, request):
+    def _prepare_request(self, request, generate_id_if_needed=True):
+        request["jsonrpc"] = "2.0"
+        if "id" not in request and generate_id_if_needed:
+            request["id"] = self.id_generator.gen_id()
+        if "params" not in request:
+            request["params"] = {}
+        return request
+
+    async def execute(self, request, notify=False):
         """
         :param request: {"jsonrpc": "2.0", "method": "post.like", "params": {"post": "12345"}, "id": 1}
         """
+
+        if notify:
+            assert "id" not in request
+        request = self._prepare_request(request, generate_id_if_needed=not notify)
         await self.websocket_client.send(self.coder.encode(request))
-        while True:
-            if request["id"] in self.responses:
-                return self.responses.pop(request["id"])
-            await asyncio.sleep(0.001)
+
+        if not notify:
+            while True:
+                if request["id"] in self.responses:
+                    return self.responses.pop(request["id"])
+                await asyncio.sleep(0.001)
 
     async def start_receiving_loop(self):
         while True:

@@ -5,25 +5,19 @@ from icecream import ic
 
 from utils_ak.jsonrpc.clients.websockets_client import WebSocketsClient
 
+from utils_ak.id_generator import *
 
 loop = asyncio.get_event_loop()
 
 
 async def main():
     async with websockets.connect("ws://localhost:5000") as ws:
-        client = WebSocketsClient(ws)
+        client = WebSocketsClient(ws, IncrementalIDGenerator())
 
         asyncio.ensure_future(client.start_receiving_loop())
 
         for i in range(5):
-            response = await client.execute(
-                {
-                    "jsonrpc": "2.0",
-                    "method": "ping",
-                    "params": {},
-                    "id": 1,
-                }
-            )
+            response = await client.execute({"method": "ping"})
             ic(response)
             time.sleep(3)
 
