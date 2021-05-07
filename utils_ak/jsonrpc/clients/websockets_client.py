@@ -13,22 +13,17 @@ class WebSocketsClient:
         self.active = True
         self.id_generator = id_generator or IncrementalIDGenerator()
 
-    def _prepare_request(self, request, generate_id_if_needed=True):
-        request["jsonrpc"] = "2.0"
-        if "id" not in request and generate_id_if_needed:
+    def _prepare_request(self, method, generate_id=True, **kwargs):
+        request = {"jsonrpc": "2.0", "params": kwargs, "method": method}
+        if generate_id:
             request["id"] = self.id_generator.gen_id()
-        if "params" not in request:
-            request["params"] = {}
         return request
 
-    async def execute(self, request, notify=False):
+    async def execute(self, method, notify=False, **kwargs):
         """
         :param request: {"jsonrpc": "2.0", "method": "post.like", "params": {"post": "12345"}, "id": 1}
         """
-
-        if notify:
-            assert "id" not in request
-        request = self._prepare_request(request, generate_id_if_needed=not notify)
+        request = self._prepare_request(method, generate_id=not notify, **kwargs)
         await self.websocket_client.send(self.coder.encode(request))
 
         if not notify:

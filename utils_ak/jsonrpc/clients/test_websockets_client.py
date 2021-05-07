@@ -17,7 +17,7 @@ async def main():
         asyncio.ensure_future(client.start_receiving_loop())
 
         for i in range(5):
-            response = await client.execute({"method": "ping"})
+            response = await client.execute("ping")
             ic(response)
             time.sleep(3)
 
