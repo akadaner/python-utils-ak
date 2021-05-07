@@ -43,7 +43,7 @@ class WebSocketsClient(_WebSocketsClient):
         request = Request(method_name, id_generator=id_generator, *args, **kwargs)
 
         id = str(request["id"])
-        ic(id)
+
         await self.send(
             request,
             trim_log_values=trim_log_values,
@@ -51,25 +51,28 @@ class WebSocketsClient(_WebSocketsClient):
         )
 
         while True:
-            ic("Current responses", self.responses)
             if id in self.responses:
-                ic("Waited for response", id)
                 return self.responses.pop(id)
-            await asyncio.sleep(1.0)
+            await asyncio.sleep(0.001)
 
-    async def start_receive_loop(self):
+    def stop_receiving_loop(self):
+        self.responses = None
+
+    async def start_receiving_loop(self):
         while True:
+            if self.responses is None:
+                return
+
             try:
-                ic("Receiving message")
-                response_text = await asyncio.wait_for(self.socket.recv(), timeout=1.0)
-                ic("Received", response_text)
+                response_text = await asyncio.wait_for(self.socket.recv(), timeout=0.1)
             except asyncio.TimeoutError:
-                ic("TimeoutError")
                 await asyncio.sleep(0)
                 continue
-            ic(response_text)
-            response = Response(response_text)
             data = self.coder.decode(response_text)
             id = str(data["id"])
+
+            if self.responses is None:
+                return
+
             self.responses[id] = data
             await asyncio.sleep(0)
