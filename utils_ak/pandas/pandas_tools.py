@@ -286,7 +286,6 @@ def df_to_ordered_tree(df, column=None, recursive=True, prune_last=True):
     pre_res = []
 
     mark_consecutive_groups(df, column, "__key")
-
     for value, grp in df.groupby([column, "__key"]):
         grp.pop(column)
         grp.pop("__key")
