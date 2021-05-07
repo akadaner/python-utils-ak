@@ -1,16 +1,17 @@
 import time
 import asyncio
 from utils_ak.coder import JsonCoder
+from utils_ak.id_generator import IncrementalIDGenerator
 
 
 class WebSocketsClient:
-    def __init__(self, websocket_client, id_generator):
+    def __init__(self, websocket_client, id_generator=None):
         self.websocket_client = websocket_client
         self.responses = {}  # {<id>: response}
         self.coder = JsonCoder(encoding=None)
 
         self.active = True
-        self.id_generator = id_generator
+        self.id_generator = id_generator or IncrementalIDGenerator()
 
     def _prepare_request(self, request, generate_id_if_needed=True):
         request["jsonrpc"] = "2.0"
