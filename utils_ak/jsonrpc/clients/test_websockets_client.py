@@ -19,7 +19,7 @@ async def main():
 
         for i in range(5):
             response = await client.request("ping")
-            ic(response.data.id)
+            ic(response)
             time.sleep(3)
 
 
