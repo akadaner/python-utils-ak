@@ -79,7 +79,7 @@ def test_dummy_push():
     configure_loguru_stdout()
 
     def brute_validator(parent, block):
-        for c in parent.children:
+        for c in parent.children[:-1]:
             validate_disjoint_by_axis(c, block, axis=parent.props["axis"])
 
     logger.debug("Dummy push test")

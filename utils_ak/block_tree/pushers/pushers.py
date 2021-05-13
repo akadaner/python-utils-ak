@@ -33,26 +33,26 @@ def test_stack_push():
 
 
 def simple_push(parent, block, validator=None, new_props=None):
-    block.set_parent(parent)
-
     # update props for current try
     new_props = new_props or {}
     block.props.update(**new_props)
+
+    parent.add_child(block)
+
     if validator:
         try:
             validator(parent, block)
         except AssertionError as e:
             try:
                 # reset parent
-                block.parent = None
+                parent.remove_child(block)
                 # extract assertion message json
                 res = cast_dict_or_list(e.__str__())  # {'disposition': 2}
                 res = res or {}
                 return res
             except:
                 return {}
-    res = parent.add_child(block)
-    return res
+    return block
 
 
 def add_push(parent, block, new_props=None):

@@ -39,7 +39,7 @@ def test_validate_disjoint_by_axis():
 
 def disjoint_validator(parent, block):
     axis = parent.props["axis"]
-    for c in parent.children:
+    for c in parent.children[:-1]:
         validate_disjoint_by_axis(c, block, axis)
 
 
@@ -60,7 +60,7 @@ class ClassValidator:
             self.validators[key](b1, b2)
 
     def __call__(self, parent, block):
-        parent_blocks = parent.children[-self.window :]
+        parent_blocks = parent.children[-self.window : -1]
 
         if not parent_blocks:
             return

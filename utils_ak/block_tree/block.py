@@ -82,35 +82,22 @@ class Block:
             for b in child.iter(**query):
                 yield b
 
-    def set_parent(self, parent):
-        self.parent = parent
-        self.props.parent = parent.props
-
     def add_child(self, block):
-        block.set_parent(self)
+        block.parent = self
+        block.props.parent = self.props
+
         self.children.append(block)
         self.children_by_cls[block.props["cls"]].append(block)
 
         self.props.children.append(block.props)
         return block
 
-    def connect(self, parent):
-        if parent == self.parent:
-            return
-        if not self.parent:
-            self.disconnect()
-
-        self.parent = parent
-        self.props.parent = parent.props
-
-    def disconnect(self):
-        self.parent.children.remove(self)
-        self.parent.children_by_cls[self.props["cls"]].remove(self)
-
-        self.parent.props.children.remove(self.props)
-
-        self.parent = None
-        self.props.parent = None
+    def remove_child(self, block):
+        self.children.remove(block)
+        self.children_by_cls[block.props["cls"]].remove(block)
+        self.props.children.remove(block.props)
+        block.parent = None
+        block.props.parent = None
 
 
 def test_block():
