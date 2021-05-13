@@ -40,6 +40,8 @@ class DynamicProps:
         self.parent = None
         self.children = []
 
+        self.cache = {}
+
     def _format_props(self, props):
         props = dict(props)
         for k, fmt in self.formatters.items():
@@ -59,6 +61,10 @@ class DynamicProps:
     def add_child(self, child):
         self.children.append(child)
         child.parent = self
+
+    def remove_child(self, child):
+        self.children.remove(child)
+        child.parent = None
 
     def __getitem__(self, item):
         accumulator = self.accumulators.get(item, self.default_accumulator)

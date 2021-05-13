@@ -84,20 +84,19 @@ class Block:
 
     def add_child(self, block):
         block.parent = self
-        block.props.parent = self.props
 
         self.children.append(block)
         self.children_by_cls[block.props["cls"]].append(block)
 
-        self.props.children.append(block.props)
+        self.props.add_child(block.props)
         return block
 
     def remove_child(self, block):
         self.children.remove(block)
         self.children_by_cls[block.props["cls"]].remove(block)
-        self.props.children.remove(block.props)
         block.parent = None
-        block.props.parent = None
+
+        self.props.remove_child(block.props)
 
 
 def test_block():
