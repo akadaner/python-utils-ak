@@ -34,11 +34,13 @@ class ParallelepipedBlock(Block):
         super().__init__(
             block_class,
             props_formatters={
-                "x": lambda k, v: SimpleVector(v),
-                "size": lambda k, v: SimpleVector(v),
+                "x": lambda k, v: SimpleVector([int(v[0]), int(v[1])]),
+                "size": lambda k, v: SimpleVector([int(v[0]), int(v[1])]),
             },
             **props,
         )
+
+        # self.props.cache_keys = ["x"]
         self.props.accumulators["x"] = x_cumsum_acc
         self.props.accumulators[
             "x_rel"
@@ -68,12 +70,10 @@ class ParallelepipedBlock(Block):
     def add_child(self, block):
         super().add_child(block)
         self.size_cached = None
-        block.props.reset_cache(recursive=True)
 
     def remove_child(self, block):
         super().remove_child(block)
         self.size_cached = None
-        block.props.reset_cache(recursive=True)
 
     @property
     def size(self):

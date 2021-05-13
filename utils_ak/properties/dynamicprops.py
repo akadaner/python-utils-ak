@@ -69,14 +69,17 @@ class DynamicProps:
     def update(self, **props):
         props = self._format_props(props)
         self.relative_props.update(**props)
+        self.reset_cache(recursive=True)
 
     def add_child(self, child):
         self.children.append(child)
         child.parent = self
+        child.reset_cache(recursive=True)
 
     def remove_child(self, child):
         self.children.remove(child)
         child.parent = None
+        child.reset_cache(recursive=True)
 
     def __getitem__(self, item):
         if item in self.cache:
@@ -117,6 +120,7 @@ def test_dynamic_props():
             props=props,
             accumulators=ACCUMULATORS,
             required_keys=["<cumsum>", "<relative>", "<other>"],
+            cache_keys=["<cumsum>"],
         )
 
     root = gen_props({"<cumsum>": 1, "<relative>": 5, "<other>": 1})
@@ -125,19 +129,34 @@ def test_dynamic_props():
     root.add_child(child1)
     child1.add_child(child2)
 
-    values = []
-    for i, node in enumerate([root, child1, child2]):
-        values.append(
-            [
-                node[key]
-                for key in ["<cumsum>", "<relative>", "<other>", "<non-existent_key>"]
-            ]
+    def print_values():
+        values = []
+        for i, node in enumerate([root, child1, child2]):
+            values.append(
+                [
+                    node[key]
+                    for key in [
+                        "<cumsum>",
+                        "<relative>",
+                        "<other>",
+                        "<non-existent_key>",
+                    ]
+                ]
+            )
+        print(
+            pd.DataFrame(
+                values,
+                columns=["<cumsum>", "<relative>", "<other>", "<non-existent_key>"],
+            )
         )
-    print(
-        pd.DataFrame(
-            values, columns=["<cumsum>", "<relative>", "<other>", "<non-existent_key>"]
-        )
-    )
+
+    print_values()
+    print_values()
+
+    root.remove_child(child1)
+    root.add_child(child1)
+
+    print_values()
 
     for node in [root, child1, child2]:
         print(node.keys(), node.all())
