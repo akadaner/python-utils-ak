@@ -29,10 +29,16 @@ def cumsum_acc(parent, child, key, default=None, formatter=None):
 
 class DynamicProps:
     def __init__(
-        self, props=None, formatters=None, accumulators=None, required_keys=None
+        self,
+        props=None,
+        formatters=None,
+        accumulators=None,
+        required_keys=None,
+        cache_keys=None,
     ):
         self.accumulators = accumulators or {}
         self.required_keys = required_keys or []
+        self.cache_keys = cache_keys or []
         self.formatters = formatters or {}
 
         self.relative_props = self._format_props(props or {})
@@ -48,6 +54,12 @@ class DynamicProps:
             if k in props:
                 props[k] = fmt(k, props[k])
         return props
+
+    def reset_cache(self, recursive=False):
+        self.cache = {}
+        if recursive:
+            for child in self.children:
+                child.reset_cache(recursive=True)
 
     @staticmethod
     def default_accumulator(parent, child, key):
@@ -67,8 +79,15 @@ class DynamicProps:
         child.parent = None
 
     def __getitem__(self, item):
+        if item in self.cache:
+            return self.cache[item]
+
         accumulator = self.accumulators.get(item, self.default_accumulator)
-        return accumulator(self.parent, self, item)
+        res = accumulator(self.parent, self, item)
+
+        if item in self.cache_keys:
+            self.cache[item] = res
+        return res
 
     def get(self, item, default=None):
         res = self[item]

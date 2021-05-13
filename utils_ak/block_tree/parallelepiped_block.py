@@ -68,10 +68,12 @@ class ParallelepipedBlock(Block):
     def add_child(self, block):
         super().add_child(block)
         self.size_cached = None
+        block.props.reset_cache(recursive=True)
 
     def remove_child(self, block):
         super().remove_child(block)
         self.size_cached = None
+        block.props.reset_cache(recursive=True)
 
     @property
     def size(self):
