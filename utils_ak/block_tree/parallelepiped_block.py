@@ -29,6 +29,8 @@ class ParallelepipedBlock(Block):
         if "size" not in props:
             props["size"] = SimpleVector(n_dims)
 
+        self.size_cached = None
+
         super().__init__(
             block_class,
             props_formatters={
@@ -62,6 +64,33 @@ class ParallelepipedBlock(Block):
     @property
     def y_rel(self):
         return self.x_rel + self.size
+
+    def add_child(self, block):
+        super().add_child(block)
+        self.size_cached = None
+
+    def remove_child(self, block):
+        super().remove_child(block)
+        self.size_cached = None
+
+    @property
+    def size(self):
+        if not self.size_cached:
+            size = self.props["size"]
+            values = []
+            for axis in range(self.n_dims):
+                if size[axis] == 0:
+                    if not self.children:
+                        values.append(0)
+                    else:
+                        start = min([c.x_rel[axis] for c in self.children] + [0])
+                        values.append(
+                            max([c.y_rel[axis] - start for c in self.children])
+                        )
+                else:
+                    values.append(size[axis])
+            self.size_cached = SimpleVector(values)
+        return self.size_cached
 
     def to_dict(self, props=None, with_children=True):
         props = props or []
@@ -126,21 +155,6 @@ class ParallelepipedBlock(Block):
                 )
                 res += "\n"
         return res
-
-    @property
-    def size(self):
-        size = self.props["size"]
-        values = []
-        for axis in range(self.n_dims):
-            if size[axis] == 0:
-                if not self.children:
-                    values.append(0)
-                else:
-                    start = min([c.x_rel[axis] for c in self.children] + [0])
-                    values.append(max([c.y_rel[axis] - start for c in self.children]))
-            else:
-                values.append(size[axis])
-        return SimpleVector(values)
 
 
 def test_parallelepiped_block():
