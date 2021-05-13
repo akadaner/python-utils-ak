@@ -37,10 +37,10 @@ class ParallelepipedBlock(Block):
                 "x": lambda k, v: SimpleVector([int(v[0]), int(v[1])]),
                 "size": lambda k, v: SimpleVector([int(v[0]), int(v[1])]),
             },
+            # props_cache_keys=["x"],
             **props,
         )
 
-        # self.props.cache_keys = ["x"]
         self.props.accumulators["x"] = x_cumsum_acc
         self.props.accumulators[
             "x_rel"

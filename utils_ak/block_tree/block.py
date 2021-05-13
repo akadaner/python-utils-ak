@@ -11,6 +11,7 @@ class Block:
         props_formatters=None,
         props_accumulators=None,
         props_required_keys=None,
+        props_cache_keys=None,
         **props,
     ):
         block_class = block_class or default_block_class
@@ -25,6 +26,7 @@ class Block:
             formatters=props_formatters,
             accumulators=props_accumulators,
             required_keys=props_required_keys,
+            cache_keys=props_cache_keys,
         )
 
     def __getitem__(self, item):
@@ -94,6 +96,7 @@ class Block:
         self.children.remove(block)
         self.children_by_cls[block.props["cls"]].remove(block)
         self.props.remove_child(block.props)
+        return block
 
 
 def test_block():
