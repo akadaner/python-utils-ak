@@ -1,5 +1,6 @@
 from utils_ak.properties import *
 from utils_ak.architecture import delistify
+from collections import defaultdict
 
 
 class Block:
@@ -17,6 +18,7 @@ class Block:
 
         self.parent = None
         self.children = []
+        self.children_by_cls = defaultdict(list)
 
         self.props = DynamicProps(
             props=props,
@@ -38,7 +40,8 @@ class Block:
 
     def get(self, item):
         if isinstance(item, str):
-            res = [b for b in self.children if b.props["cls"] == item]
+            res = self.children_by_cls[item]
+            # res = [b for b in self.children if b.props["cls"] == item]
         elif isinstance(item, int):
             res = self.children[item]
         elif isinstance(item, slice):
@@ -79,15 +82,15 @@ class Block:
             for b in child.iter(**query):
                 yield b
 
-    # todo: deprecated, remove dependencies
     def set_parent(self, parent):
         self.parent = parent
         self.props.parent = parent.props
 
-    # todo: deprecated, remove dependencies
     def add_child(self, block):
         block.set_parent(self)
         self.children.append(block)
+        self.children_by_cls[block.props["cls"]].append(block)
+
         self.props.children.append(block.props)
         return block
 
@@ -102,6 +105,8 @@ class Block:
 
     def disconnect(self):
         self.parent.children.remove(self)
+        self.parent.children_by_cls[self.props["cls"]].remove(self)
+
         self.parent.props.children.remove(self.props)
 
         self.parent = None

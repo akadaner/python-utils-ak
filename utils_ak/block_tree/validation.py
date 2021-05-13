@@ -2,6 +2,7 @@ from utils_ak.portion import *
 from utils_ak.coder import cast_js
 from utils_ak.block_tree.parallelepiped_block import ParallelepipedBlock
 from utils_ak.block_tree.block import Block
+from utils_ak.clock import *
 
 from loguru import logger
 
@@ -10,16 +11,18 @@ def validate_disjoint_by_axis(b1, b2, axis=0):
     validate_disjoint_by_intervals((b1.x[axis], b1.y[axis]), (b2.x[axis], b2.y[axis]))
 
 
+def _calc_interval_intersection(i1, i2):
+    return max(min(i1[1], i2[1]) - max(i1[0], i2[0]), 0)
+
+
 def validate_disjoint_by_intervals(i1, i2):
-    try:
-        disposition = int(i1[1] - i2[0])
-    except:
-        disposition = 1
+    if _calc_interval_intersection(i1, i2) != 0:
+        try:
+            disposition = int(i1[1] - i2[0])
+        except:
+            disposition = 1
 
-    i1 = cast_interval(*i1)
-    i2 = cast_interval(*i2)
-
-    assert calc_interval_length(i1 & i2) == 0, cast_js({"disposition": disposition})
+        raise AssertionError(cast_js({"disposition": disposition}))
 
 
 def test_validate_disjoint_by_axis():
@@ -109,6 +112,12 @@ def test_class_validator():
     root.add_child(a2)
 
 
+def test_interval_intersection():
+    print(_calc_interval_intersection([0, 2], [3, 4]))
+    print(_calc_interval_intersection([0, 2], [1, 3]))
+
+
 if __name__ == "__main__":
-    test_validate_disjoint_by_axis()
-    test_class_validator()
+    # test_validate_disjoint_by_axis()
+    # test_class_validator()
+    test_interval_intersection()

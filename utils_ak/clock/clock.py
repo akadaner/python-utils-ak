@@ -18,7 +18,7 @@ class Clock(object):
         laps=None,
         auto_close=False,
         sep="/",
-        max_observations=10000,
+        max_observations=100000,
         enabled=True,
     ):
         self.checkpoints = checkpoints or {}
