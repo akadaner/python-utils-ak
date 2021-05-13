@@ -52,8 +52,16 @@ class ParallelepipedBlock(Block):
         return self.props["x"]
 
     @property
+    def x_rel(self):
+        return self.props["x_rel"]
+
+    @property
     def y(self):
         return self.x + self.size
+
+    @property
+    def y_rel(self):
+        return self.x_rel + self.size
 
     def to_dict(self, props=None, with_children=True):
         props = props or []
@@ -128,9 +136,8 @@ class ParallelepipedBlock(Block):
                 if not self.children:
                     values.append(0)
                 else:
-                    start = min([c.x[axis] for c in self.children] + [self.x[axis]])
-                    # start = self.x[axis]
-                    values.append(max([c.y[axis] - start for c in self.children]))
+                    start = min([c.x_rel[axis] for c in self.children] + [0])
+                    values.append(max([c.y_rel[axis] - start for c in self.children]))
             else:
                 values.append(size[axis])
         return SimpleVector(values)

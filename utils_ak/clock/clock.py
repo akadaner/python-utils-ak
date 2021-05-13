@@ -220,7 +220,12 @@ def clockify(key=None):
     def _clockify(f):
         @wraps(f)
         def inner(*args, **kwargs):
-            _key = key or f.__name__
+
+            _values = [str(f.__module__), f.__name__]
+            if key:
+                _values.append(key)
+            _key = "/".join(_values)
+
             clock.start(_key)
             try:
                 res = f(*args, **kwargs)
