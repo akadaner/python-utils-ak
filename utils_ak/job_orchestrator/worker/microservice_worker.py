@@ -2,6 +2,7 @@ from utils_ak.simple_microservice import SimpleMicroservice
 
 from .worker import Worker
 
+
 class MicroserviceWorker(Worker):
     def __init__(self, id, payload):
         super().__init__(id, payload)

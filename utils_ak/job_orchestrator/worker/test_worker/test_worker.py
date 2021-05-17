@@ -1,9 +1,8 @@
 import asyncio
+import time
+from datetime import datetime, timedelta
 
-from utils_ak.job_orchestrator.worker.worker import MicroserviceWorker
-from utils_ak.job_orchestrator.worker.test_worker import *
-
-from datetime import datetime
+from utils_ak.job_orchestrator.worker.microservice_worker import MicroserviceWorker
 
 
 class TestWorker(MicroserviceWorker):

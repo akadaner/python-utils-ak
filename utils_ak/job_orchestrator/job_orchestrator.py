@@ -4,6 +4,8 @@ from utils_ak.loguru import *
 from utils_ak.deployment import *
 from utils_ak.simple_microservice import SimpleMicroservice
 
+from utils_ak.job_orchestrator.worker.gen_deployment import gen_deployment
+
 from .models import Job, Worker
 
 
@@ -73,6 +75,7 @@ class JobOrchestrator:
 
     def _gen_deployment(self, worker_model):
         params = {
+            "container_name": "worker",
             "deployment_id": str(worker_model.id),
             "payload": worker_model.job.payload,
             "image": worker_model.job.runnable.get("image", ""),
