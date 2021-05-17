@@ -1,6 +1,6 @@
 id: "{deployment_id}"
 containers:
-  test-worker:
+  <container_name>:
     image: "{image}"
     python_main: "{python_main}"
     command_line_arguments:
