@@ -16,7 +16,7 @@ from utils_ak.job_orchestrator.tests.test_monitor import run_monitor
 
 def create_new_job(config, payload, python_main=TEST_MAIN):
     configure_loguru_stdout("DEBUG")
-    connect_to_mongodb(host=mongodb_host, db=mongodb_db)
+    connect_to_mongodb(host=config.MONGODB_HOST, db=config.MONGODB_DB)
     logger.info("Connected to mongodb")
     time.sleep(2)
     logger.debug("Creating new job...")

@@ -1,29 +1,29 @@
 import os
 import time
 import fire
+import notifiers
+
 from loguru import logger
-from notifiers import get_notifier
-from datetime import datetime
+from datetime import datetime, timedelta
 
-# todo: make beep properly
-
-from utils_ak.deployment.example.config import settings
+from utils_ak.deployment.example.config import config
 
 
-def main(name=None, run_forever=True, beep=True):
-    telegram = get_notifier("telegram")
+def main(name=None, run_forever=False):
+    notifier = notifiers.get_notifier("gmail")
 
     name = name or os.environ.get("NAME") or "World"
     logger.info(f"Hello {name}!")
 
-    if beep and settings.get("telegram_bot_token"):
-        for i in range(5):
-            telegram.notify(
-                message=f"Hi! from {datetime.now()}",
-                token=settings["telegram_bot_token"],
-                chat_id=settings["telegram_chat_id"],
-            )
-            time.sleep(2)
+    for i in range(5):
+        notifier.notify(
+            message=f"Hello, Friend! {datetime.now()}",
+            subject="<subject>",
+            to=config.EMAIL_USER,
+            username=config.EMAIL_USER,
+            password=config.EMAIL_PSWD,
+        )
+        time.sleep(2)
 
     if run_forever:
         while True:

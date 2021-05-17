@@ -1,8 +1,5 @@
 from utils_ak.job_orchestrator.worker.test.test_worker import *
-from utils_ak.job_orchestrator.config import settings
 from utils_ak.deployment import *
-
-MESSAGE_BROKER = settings.as_dict()["TRANSPORT"]["message_broker"]
 
 
 def test_batch():
