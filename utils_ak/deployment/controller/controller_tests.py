@@ -1,7 +1,6 @@
-import anyconfig
 import time
-import os
 from utils_ak.loguru import logger, configure_loguru_stdout
+from utils_ak.deployment.deployment_file import *
 
 
 def _test_controller(controller_cls):
@@ -11,7 +10,7 @@ def _test_controller(controller_cls):
         os.path.dirname(os.path.dirname(__file__)),
         "examples/hello_world/deployment.yml",
     )
-    deployment = anyconfig.load(deployment_fn)
+    deployment = read_deployment(deployment_fn)
     ctrl = controller_cls()
     logger.info("Starting")
     ctrl.start(deployment)
