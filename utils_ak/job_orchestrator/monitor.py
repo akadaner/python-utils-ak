@@ -14,9 +14,6 @@ class Monitor:
         self.microservice.add_callback("monitor_in", "state", self._on_state)
         self.microservice.register_publishers(["monitor_out"])
 
-        # # todo: del, hardcode
-        # self.received_messages_cache = []
-
     def _update_stalled(self):
         for worker_id, worker in self.workers.items():
             if "status" not in worker:
@@ -49,14 +46,6 @@ class Monitor:
             self.workers[worker_id]["status"] = status
 
     def _on_state(self, topic, id, status, state):
-        # # todo: del, preview hardcode
-        # if id is not None and state is not None:
-        #     key = id + state
-        #     if key not in self.received_messages_cache:
-        #         self.received_messages_cache.append(key)
-        #     else:
-        #         return
-
         # init if necessary
         if id not in self.workers:
             self.microservice.publish("monitor_out", "new", id=id)
