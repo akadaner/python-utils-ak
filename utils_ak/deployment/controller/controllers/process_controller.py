@@ -2,9 +2,6 @@ from utils_ak.deployment.controller import Controller
 from utils_ak.coder import cast_js, cast_dict_or_list
 from utils_ak.os import *
 from utils_ak.builtin import *
-from utils_ak.deployment.controller.test_controller import test_controller
-
-# todo: add screen support for *nix
 
 
 class ProcessController(Controller):
@@ -50,6 +47,3 @@ class ProcessController(Controller):
     def log(self, deployment_id):
         pass
 
-
-if __name__ == "__main__":
-    test_controller(ProcessController)

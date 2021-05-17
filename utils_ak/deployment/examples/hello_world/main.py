@@ -6,19 +6,19 @@ import notifiers
 from loguru import logger
 from datetime import datetime, timedelta
 
-from utils_ak.deployment.example.config import config
+from utils_ak.deployment.examples.hello_world.config import config
 
 
 def main(name=None, run_forever=False):
     notifier = notifiers.get_notifier("gmail")
 
     name = name or os.environ.get("NAME") or "World"
-    logger.info(f"Hello {name}!")
+    logger.info(f"Running deployment, {name}")
 
     for i in range(5):
         notifier.notify(
-            message=f"Hello, Friend! {datetime.now()}",
-            subject="<subject>",
+            message=f"Running deployment, {name}: {datetime.now()}",
+            subject="utils_ak/deployment/examples/hello_world",
             to=config.EMAIL_USER,
             username=config.EMAIL_USER,
             password=config.EMAIL_PSWD,
