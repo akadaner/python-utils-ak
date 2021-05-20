@@ -6,7 +6,7 @@ from utils_ak.job_orchestrator.worker.worker_tests import (
 )
 from utils_ak.job_orchestrator.worker.sample_worker.sample_worker import *
 from utils_ak.job_orchestrator.tests.config.config import config
-from utils_ak.job_orchestrator.worker.sample_worker.main import path
+from utils_ak.job_orchestrator.worker.sample_worker.main import MAIN
 
 
 def run_batch():
@@ -29,7 +29,7 @@ def run_deployment():
     controller = ProcessController()
     _test_microservice_worker_deployment(
         {"type": "batch", "message_broker": config.TRANSPORT},
-        path,
+        MAIN,
         controller,
     )
 

@@ -11,10 +11,10 @@ from utils_ak.job_orchestrator.models import *
 from utils_ak.job_orchestrator.job_orchestrator import JobOrchestrator
 from utils_ak.job_orchestrator.tests.test_monitor import run_monitor
 from utils_ak.job_orchestrator.tests.config.config import config
-from utils_ak.job_orchestrator.worker.sample_worker.main import path
+from utils_ak.job_orchestrator.worker.sample_worker.main import MAIN
 
 
-def create_new_job(payload, python_main=path, drop_collections=True):
+def create_new_job(payload, python_main=MAIN, drop_collections=True):
     configure_loguru_stdout("DEBUG")
     connect_to_mongodb(host=config.MONGODB_HOST, db=config.MONGODB_DB)
     logger.info("Connected to mongodb")
