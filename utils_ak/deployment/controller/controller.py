@@ -1,4 +1,6 @@
 class Controller:
+    """ Manage deployment running instances.  """
+
     def start(self, deployment):
         raise NotImplemented
 

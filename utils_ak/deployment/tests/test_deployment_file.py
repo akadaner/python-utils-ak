@@ -1,4 +1,4 @@
-from utils_ak.deployment.deployment_file import *
+from utils_ak.deployment.io import *
 
 
 def test_read_deployment_file():

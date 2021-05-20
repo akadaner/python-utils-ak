@@ -5,6 +5,8 @@ from utils_ak.loguru import configure_loguru_stdout
 
 
 class Listener(SimpleMicroservice):
+    """ Logging service for current collection. """
+
     def __init__(self, collection, topic="", *args, **kwargs):
         super().__init__(f"Listener_{collection}", *args, **kwargs)
         self.add_callback(collection, topic, self._log)
@@ -14,11 +16,13 @@ class Listener(SimpleMicroservice):
 
 
 def run_listener(collection, topic="", *args, **kwargs):
+    """ Run listener process for current collection. """
     configure_loguru_stdout("DEBUG")
     Listener(collection, topic, *args, **kwargs).run()
 
 
 def run_listener_async(collection, topic="", timeout=None, *args, **kwargs):
+    """ Run listener in a separate process."""
     args = [collection, topic] + list(args)
     if timeout:
         time.sleep(timeout)

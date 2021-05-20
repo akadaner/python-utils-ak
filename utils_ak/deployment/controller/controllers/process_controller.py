@@ -5,6 +5,8 @@ from utils_ak.builtin import *
 
 
 class ProcessController(Controller):
+    """ Controller using processes. """
+
     def __init__(self):
         self.processes = {}
 
@@ -46,4 +48,3 @@ class ProcessController(Controller):
 
     def log(self, deployment_id):
         pass
-
