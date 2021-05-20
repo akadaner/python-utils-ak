@@ -3,6 +3,9 @@ from utils_ak.simple_microservice import SimpleMicroservice
 
 
 class Monitor:
+    """Worker state tracker.
+    Monitor listens to worker heartbeats and states."""
+
     def __init__(self, message_broker, heartbeat_timeout=10):
         self.microservice = SimpleMicroservice("Monitor", message_broker=message_broker)
 

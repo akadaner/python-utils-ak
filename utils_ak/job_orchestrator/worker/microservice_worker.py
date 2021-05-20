@@ -4,6 +4,7 @@ from .worker import Worker
 
 
 class MicroserviceWorker(Worker):
+    """ Working using SimpleMicroservice class from utils_ak.simple_microservice util. """
     def __init__(self, id, payload):
         super().__init__(id, payload)
         self.microservice = SimpleMicroservice(

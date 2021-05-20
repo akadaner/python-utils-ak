@@ -3,7 +3,7 @@ from utils_ak.coder import *
 from utils_ak.dict import *
 
 
-def gen_deployment(
+def create_deployment(
     container_name, deployment_id, payload, image=None, python_main=None
 ):
     deployment_template = cast_dict_or_list(

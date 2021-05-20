@@ -1,9 +1,9 @@
-from utils_ak.job_orchestrator.worker.gen_deployment import gen_deployment
+from utils_ak.job_orchestrator.worker.gen_deployment import create_deployment
 
 
 def test_gen_deployment():
     print(
-        gen_deployment(
+        create_deployment(
             "<container_name>",
             "<deployment_id>",
             "<payload>",

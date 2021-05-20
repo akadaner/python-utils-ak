@@ -4,11 +4,14 @@ from utils_ak.loguru import *
 from utils_ak.deployment import *
 from utils_ak.simple_microservice import SimpleMicroservice
 
-from utils_ak.job_orchestrator.worker.gen_deployment import gen_deployment
+from utils_ak.job_orchestrator.worker.gen_deployment import create_deployment
 
 from .models import Job, Worker
 
+
 class JobOrchestrator:
+    """ Jobs and Workers manager."""
+
     def __init__(self, deployment_controller, message_broker):
         self.controller = deployment_controller
         self.microservice = SimpleMicroservice(
@@ -63,6 +66,7 @@ class JobOrchestrator:
         self.controller.stop(str(worker.id))
 
     def _create_worker_model(self, job):
+        """ Init new worker model for a job. """
         worker_model = Worker()
         worker_model.job = job
         worker_model.save()
@@ -72,7 +76,7 @@ class JobOrchestrator:
         job.save()
         return worker_model
 
-    def _gen_deployment(self, worker_model):
+    def _create_deployment(self, worker_model):
         params = {
             "container_name": "worker",
             "deployment_id": str(worker_model.id),
@@ -80,7 +84,7 @@ class JobOrchestrator:
             "image": worker_model.job.runnable.get("image", ""),
             "python_main": worker_model.job.runnable.get("python_main", ""),
         }
-        return gen_deployment(**params)
+        return create_deployment(**params)
 
     def _process_pending(self):
         jobs = Job.objects(status="pending").all()
@@ -90,7 +94,7 @@ class JobOrchestrator:
         for job in jobs:
             worker_model = self._create_worker_model(job)
             self._update_worker_status(worker_model, "initializing")
-            deployment = self._gen_deployment(worker_model)
+            deployment = self._create_deployment(worker_model)
             self.controller.start(deployment)
 
     def _process_initializing(self):
@@ -143,6 +147,7 @@ class JobOrchestrator:
                 )
 
     def _on_monitor(self, topic, id, old_status, new_status, state):
+        """ Process new messages from the monitor about worker state change. """
         try:
             worker = Worker.objects(pk=id).first()
             assert worker is not None

@@ -4,7 +4,7 @@ from loguru import logger
 from utils_ak.loguru import configure_loguru_stdout
 from utils_ak.simple_microservice import run_listener_async
 from utils_ak.job_orchestrator.worker.worker import run_worker
-from utils_ak.job_orchestrator.worker.gen_deployment import gen_deployment
+from utils_ak.job_orchestrator.worker.gen_deployment import create_deployment
 from utils_ak.deployment import *
 
 
@@ -25,7 +25,7 @@ def _test_microservice_worker_deployment(
 ):
     configure_loguru_stdout("DEBUG")
 
-    deployment = gen_deployment(
+    deployment = create_deployment(
         "worker", "<deployment_id>", payload, python_main=python_main
     )
 
