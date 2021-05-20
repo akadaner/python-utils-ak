@@ -60,7 +60,7 @@ class ClassValidator:
             self.validators[key](b1, b2)
 
     def __call__(self, parent, block):
-        parent_blocks = parent.children[-self.window : -1]
+        parent_blocks = parent.children[-self.window - 1 : -1]
 
         if not parent_blocks:
             return
