@@ -1,3 +1,5 @@
+from loguru import logger
+
 from utils_ak.deployment import *
 
 from utils_ak.job_orchestrator.worker.worker_tests import (
@@ -10,6 +12,7 @@ from utils_ak.job_orchestrator.worker.sample_worker.main import MAIN
 
 
 def run_batch():
+    logger.info("Running batch SampleWorker")
     _test_microservice_worker(
         SampleWorker,
         {"type": "batch", "message_broker": config.TRANSPORT},
@@ -18,6 +21,8 @@ def run_batch():
 
 
 def run_streaming():
+    logger.info("Running streaming SampleWorker")
+
     _test_microservice_worker(
         SampleWorker,
         {"type": "streaming", "message_broker": config.TRANSPORT},
@@ -26,6 +31,8 @@ def run_streaming():
 
 
 def run_deployment():
+    logger.info("Running batch SampleWorker using deployment via ProcessController")
+
     controller = ProcessController()
     _test_microservice_worker_deployment(
         {"type": "batch", "message_broker": config.TRANSPORT},

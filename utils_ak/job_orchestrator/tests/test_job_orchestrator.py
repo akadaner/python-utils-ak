@@ -52,6 +52,7 @@ def run_job_orchestrator(payload=None):
     controller = ProcessController()
 
     run_listener_async("job_orchestrator", message_broker=config.TRANSPORT)
+    logger.info('Running job orchestrator...')
     job_orchestrator = JobOrchestrator(controller, config.TRANSPORT)
     multiprocessing.Process(target=run_monitor).start()
     if payload:

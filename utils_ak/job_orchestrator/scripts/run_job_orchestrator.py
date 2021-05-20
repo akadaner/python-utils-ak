@@ -8,6 +8,7 @@ from utils_ak.job_orchestrator.tests.config.config import config
 
 def run_job_orchestrator():
     utils.configure_loguru_stdout("DEBUG")
+
     connect(host=config.MONGODB_HOST, db=config.MONGODB_DB)
     logger.info("Connected to mongodb")
     controller = utils.ProcessController()
@@ -15,6 +16,7 @@ def run_job_orchestrator():
     utils.run_listener_async("job_orchestrator", message_broker=config.TRANSPORT)
     job_orchestrator = JobOrchestrator(controller, config.TRANSPORT)
     multiprocessing.Process(target=run_monitor).start()
+    logger.info("Running job orchestrator...")
     job_orchestrator.run()
 
 

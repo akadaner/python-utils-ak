@@ -1,6 +1,7 @@
 import time
 import multiprocessing
 
+from loguru import logger
 
 from utils_ak.loguru import configure_loguru_stdout
 from utils_ak.simple_microservice import run_listener_async
@@ -11,12 +12,14 @@ from utils_ak.job_orchestrator.tests.config.config import config
 
 def run_monitor():
     configure_loguru_stdout("DEBUG")
+    logger.info("Running monitor...")
     monitor = Monitor(config.TRANSPORT)
     monitor.microservice.run()
 
 
 def run_worker():
     configure_loguru_stdout("DEBUG")
+    logger.info("Running SampleWorker instance...")
     worker = SampleWorker(
         "WorkerId",
         {"type": "batch", "message_broker": config.TRANSPORT},

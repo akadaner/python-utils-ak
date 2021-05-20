@@ -14,7 +14,7 @@ class Job(Document):
     locked_by = ReferenceField("Worker")
     locked_at = DateTimeField()
 
-    runnable = DictField(required=True)
+    runnable = DictField(required=True)  # docker image name, python main path, ...
     params = DictField()
 
     running_timeout = IntField()  # how much time allowed for the whole job runtime.
