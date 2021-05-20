@@ -2,6 +2,7 @@ from typing import *
 from pydantic import *
 
 
+
 class Config(BaseSettings):
     MONGODB_HOST: str
     MONGODB_DB: str
