@@ -1,6 +1,6 @@
-import datetime
 import msgpack
 import decimal
+import datetime as datetime_module
 
 from utils_ak.coder import Coder
 
@@ -22,11 +22,11 @@ EXT_TIME = 4
 
 
 def default(obj):
-    if isinstance(obj, datetime.datetime):
+    if isinstance(obj, datetime_module.datetime):
         return msgpack.ExtType(EXT_DATETIME, pack_datetime(obj))
-    elif isinstance(obj, datetime.date):
+    elif isinstance(obj, datetime_module.date):
         return msgpack.ExtType(EXT_DATE, pack_date(obj))
-    elif isinstance(obj, datetime.time):
+    elif isinstance(obj, datetime_module.time):
         return msgpack.ExtType(EXT_TIME, pack_time(obj))
     elif isinstance(obj, decimal.Decimal):
         return msgpack.ExtType(EXT_DECIMAL, pack_decimal(obj))
@@ -66,6 +66,6 @@ class MsgPackCoder(Coder):
 
 
 if __name__ == "__main__":
-    from utils_ak.coder import test_coder
+    from utils_ak.coder import _test_coder
 
     test_coder(MsgPackCoder())

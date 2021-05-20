@@ -1,7 +1,8 @@
-import datetime
 import decimal
 import struct
 import six
+
+import datetime as datetime_module
 
 STRUCT_DATE = struct.Struct("!HBB")
 STRUCT_DATETIME = struct.Struct("!q")
@@ -14,20 +15,20 @@ def pack_date(obj):
 
 
 def unpack_date(data):
-    return datetime.date(*STRUCT_DATE.unpack(data))
+    return datetime_module.date(*STRUCT_DATE.unpack(data))
 
 
 def pack_datetime(obj):
     if obj.tzinfo is not None:
         raise TypeError("Cannot encode time zone-aware date-times to MessagePack")
-    seconds = (obj - datetime.datetime(1970, 1, 1)).total_seconds()
+    seconds = (obj - datetime_module.datetime(1970, 1, 1)).total_seconds()
     microseconds = int(seconds * 1000000.0)
     return STRUCT_DATETIME.pack(microseconds)
 
 
 def unpack_datetime(data):
     microseconds = STRUCT_DATETIME.unpack(data)[0]
-    return datetime.datetime.utcfromtimestamp(microseconds / 1000000.0)
+    return datetime_module.datetime.utcfromtimestamp(microseconds / 1000000.0)
 
 
 def pack_time(obj):
@@ -35,7 +36,7 @@ def pack_time(obj):
 
 
 def unpack_time(data):
-    return datetime.time(*STRUCT_TIME.unpack(data))
+    return datetime_module.time(*STRUCT_TIME.unpack(data))
 
 
 def pack_decimal(obj):

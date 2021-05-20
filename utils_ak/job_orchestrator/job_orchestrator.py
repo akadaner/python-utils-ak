@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from utils_ak.loguru import *
 from utils_ak.deployment import *
@@ -7,7 +7,6 @@ from utils_ak.simple_microservice import SimpleMicroservice
 from utils_ak.job_orchestrator.worker.gen_deployment import gen_deployment
 
 from .models import Job, Worker
-
 
 class JobOrchestrator:
     def __init__(self, deployment_controller, message_broker):

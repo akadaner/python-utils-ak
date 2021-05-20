@@ -1,9 +1,9 @@
 import decimal
-import datetime
 import os
 import yaml
 import json
 import ujson
+import datetime as datetime_module
 
 from io import StringIO
 
@@ -22,11 +22,11 @@ class JsonEncoder(json.JSONEncoder):
             return obj.to_json()
         elif isinstance(obj, decimal.Decimal):
             return str(obj)
-        elif isinstance(obj, datetime.datetime):
+        elif isinstance(obj, datetime_module.datetime):
             return str(obj)
-        elif isinstance(obj, datetime.date):
+        elif isinstance(obj, datetime_module.date):
             return str(obj)
-        elif isinstance(obj, datetime.time):
+        elif isinstance(obj, datetime_module.time):
             return str(obj)
         elif is_int(obj):
             return int(obj)
@@ -94,8 +94,3 @@ def cast_dict_or_list(obj, *args, **kwargs):
 
     raise Exception("Unknown type")
 
-
-if __name__ == "__main__":
-    from utils_ak.coder import test_coder
-
-    test_coder(JsonCoder(), assert_equal=False)

@@ -1,6 +1,6 @@
 import time
 import multiprocessing
-
+from loguru import logger
 from mongoengine import connect as connect_to_mongodb
 
 from utils_ak.simple_microservice import run_listener_async
@@ -10,19 +10,22 @@ from utils_ak.loguru import configure_loguru_stdout
 from utils_ak.job_orchestrator.models import *
 from utils_ak.job_orchestrator.job_orchestrator import JobOrchestrator
 from utils_ak.job_orchestrator.tests.test_monitor import run_monitor
+from utils_ak.job_orchestrator.tests.config.config import config
+from utils_ak.job_orchestrator.worker.sample_worker.main import path
 
-# TEST_MAIN = "/Users/arsenijkadaner/Yandex.Disk.localized/master/code/git/python-utils-ak/utils_ak/job_orchestrator/worker/test/main.py"
-#
 
-def create_new_job(config, payload, python_main=TEST_MAIN):
+def create_new_job(payload, python_main=path, drop_collections=True):
     configure_loguru_stdout("DEBUG")
     connect_to_mongodb(host=config.MONGODB_HOST, db=config.MONGODB_DB)
     logger.info("Connected to mongodb")
     time.sleep(2)
-    logger.debug("Creating new job...")
-    Job.drop_collection()
-    Worker.drop_collection()
 
+    if drop_collections:
+        logger.info("Dropping Job and Worker collections...")
+        Job.drop_collection()
+        Worker.drop_collection()
+
+    logger.debug("Creating new job...")
     payload = dict(payload)
     payload.update(
         {
@@ -42,11 +45,10 @@ def create_new_job(config, payload, python_main=TEST_MAIN):
     job.save()
 
 
-def test_job_orchestrator(config, payload=None):
+def run_job_orchestrator(payload=None):
     configure_loguru_stdout("DEBUG")
     connect_to_mongodb(host=config.MONGODB_HOST, db=config.MONGODB_DB)
     logger.info("Connected to mongodb")
-
     controller = ProcessController()
 
     run_listener_async("job_orchestrator", message_broker=config.TRANSPORT)
@@ -57,29 +59,29 @@ def test_job_orchestrator(config, payload=None):
     job_orchestrator.run()
 
 
-def test_success():
-    test_job_orchestrator({"type": "batch"})
+def run_success():
+    run_job_orchestrator({"type": "batch"})
 
 
-def test_stalled():
-    test_job_orchestrator({"type": "batch", "stalled_timeout": 600})
+def run_stalled():
+    run_job_orchestrator({"type": "batch", "stalled_timeout": 600})
 
 
-def test_timeout():
-    test_job_orchestrator({"type": "batch", "running_timeout": 20})
+def run_timeout():
+    run_job_orchestrator({"type": "batch", "running_timeout": 20})
 
 
-def test_failure():
-    test_job_orchestrator({"type": "batch", "initializing_timeout": 600})
+def run_failure():
+    run_job_orchestrator({"type": "batch", "initializing_timeout": 600})
 
 
-def test_run():
-    test_job_orchestrator()
+def run():
+    run_job_orchestrator()
 
 
 if __name__ == "__main__":
-    # test_success()
-    # test_stalled()
-    # test_timeout()
-    # test_failure()
-    test_run()
+    run_success()
+    # run_stalled()
+    # run_timeout()
+    # run_failure()
+    # run()

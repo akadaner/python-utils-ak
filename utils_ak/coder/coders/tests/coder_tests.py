@@ -1,13 +1,14 @@
-def test_coder(coder, assert_equal=True):
-    import datetime
-    import decimal
+import decimal
+import datetime as datetime_module
 
+
+def _test_coder(coder, assert_equal=True):
     obj = {
         "int": 1,
-        "datetime": datetime.datetime.now(),
+        "datetime": datetime_module.datetime.now(),
         "decimal": decimal.Decimal("0.12431234123000"),
-        "date": datetime.date(2018, 1, 1),
-        "time": datetime.datetime.now().time(),
+        "date": datetime_module.date(2018, 1, 1),
+        "time": datetime_module.datetime.now().time(),
     }
 
     encoded = coder.encode(obj)
