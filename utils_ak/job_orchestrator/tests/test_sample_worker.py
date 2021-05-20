@@ -4,13 +4,13 @@ from utils_ak.job_orchestrator.worker.worker_tests import (
     _test_batch_microservice_worker,
     _test_microservice_worker_deployment,
 )
-from utils_ak.job_orchestrator.worker.test_worker.test_worker import *
+from utils_ak.job_orchestrator.worker.sample_worker.sample_worker import *
 from utils_ak.job_orchestrator.tests.config.config import config
 
 
 def test_batch():
     _test_batch_microservice_worker(
-        TestWorker,
+        SampleWorker,
         {"type": "batch", "message_broker": config.TRANSPORT},
         run_listener=True,
     )
@@ -18,7 +18,7 @@ def test_batch():
 
 def test_streaming():
     _test_batch_microservice_worker(
-        TestWorker,
+        SampleWorker,
         {"type": "streaming", "message_broker": config.TRANSPORT},
         run_listener=True,
     )
