@@ -37,7 +37,7 @@ class ParallelepipedBlock(Block):
                 "x": lambda k, v: SimpleVector([int(v[0]), int(v[1])]),
                 "size": lambda k, v: SimpleVector([int(v[0]), int(v[1])]),
             },
-            # props_cache_keys=["x"],
+            props_cache_keys=["x"],
             **props,
         )
 
@@ -163,23 +163,30 @@ def test_parallelepiped_block():
     a = ParallelepipedBlock("a", n_dims=2, x=[1, 2])
     b = ParallelepipedBlock("b", n_dims=2)
     c = ParallelepipedBlock("c", n_dims=2, x=[3, 4], size=[1, 5])
+    print(a.props.cache, b.props.cache, c.props.cache)
     a.add_child(b)
+    print(a.props.cache, b.props.cache, c.props.cache)
     b.add_child(c)
-
+    print(a.props.cache, b.props.cache, c.props.cache)
     print(a)
+    print(a.props.cache, b.props.cache, c.props.cache)
     print(b)
+    print(a.props.cache, b.props.cache, c.props.cache)
     print(c)
-    print(a.x, a.size, a.y)
-    print(b.x, b.size, b.y)
-    print(c.x, c.size, c.y)
 
     print()
-    print(a["b"]["c"])
 
-    print(a.__repr__())
-
-    print(a.to_dict())
-    print(a.to_dict(["x", {"key": "size", "value": lambda b: list(b.props["size"])}]))
+    # print(a.x, a.size, a.y)
+    # print(b.x, b.size, b.y)
+    # print(c.x, c.size, c.y)
+    #
+    # print()
+    # print(a["b"]["c"])
+    #
+    # print(a.__repr__())
+    #
+    # print(a.to_dict())
+    # print(a.to_dict(["x", {"key": "size", "value": lambda b: list(b.props["size"])}]))
 
 
 if __name__ == "__main__":

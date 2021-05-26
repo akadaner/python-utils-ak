@@ -6,6 +6,9 @@ class Worker:
     def run(self):
         raise NotImplementedError
 
+    def send_state(self, status, state):
+        """ Send current status and state to the monitor. """
+        pass
 
 
 def run_worker(worker_cls, worker_config):

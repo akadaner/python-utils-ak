@@ -1,3 +1,4 @@
+import copy
 import pandas as pd
 from loguru import logger
 
@@ -84,13 +85,20 @@ class DynamicProps:
 
     def __getitem__(self, item):
         if item in self.cache:
-            return self.cache[item]
+            res = self.cache[item]
+        else:
+            accumulator = self.accumulators.get(item, self.default_accumulator)
+            res = accumulator(self.parent, self, item)
 
-        accumulator = self.accumulators.get(item, self.default_accumulator)
-        res = accumulator(self.parent, self, item)
+            if item in self.cache_keys:
+                self.cache[item] = res
 
         if item in self.cache_keys:
-            self.cache[item] = res
+            if hasattr(res, "copy"):
+                res = res.copy()
+            else:
+                res = copy.deepcopy(res)
+
         return res
 
     def get(self, item, default=None):
@@ -151,7 +159,6 @@ def test_dynamic_props():
             )
         )
 
-    print_values()
     print_values()
 
     root.remove_child(child1)

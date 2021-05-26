@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "utils-ak"
-version = "0.1.12"
+version = "0.1.13"
 description = "Lots of small utils"
 authors = ["akadaner <arseniikadaner@gmail.com>"]
 license = "MIT"
@@ -10,6 +10,7 @@ packages = [
 
 [tool.poetry.dependencies]
 python = "^3.7.1"
+
 
 [tool.poetry.dev-dependencies]
 
