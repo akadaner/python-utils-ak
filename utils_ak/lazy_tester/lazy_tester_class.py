@@ -6,34 +6,37 @@ from collections import defaultdict
 from loguru import logger
 
 from utils_ak.os import makedirs, list_files
+from utils_ak.str import trim
 
 
 class LazyTester:
     def __init__(self, verbose=True):
-        self.logs_path = None
+        self.root = "tests/lazy_tester_logs"
         self.app_path = None
+        self.local_path = ""
+
         self.buffer = defaultdict(list)  # {source: values}
         self.verbose = verbose
 
-    def set_logs_path(self, path):
-        self.logs_path = path
+    def configure(self, root=None, app_path=None, local_path=None):
+        if root:
+            self.root = os.path.abspath(root)
+        if app_path:
+            self.app_path = os.path.abspath(app_path)
+        self.local_path = local_path or self.local_path
 
-    def set_app_path(self, path):
-        self.app_path = os.path.abspath(path)  # normalized
-
-    def set_function_logs_path(self):
-        assert self.logs_path is not None
-        assert self.app_path is not None
+    def configure_function(self):
+        assert self.root is not None and self.app_path is not None
 
         stack = inspect.stack()[1]
         fn, function_name = stack[1], stack[3]
+        local_fn = trim(fn, self.app_path + "/")
+        self.local_path = os.path.join(local_fn, function_name)
 
-        # todo: crop better in future python version (3.10)
-        local_fn = fn[len(self.app_path) :]
-        if local_fn.startswith("/"):
-            local_fn = local_fn[1:]
-
-        self.set_logs_path(os.path.join(self.logs_path, local_fn, function_name + "/"))
+    @property
+    def path(self):
+        assert self.root is not None
+        return os.path.join(self.root, self.local_path)
 
     def _format_log(self, value, **kwargs):
         log_values = [str(value)]
@@ -46,23 +49,21 @@ class LazyTester:
         if self.verbose:
             logger.info(str(value), source=source, **kwargs)
 
-    def _dump_logs(self, path):
-        makedirs(path)
+    def _flush(self, path):
+        makedirs(path + "/")
         for source, log_values in self.buffer.items():
             log_path = os.path.join(path, source) + ".log"
             with open(log_path, "w") as f:
                 f.write("\n".join(log_values))
+        self.buffer = defaultdict(list)
 
     def _assert_equal_directory_contents(self, dir1, dir2):
         dir1 = os.path.abspath(dir1)  # normalize
         dir2 = os.path.abspath(dir2)  # normalize
-        if not dir1.endswith("/"):
-            dir1 += "/"
-        if not dir2.endswith("/"):
-            dir2 += "/"
 
-        local_fns1 = [fn[len(dir1) :] for fn in list_files(dir1)]
-        local_fns2 = [fn[len(dir2) :] for fn in list_files(dir2)]
+        local_fns1 = [trim(fn, dir1 + "/") for fn in list_files(dir1)]
+        local_fns2 = [trim(fn, dir2 + "/") for fn in list_files(dir2)]
+
         assert set(local_fns1) == set(local_fns2)
 
         local_fns = local_fns1
@@ -77,13 +78,13 @@ class LazyTester:
             assert contents1 == contents2
 
     def assert_logs(self):
-        if not os.path.exists(self.logs_path):
-            logger.info(f"Logs not found: {self.logs_path}. Initializing...")
-            self._dump_logs(self.logs_path)
+        if not os.path.exists(self.path):
+            logger.info(f"Logs not found: {self.path}. Initializing...")
+            self._flush(self.path)
         else:
             with tempfile.TemporaryDirectory() as temp_dir:
-                self._dump_logs(temp_dir)
-                self._assert_equal_directory_contents(temp_dir, self.logs_path)
+                self._flush(temp_dir)
+                self._assert_equal_directory_contents(temp_dir, self.path)
 
 
 lazy_tester = LazyTester()
@@ -91,10 +92,8 @@ lazy_tester = LazyTester()
 
 def test_lazy_tester():
     lazy_tester = LazyTester()
-    lazy_tester.set_logs_path("tests/lazy_tester_logs/")
-    lazy_tester.set_app_path(".")
-    lazy_tester.set_function_logs_path()
-
+    lazy_tester.configure(app_path=".")
+    lazy_tester.configure_function()
     lazy_tester.log("This is a test", var="<var>")
     lazy_tester.assert_logs()
 

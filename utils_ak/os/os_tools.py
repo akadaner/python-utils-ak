@@ -177,8 +177,7 @@ def open_file_in_os(fn):
 
 
 def test():
-    with tempdir() as f:
-        print(f)
+    makedirs("a/asdf/")
 
 
 if __name__ == "__main__":
