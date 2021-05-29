@@ -9,10 +9,11 @@ from utils_ak.os import makedirs, list_files
 
 
 class LazyTester:
-    def __init__(self):
+    def __init__(self, verbose=True):
         self.logs_path = None
         self.app_path = None
         self.buffer = defaultdict(list)  # {source: values}
+        self.verbose = verbose
 
     def set_logs_path(self, path):
         self.logs_path = path
@@ -21,25 +22,29 @@ class LazyTester:
         self.app_path = os.path.abspath(path)  # normalized
 
     def set_function_logs_path(self):
+        assert self.logs_path is not None
+        assert self.app_path is not None
+
         stack = inspect.stack()[1]
         fn, function_name = stack[1], stack[3]
-
-        assert self.app_path is not None
 
         # todo: crop better in future python version (3.10)
         local_fn = fn[len(self.app_path) :]
         if local_fn.startswith("/"):
             local_fn = local_fn[1:]
+
         self.set_logs_path(os.path.join(self.logs_path, local_fn, function_name + "/"))
 
     def _format_log(self, value, **kwargs):
-        log_values = [value]
+        log_values = [str(value)]
         for k, v in kwargs.items():
-            log_values.append(f"{k}: {v}")
+            log_values.append(f"{k}: {str(v)}")
         return " | ".join(log_values)
 
     def log(self, value, source="default", **kwargs):
         self.buffer[source].append(self._format_log(value, **kwargs))
+        if self.verbose:
+            logger.info(str(value), source=source, **kwargs)
 
     def _dump_logs(self, path):
         makedirs(path)
@@ -79,6 +84,9 @@ class LazyTester:
             with tempfile.TemporaryDirectory() as temp_dir:
                 self._dump_logs(temp_dir)
                 self._assert_equal_directory_contents(temp_dir, self.logs_path)
+
+
+lazy_tester = LazyTester()
 
 
 def test_lazy_tester():
