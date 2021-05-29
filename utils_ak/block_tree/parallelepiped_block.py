@@ -94,6 +94,20 @@ class ParallelepipedBlock(Block):
             self.size_cached = SimpleVector(values)
         return self.size_cached
 
+    def reset_cache(self, recursive="down"):
+        self.size_cached = None
+
+        if recursive == "down":
+            for child in self.children:
+                child.reset_cache(recursive="down")
+        elif recursive == "up":
+            if self.parent:
+                self.parent.reset_cache(recursive="up")
+
+    def update_size(self, size):
+        self.props.update(size=size)
+        self.reset_cache(recursive="up")
+
     def to_dict(self, props=None, with_children=True):
         props = props or []
 

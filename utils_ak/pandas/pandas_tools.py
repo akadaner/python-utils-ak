@@ -269,6 +269,7 @@ def df_to_tree(df, recursive=True, delistify=False):
 def df_to_ordered_tree(df, column=None, recursive=True, prune_last=True):
     df = df.copy()
     column = column or df.columns[0]
+
     assert column in df.columns
 
     if column != df.columns[0]:
