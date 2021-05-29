@@ -86,16 +86,6 @@ def gen_fn_hash(s):
     return sha512(s).hexdigest()
 
 
-def gen_tmp_fn(s=None, extension=None):
-    if not s:
-        s = uuid4().hex
-    s = cast_bytes(s, encoding="utf-8")
-    res = os.path.join("/tmp/", gen_fn_hash(s))
-    if extension:
-        res = res + extension
-    return res
-
-
 @contextmanager
 def tempfile(*args, **kwargs):
     """Context for temporary file.
@@ -176,5 +166,10 @@ def open_file_in_os(fn):
         subprocess.call(("xdg-open", fn))
 
 
+def test():
+    with tempdir() as f:
+        print(f)
+
+
 if __name__ == "__main__":
-    print(gen_tmp_fn(extension=".operation.canary"))
+    test()
