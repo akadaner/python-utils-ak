@@ -49,6 +49,8 @@ class LazyTester:
                 f.write("\n".join(log_values))
 
     def _assert_equal_directory_contents(self, dir1, dir2):
+        dir1 = os.path.abspath(dir1)  # normalize
+        dir2 = os.path.abspath(dir2)  # normalize
         if not dir1.endswith("/"):
             dir1 += "/"
         if not dir2.endswith("/"):
