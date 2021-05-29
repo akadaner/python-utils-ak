@@ -28,8 +28,9 @@ class LazyTester:
 
         # todo: crop better in future python version (3.10)
         local_fn = fn[len(self.app_path) :]
-
-        self.set_logs_path(os.path.join(self.logs_path, local_fn, function_name))
+        if local_fn.startswith("/"):
+            local_fn = local_fn[1:]
+        self.set_logs_path(os.path.join(self.logs_path, local_fn, function_name + "/"))
 
     def _format_log(self, value, **kwargs):
         log_values = [value]
@@ -83,6 +84,7 @@ def test_lazy_tester():
     lazy_tester.set_logs_path("tests/lazy_tester_logs/")
     lazy_tester.set_app_path(".")
     lazy_tester.set_function_logs_path()
+
     lazy_tester.log("This is a test", var="<var>")
     lazy_tester.assert_logs()
 
