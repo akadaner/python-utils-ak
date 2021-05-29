@@ -13,30 +13,33 @@ class LazyTester:
     def __init__(self, verbose=True):
         self.root = "tests/lazy_tester_logs"
         self.app_path = None
+        self.function_path = ""
         self.local_path = ""
-
+        self.default_source = "default"
         self.buffer = defaultdict(list)  # {source: values}
         self.verbose = verbose
 
-    def configure(self, root=None, app_path=None, local_path=None):
+    def configure(self, root=None, app_path=None, local_path=None, source=None):
         if root:
             self.root = os.path.abspath(root)
         if app_path:
             self.app_path = os.path.abspath(app_path)
-        self.local_path = local_path or self.local_path
 
-    def configure_function(self):
+        self.local_path = local_path or self.local_path
+        self.default_source = source or self.default_source
+
+    def configure_function_path(self):
         assert self.root is not None and self.app_path is not None
 
         stack = inspect.stack()[1]
         fn, function_name = stack[1], stack[3]
         local_fn = trim(fn, self.app_path + "/")
-        self.local_path = os.path.join(local_fn, function_name)
+        self.function_path = os.path.join(local_fn, function_name)
 
     @property
     def path(self):
         assert self.root is not None
-        return os.path.join(self.root, self.local_path)
+        return os.path.join(self.root, self.function_path, self.local_path)
 
     def _format_log(self, value, **kwargs):
         log_values = [str(value)]
@@ -44,7 +47,8 @@ class LazyTester:
             log_values.append(f"{k}: {str(v)}")
         return " | ".join(log_values)
 
-    def log(self, value, source="default", **kwargs):
+    def log(self, value, source=None, **kwargs):
+        source = source or self.default_source
         self.buffer[source].append(self._format_log(value, **kwargs))
         if self.verbose:
             logger.info(str(value), source=source, **kwargs)
@@ -93,7 +97,7 @@ lazy_tester = LazyTester()
 def test_lazy_tester():
     lazy_tester = LazyTester()
     lazy_tester.configure(app_path=".")
-    lazy_tester.configure_function()
+    lazy_tester.configure_function_path()
     lazy_tester.log("This is a test", var="<var>")
     lazy_tester.assert_logs()
 
