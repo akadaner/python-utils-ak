@@ -109,33 +109,40 @@ class ParallelepipedBlock(Block):
         self.reset_cache(recursive="up")
 
     def to_dict(self, props=None, with_children=True):
-        props = props or []
-
         res = {}
         res["cls"] = self.props["cls"]
+        res["n_dims"] = self.n_dims
 
-        res["props"] = {}
+        if not props:
+            rel_props = dict(self.props.relative_props)
+            rel_props = {
+                k: list(v) if isinstance(v, SimpleVector) else v
+                for k, v in rel_props.items()
+            }
+            res["props"] = rel_props
+        else:
+            res["props"] = {}
 
-        for prop in props:
-            if isinstance(prop, str):
-                res["props"][prop] = self.props.get(prop)
+            for prop in props:
+                if isinstance(prop, str):
+                    res["props"][prop] = self.props.get(prop)
 
-            elif isinstance(prop, dict):
-                if "cls" not in prop or (
-                    "cls" in prop and self.props["cls"] == prop["cls"]
-                ):
-                    key = prop["key"]
-                    value = prop.get("value", key)
-                    if isinstance(value, str):
-                        res["props"][key] = self.props[key]
-                    elif callable(value):
-                        res["props"][key] = value(self)
-                    else:
-                        raise Exception("Value should be either callable or string")
+                elif isinstance(prop, dict):
+                    if "cls" not in prop or (
+                        "cls" in prop and self.props["cls"] == prop["cls"]
+                    ):
+                        key = prop["key"]
+                        value = prop.get("value", key)
+                        if isinstance(value, str):
+                            res["props"][key] = self.props[key]
+                        elif callable(value):
+                            res["props"][key] = value(self)
+                        else:
+                            raise Exception("Value should be either callable or string")
 
         if with_children:
             res["children"] = [
-                child.to_dict(props, with_children) for child in self.children
+                child.to_dict(props, with_children=True) for child in self.children
             ]
         return res
 
@@ -172,24 +179,11 @@ class ParallelepipedBlock(Block):
                 res += "\n"
         return res
 
-    # todo: merge with to_dict
-    def encode(self):
-        props = dict(self.props.relative_props)
-        props = {
-            k: list(v) if isinstance(v, SimpleVector) else v for k, v in props.items()
-        }
-        return {
-            "n_dims": self.n_dims,
-            "cls": self.props["cls"],
-            "props": props,
-            "children": [child.encode() for child in self.children],
-        }
-
     @staticmethod
-    def decode(dic):
+    def from_dict(dic):
         res = ParallelepipedBlock(dic["cls"], dic["n_dims"], **dic["props"])
         for child in dic["children"]:
-            res.add_child(ParallelepipedBlock.decode(child))
+            res.add_child(ParallelepipedBlock.from_dict(child))
 
         return res
 
@@ -211,9 +205,9 @@ def test_parallelepiped_block():
 
     print()
 
-    a_enc = a.encode()
+    a_enc = a.to_dict()
     print(a_enc)
-    print(ParallelepipedBlock.decode(a_enc))
+    print(ParallelepipedBlock.from_dict(a_enc))
 
     # print(a.x, a.size, a.y)
     # print(b.x, b.size, b.y)
