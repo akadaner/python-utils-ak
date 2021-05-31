@@ -172,6 +172,27 @@ class ParallelepipedBlock(Block):
                 res += "\n"
         return res
 
+    # todo: merge with to_dict
+    def encode(self):
+        props = dict(self.props.relative_props)
+        props = {
+            k: list(v) if isinstance(v, SimpleVector) else v for k, v in props.items()
+        }
+        return {
+            "n_dims": self.n_dims,
+            "cls": self.props["cls"],
+            "props": props,
+            "children": [child.encode() for child in self.children],
+        }
+
+    @staticmethod
+    def decode(dic):
+        res = ParallelepipedBlock(dic["cls"], dic["n_dims"], **dic["props"])
+        for child in dic["children"]:
+            res.add_child(ParallelepipedBlock.decode(child))
+
+        return res
+
 
 def test_parallelepiped_block():
     a = ParallelepipedBlock("a", n_dims=2, x=[1, 2])
@@ -189,6 +210,10 @@ def test_parallelepiped_block():
     print(c)
 
     print()
+
+    a_enc = a.encode()
+    print(a_enc)
+    print(ParallelepipedBlock.decode(a_enc))
 
     # print(a.x, a.size, a.y)
     # print(b.x, b.size, b.y)
