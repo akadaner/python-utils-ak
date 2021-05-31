@@ -11,6 +11,8 @@ def add_months(dt, n):
 
 
 def iter_range_by_months(beg, end):
+    if beg >= end:
+        return
     while True:
         next_end = add_months(
             datetime(beg.year, beg.month, 1), 1
