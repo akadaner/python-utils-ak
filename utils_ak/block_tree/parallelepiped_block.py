@@ -209,17 +209,17 @@ def test_parallelepiped_block():
     print(a_enc)
     print(ParallelepipedBlock.from_dict(a_enc))
 
-    # print(a.x, a.size, a.y)
-    # print(b.x, b.size, b.y)
-    # print(c.x, c.size, c.y)
-    #
-    # print()
-    # print(a["b"]["c"])
-    #
-    # print(a.__repr__())
-    #
-    # print(a.to_dict())
-    # print(a.to_dict(["x", {"key": "size", "value": lambda b: list(b.props["size"])}]))
+    print(a.x, a.size, a.y)
+    print(b.x, b.size, b.y)
+    print(c.x, c.size, c.y)
+
+    print()
+    print(a["b"]["c"])
+
+    print(a.__repr__())
+
+    print(a.to_dict())
+    print(a.to_dict(["x", {"key": "size", "value": lambda b: list(b.props["size"])}]))
 
 
 if __name__ == "__main__":
