@@ -9,7 +9,7 @@ import json
 # todo: remove overhead from timing. Is it even possible?
 
 
-class Clock(object):
+class Clock:
     """ Time measurement of any code piece. """
 
     def __init__(
