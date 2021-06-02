@@ -41,17 +41,24 @@ class Block:
         return res
 
     def get(self, item):
+        return_list = False
+        if isinstance(item, tuple):
+            item, return_list = item
+
         if isinstance(item, str):
             res = self.children_by_cls[item]
             # res = [b for b in self.children if b.props["cls"] == item]
         elif isinstance(item, int):
-            res = self.children[item]
+            res = [self.children[item]]
         elif isinstance(item, slice):
             # Get the start, stop, and step from the slice
             res = [self[ii] for ii in range(*item.indices(len(self)))]
         else:
             raise TypeError("Item type not supported")
-        return delistify(res)
+
+        if not return_list:
+            res = delistify(res)
+        return res
 
     def __str__(self):
         res = f'{self.props["cls"]}\n'

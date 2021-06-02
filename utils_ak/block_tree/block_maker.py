@@ -38,7 +38,9 @@ class BlockMaker:
             res.props.update(**props)
         return res
 
-    def make(self, block_obj=None, push_func=None, push_kwargs=None, **kwargs):
+    def block(
+        self, block_obj=None, push_func=None, push_kwargs=None, inplace=True, **kwargs
+    ):
         push_func = push_func or self.default_push_func
         push_kwargs = push_kwargs or {}
 
@@ -46,12 +48,38 @@ class BlockMaker:
             block = self.create_block(block_obj, **kwargs)
         elif isinstance(block_obj, ParallelepipedBlock):
             block = block_obj
+
+            # todo: make inplace=True by default
+            if not inplace:
+                block = self.copy(block)
             block.props.update(**kwargs)
         else:
             raise Exception("Unknown block obj type")
 
         push_func(self.blocks[-1], block, **push_kwargs)
         return BlockMakerContext(self, block)
+
+    # todo: del
+    def make(self, *args, **kwargs):
+        return self.block(*args, **kwargs)
+
+    def row(self, *args, **kwargs):
+        for key in ["size", "x"]:
+            if key in kwargs:
+                if isinstance(kwargs[key], (list, tuple, SimpleVector)):
+                    assert kwargs[key][1] == 0
+                else:
+                    kwargs[key] = (kwargs[key], 0)
+        return self.block(*args, **kwargs)
+
+    def col(self, *args, **kwargs):
+        for key in ["size", "x"]:
+            if key in kwargs:
+                if isinstance(kwargs[key], (list, tuple)):
+                    assert kwargs[key][0] == 0
+                else:
+                    kwargs[key] = (0, kwargs[key])
+        return self.block(*args, **kwargs)
 
 
 class BlockMakerContext:
@@ -67,9 +95,10 @@ class BlockMakerContext:
         self.maker.blocks.pop()
 
 
+# todo: del
 def init_block_maker(root_obj, default_push_func=stack_push, **kwargs):
     block_maker = BlockMaker(root_obj, default_push_func, **kwargs)
-    return block_maker, block_maker.make
+    return block_maker, block_maker.block
 
 
 def test_block_maker1():
