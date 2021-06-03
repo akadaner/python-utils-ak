@@ -1,6 +1,7 @@
 class CodeBlock:
-    def __init__(self, name):
+    def __init__(self, name, desc=""):
         self.name = name
+        self.desc = desc
 
     def __enter__(self):
         return self
@@ -9,5 +10,5 @@ class CodeBlock:
         pass
 
 
-def code(name):
-    return CodeBlock(name)
+def code(*args, **kwargs):
+    return CodeBlock(*args, **kwargs)

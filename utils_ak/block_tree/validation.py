@@ -3,6 +3,7 @@ from utils_ak.coder import cast_js
 from utils_ak.block_tree.parallelepiped_block import ParallelepipedBlock
 from utils_ak.block_tree.block import Block
 from utils_ak.clock import *
+from utils_ak.str import *
 
 from loguru import logger
 
@@ -49,10 +50,15 @@ class ClassValidator:
         self.window = window
         self.window_by_classes = window_by_classes or {}
 
-    def add(self, class1, class2, validator, uni_direction=False):
+        # add attribute validations
+        validate_attrs = [attr for attr in dir(self) if attr.startswith("validate__")]
+
+        for attr in validate_attrs:
+            class1, class2 = trim(attr, "validate__").split("__")
+            self.add(class1, class2, getattr(self, attr))
+
+    def add(self, class1, class2, validator):
         self.validators[(class1, class2)] = validator
-        if uni_direction:
-            self.validators[(class2, class1)] = validator
 
     def validate(self, b1, b2):
         key = (b1.props["cls"], b2.props["cls"])
