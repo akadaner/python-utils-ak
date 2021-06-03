@@ -1,10 +1,17 @@
 from utils_ak.block_tree.pushers import *
 from utils_ak.block_tree.parallelepiped_block import ParallelepipedBlock
+from utils_ak.code_block import *
 
 
 class BlockMaker:
     def __init__(
-        self, root_obj="root", default_push_func=stack_push, block_factory=None, **props
+        self,
+        root_obj="root",
+        default_push_func=stack_push,
+        block_factory=None,
+        default_row_width=0,
+        default_col_width=0,
+        **props
     ):
         self.block_factory = block_factory or ParallelepipedBlock
 
@@ -18,6 +25,9 @@ class BlockMaker:
 
         self.blocks = [self.root]
         self.default_push_func = default_push_func
+
+        self.default_row_width = default_row_width
+        self.default_col_width = default_col_width
 
     def create_block(self, block_obj, **kwargs):
         return self.block_factory(block_obj, **kwargs)
@@ -64,19 +74,38 @@ class BlockMaker:
         return self.block(*args, **kwargs)
 
     def row(self, *args, **kwargs):
-        for key in ["size", "x"]:
+        with code("size"):
+            key = "size"
+            if key in kwargs:
+                if isinstance(kwargs[key], (list, tuple, SimpleVector)):
+                    assert kwargs[key][1] == self.default_row_width
+                else:
+                    kwargs[key] = (kwargs[key], self.default_row_width)
+
+        with code("x"):
+            key = "x"
             if key in kwargs:
                 if isinstance(kwargs[key], (list, tuple, SimpleVector)):
                     assert kwargs[key][1] == 0
                 else:
                     kwargs[key] = (kwargs[key], 0)
+
         return self.block(*args, **kwargs)
 
     def col(self, *args, **kwargs):
-        for key in ["size", "x"]:
+        with code("size"):
+            key = "size"
             if key in kwargs:
-                if isinstance(kwargs[key], (list, tuple)):
-                    assert kwargs[key][0] == 0
+                if isinstance(kwargs[key], (list, tuple, SimpleVector)):
+                    assert kwargs[key][1] == self.default_row_width
+                else:
+                    kwargs[key] = (self.default_row_width, kwargs[key])
+
+        with code("x"):
+            key = "x"
+            if key in kwargs:
+                if isinstance(kwargs[key], (list, tuple, SimpleVector)):
+                    assert kwargs[key][1] == 0
                 else:
                     kwargs[key] = (0, kwargs[key])
         return self.block(*args, **kwargs)
