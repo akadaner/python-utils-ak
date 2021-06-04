@@ -59,7 +59,6 @@ class BlockMaker:
         elif isinstance(block_obj, ParallelepipedBlock):
             block = block_obj
 
-            # todo: make inplace=True by default
             if not inplace:
                 block = self.copy(block)
             block.props.update(**kwargs)
@@ -85,9 +84,7 @@ class BlockMaker:
         with code("x"):
             key = "x"
             if key in kwargs:
-                if isinstance(kwargs[key], (list, tuple, SimpleVector)):
-                    assert kwargs[key][1] == 0
-                else:
+                if not isinstance(kwargs[key], (list, tuple, SimpleVector)):
                     kwargs[key] = (kwargs[key], 0)
 
         return self.block(*args, **kwargs)

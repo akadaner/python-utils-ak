@@ -5,12 +5,12 @@ import inspect
 from collections import defaultdict
 from loguru import logger
 
-from utils_ak.os import makedirs, list_files
+from utils_ak.os import makedirs, list_files, remove_path
 from utils_ak.str import trim
 
 
 class LazyTester:
-    def __init__(self, verbose=True):
+    def __init__(self, verbose=False):
         self.root = "tests/lazy_tester_logs"
         self.app_path = None
         self.function_path = ""
@@ -81,7 +81,9 @@ class LazyTester:
                 contents2 = f.read()
             assert contents1 == contents2
 
-    def assert_logs(self):
+    def assert_logs(self, reset=False):
+        if reset and os.path.exists(self.path):
+            remove_path(self.path)
         if not os.path.exists(self.path):
             logger.info(f"Logs not found: {self.path}. Initializing...")
             self._flush(self.path)

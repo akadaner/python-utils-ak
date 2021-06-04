@@ -49,7 +49,6 @@ class ParallelepipedBlock(Block):
         )
         self.props.accumulators["size"] = relative_acc
         self.props.accumulators["axis"] = partial(relative_acc, default=0)
-        self.props.accumulators["is_parent_node"] = partial(relative_acc, default=False)
 
     @property
     def x(self):
@@ -164,7 +163,7 @@ class ParallelepipedBlock(Block):
         return self.tabular()
 
     def is_leaf(self):
-        return not self.children and not self.props["is_parent_node"]
+        return not self.children
 
     def tabular(self):
         res = ""
