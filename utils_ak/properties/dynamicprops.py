@@ -57,11 +57,15 @@ class DynamicProps:
                 props[k] = fmt(k, props[k])
         return props
 
-    def reset_cache(self, recursive=False):
+    def reset_cache(self, recursion=None):
         self.cache = {}
-        if recursive:
+
+        if recursion == "down":
             for child in self.children:
-                child.reset_cache(recursive=True)
+                child.reset_cache(recursion="down")
+        elif recursion == "up":
+            if self.parent:
+                self.parent.reset_cache(recursion="up")
 
     @staticmethod
     def default_accumulator(parent, child, key):
@@ -71,17 +75,17 @@ class DynamicProps:
     def update(self, **props):
         props = self._format_props(props)
         self.relative_props.update(**props)
-        self.reset_cache(recursive=True)
+        self.reset_cache(recursion="down")
 
     def add_child(self, child):
         self.children.append(child)
         child.parent = self
-        child.reset_cache(recursive=True)
+        child.reset_cache(recursion="down")
 
     def remove_child(self, child):
         self.children.remove(child)
         child.parent = None
-        child.reset_cache(recursive=True)
+        child.reset_cache(recursion="down")
 
     def __getitem__(self, item):
         if item in self.cache:
