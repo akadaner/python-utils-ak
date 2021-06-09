@@ -7,17 +7,35 @@ from utils_ak.str import *
 
 from loguru import logger
 
+from utils_ak.lazy_tester import lazy_tester
 
-def validate_disjoint_by_axis(b1, b2, axis=0):
-    validate_disjoint_by_intervals((b1.x[axis], b1.y[axis]), (b2.x[axis], b2.y[axis]))
+
+def validate_disjoint_by_axis(b1, b2, axis=0, distance=0, ordered=False):
+    validate_disjoint_by_intervals(
+        (b1.x[axis], b1.y[axis]),
+        (b2.x[axis], b2.y[axis]),
+        distance=distance,
+        ordered=ordered,
+    )
 
 
 def _calc_interval_intersection(i1, i2):
     return max(min(i1[1], i2[1]) - max(i1[0], i2[0]), 0)
 
 
-def validate_disjoint_by_intervals(i1, i2):
-    if _calc_interval_intersection(i1, i2) != 0:
+def validate_disjoint_by_intervals(i1, i2, distance=0, ordered=False):
+    """
+    :param i1:
+    :param i2:
+    :param distance:
+    :param ordered: i1 <= i2
+    :return:
+    """
+
+    # add neighborhood to the first interval
+    i1 = (i1[0] - distance, i1[1] + distance)
+
+    if _calc_interval_intersection(i1, i2) != 0 or (ordered and i2[0] <= i1[0]):
         try:
             disposition = int(i1[1] - i2[0])
         except:
@@ -27,15 +45,42 @@ def validate_disjoint_by_intervals(i1, i2):
 
 
 def test_validate_disjoint_by_axis():
-    print("Validate disjoint test")
-    for t in range(0, 10):
-        a = ParallelepipedBlock("a", n_dims=1, x=[t], size=[4])
-        b = ParallelepipedBlock("b", n_dims=1, x=[3], size=[3])
-        print(a, b)
+    lazy_tester.log("Basic test")
+    for t in range(10):
+        a = ParallelepipedBlock("a", n_dims=1, x=[t], size=[3])
+        b = ParallelepipedBlock("b", n_dims=1, x=[5], size=[3])
+        lazy_tester.log("Blocks", a=a, b=b)
         try:
             validate_disjoint_by_axis(a, b, 0)
         except AssertionError as e:
-            print("AssertionError on disposition", e)
+            lazy_tester.log("AssertionError on disposition", e=e)
+
+    lazy_tester.log("\n")
+    lazy_tester.log("Distance = 1")
+
+    for t in range(10):
+        a = ParallelepipedBlock("a", n_dims=1, x=[t], size=[3])
+        b = ParallelepipedBlock("b", n_dims=1, x=[5], size=[3])
+        lazy_tester.log("Blocks", a=a, b=b)
+
+        try:
+            validate_disjoint_by_axis(a, b, 0, distance=1)
+        except AssertionError as e:
+            lazy_tester.log("AssertionError on disposition", e=e)
+
+    lazy_tester.log("\n")
+    lazy_tester.log("Ordered")
+
+    for t in range(10):
+        a = ParallelepipedBlock("a", n_dims=1, x=[t], size=[3])
+        b = ParallelepipedBlock("b", n_dims=1, x=[5], size=[3])
+        lazy_tester.log("Blocks", a=a, b=b)
+
+        try:
+            validate_disjoint_by_axis(a, b, 0, ordered=True)
+        except AssertionError as e:
+            lazy_tester.log("AssertionError on disposition", e=e)
+    lazy_tester.assert_logs(reset=True)
 
 
 def disjoint_validator(parent, block):
@@ -124,6 +169,10 @@ def test_interval_intersection():
 
 
 if __name__ == "__main__":
-    # test_validate_disjoint_by_axis()
+    from utils_ak.loguru import configure_loguru_stdout
+
+    configure_loguru_stdout()
+    lazy_tester.verbose = True
+    test_validate_disjoint_by_axis()
     # test_class_validator()
     test_interval_intersection()

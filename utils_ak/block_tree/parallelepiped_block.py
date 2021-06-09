@@ -34,8 +34,8 @@ class ParallelepipedBlock(Block):
         super().__init__(
             block_class,
             props_formatters={
-                "x": lambda k, v: SimpleVector([int(v[0]), int(v[1])]),
-                "size": lambda k, v: SimpleVector([int(v[0]), int(v[1])]),
+                "x": lambda k, v: SimpleVector([int(x) for x in v]),
+                "size": lambda k, v: SimpleVector([int(x) for x in v]),
             },
             props_cache_keys=["x"],
             **props,
@@ -93,19 +93,19 @@ class ParallelepipedBlock(Block):
             self.size_cached = SimpleVector(values)
         return self.size_cached
 
-    def reset_cache(self, recursive="down"):
+    def reset_cache(self, recursion="down"):
         self.size_cached = None
 
-        if recursive == "down":
+        if recursion == "down":
             for child in self.children:
-                child.reset_cache(recursive="down")
-        elif recursive == "up":
+                child.reset_cache(recursion="down")
+        elif recursion == "up":
             if self.parent:
-                self.parent.reset_cache(recursive="up")
+                self.parent.reset_cache(recursion="up")
 
     def update_size(self, size):
         self.props.update(size=size)
-        self.reset_cache(recursive="up")
+        self.reset_cache(recursion="up")
 
     def to_dict(self, props=None, with_children=True):
         res = {}

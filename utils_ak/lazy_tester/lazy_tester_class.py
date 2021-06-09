@@ -93,7 +93,7 @@ class LazyTester:
                 self._assert_equal_directory_contents(temp_dir, self.path)
 
 
-lazy_tester = LazyTester()
+lazy_tester = LazyTester(verbose=False)
 
 
 def test_lazy_tester():
