@@ -14,6 +14,7 @@ import httpx
 import uuid
 import openpyxl
 import pydantic
+import hashlib
 
 
 import inspect

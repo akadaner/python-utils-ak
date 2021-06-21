@@ -317,6 +317,9 @@ def cast_dateoffset(td_obj):
 
 
 def round_datetime(dt_obj, td_obj, rounding="nearest_half_even"):
+    assert cast_timedelta(td_obj) < timedelta(
+        days=1
+    ), "Only rounding less than a day is supported."
     ts = cast_timestamp(dt_obj)
     ts = custom_round(ts, cast_sec(td_obj), rounding)
     return cast_datetime(ts)
@@ -362,6 +365,7 @@ def test():
     print(round_datetime(cast_datetime("2018-01-01 12:00:05"), 300))
     print(round_datetime(cast_datetime("2018-01-01 12:00:05"), 300, "ceil"))
     print(round_datetime(cast_datetime("2018-01-01 12:00:05"), 300, "floor"))
+    print(round_datetime(cast_datetime("2018-01-01 23:30:00"), 300, "floor"))
 
 
 if __name__ == "__main__":
