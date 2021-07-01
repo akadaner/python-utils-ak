@@ -146,10 +146,13 @@ class ParallelepipedBlock(Block):
         return res
 
     def __str__(self):
-        res = (
-            self.props["cls"]
-            + " "
-            + " x ".join([f"({self.x[i]}, {self.y[i]}]" for i in range(self.n_dims)])
+        res = self.props["cls"]
+
+        if self.props["label"]:
+            res += ": " + self.props["label"]
+
+        res += " " + " x ".join(
+            [f"({self.x[i]}, {self.y[i]}]" for i in range(self.n_dims)]
         )
 
         for child in self.children:
@@ -169,12 +172,10 @@ class ParallelepipedBlock(Block):
         res = ""
         for b in self.iter():
             if b.size[0] != 0:
-                res += (
-                    " " * int(b.x[0])
-                    + "=" * int(b.size[0])
-                    + f' {b.props["cls"]} '
-                    + " x ".join([f"({b.x[i]}, {b.y[i]}]" for i in range(b.n_dims)])
-                )
+                res += " " * int(b.x[0]) + "=" * int(b.size[0]) + f' {b.props["cls"]} '
+                if b.props["label"]:
+                    res += f': {b.props["label"]} '
+                res += " x ".join([f"({b.x[i]}, {b.y[i]}]" for i in range(b.n_dims)])
                 res += "\n"
         return res
 
