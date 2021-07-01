@@ -163,7 +163,7 @@ class ParallelepipedBlock(Block):
         return res
 
     def __repr__(self):
-        return self.tabular()
+        return str(self)
 
     def is_leaf(self):
         return not self.children
