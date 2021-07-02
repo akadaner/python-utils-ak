@@ -14,9 +14,10 @@ from loguru import logger
 
 
 class IterativePusher:
-    def __init__(self):
+    def __init__(self, validator=None):
         self.parent = None
         self.block = None
+        self.validator = validator
 
     def init(self):
         pass
@@ -27,7 +28,8 @@ class IterativePusher:
     def __call__(self, *args, **kwargs):
         return self.push(*args, **kwargs)
 
-    def push(self, parent, block, validator, iter_props=None, max_tries=300):
+    def push(self, parent, block, validator=None, iter_props=None, max_tries=300):
+        validator = validator or self.validator
         self.parent = parent
         self.block = block
 
@@ -64,31 +66,31 @@ class IterativePusher:
 
 
 class AxisPusher(IterativePusher):
-    def __init__(self, start_from="last_end", start_shift=0):
-        super().__init__()
+    def __init__(self, start_from="last_end", start_shift=0, validator=None):
+        super().__init__(validator=validator)
         self.start_from = start_from
         self.start_shift = start_shift
 
-    def init(self):
-        self.axis = self.parent.props["axis"]
-
-        if is_int_like(self.start_from):
-            cur_start = int(float(self.start_from))
-        elif self.start_from == "beg":
-            cur_start = self.block.props["x_rel"][self.axis]
+    def _resolve_start_from(self, start_from):
+        if isinstance(start_from, list):
+            return max([self._resolve_start_from(x) for x in start_from])
+        elif is_int_like(start_from):
+            return int(float(start_from))
+        elif start_from == "beg":
+            return self.block.props["x_rel"][self.axis]
         else:
             if not self.parent.children:
-                cur_start = 0
+                return 0
             else:
-                if self.start_from == "last_beg":
-                    cur_start = max(
+                if start_from == "last_beg":
+                    return max(
                         [
                             child.props["x_rel"][self.axis]
                             for child in self.parent.children
                         ]
                     )
-                elif self.start_from == "last_end":
-                    cur_start = max(
+                elif start_from == "last_end":
+                    return max(
                         [
                             (child.props["x_rel"] + child.size)[self.axis]
                             for child in self.parent.children
@@ -96,9 +98,12 @@ class AxisPusher(IterativePusher):
                     )
                 else:
                     raise Exception("Unknown beg type")
+
+    def init(self):
+        self.axis = self.parent.props["axis"]
+        cur_start = self._resolve_start_from(self.start_from)
         cur_start += self.start_shift
         cur_start = max(cur_start, 0)
-
         self.cur_x = cast_simple_vector(self.block.n_dims)
         self.cur_x[self.axis] = cur_start
         self.block.props.update(x=self.cur_x)
