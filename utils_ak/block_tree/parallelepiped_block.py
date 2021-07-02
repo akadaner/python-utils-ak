@@ -20,6 +20,15 @@ def x_cumsum_acc(parent, child, key, default=None, formatter=None):
     )
 
 
+# todo: put outside for pickle compatability
+def x_rel_acc(parent, child, key):
+    return relative_acc(parent, child, "x")
+
+
+def _init_simple_vector(k, v):
+    return SimpleVector([int(x) for x in v])
+
+
 class ParallelepipedBlock(Block):
     def __init__(self, block_class, n_dims=2, **props):
         self.n_dims = n_dims
@@ -34,19 +43,15 @@ class ParallelepipedBlock(Block):
         super().__init__(
             block_class,
             props_formatters={
-                "x": lambda k, v: SimpleVector([int(x) for x in v]),
-                "size": lambda k, v: SimpleVector([int(x) for x in v]),
+                "x": _init_simple_vector,
+                "size": _init_simple_vector,
             },
             props_cache_keys=["x"],
             **props,
         )
 
         self.props.accumulators["x"] = x_cumsum_acc
-        self.props.accumulators[
-            "x_rel"
-        ] = lambda parent_props, child_props, key: relative_acc(
-            parent_props, child_props, "x"
-        )
+        self.props.accumulators["x_rel"] = x_rel_acc
         self.props.accumulators["size"] = relative_acc
         self.props.accumulators["axis"] = partial(relative_acc, default=0)
 
