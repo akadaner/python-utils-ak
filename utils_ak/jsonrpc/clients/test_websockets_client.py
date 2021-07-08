@@ -1,7 +1,8 @@
 import asyncio
 import websockets
 import time
-from icecream import ic
+
+# from icecream import ic
 
 from utils_ak.jsonrpc.clients.websockets_client import WebSocketsClient
 
@@ -18,7 +19,7 @@ async def main():
 
         for i in range(5):
             response = await client.execute("ping")
-            ic(response)
+            print(response)
             time.sleep(3)
 
 

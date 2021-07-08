@@ -2,6 +2,7 @@ import time
 import asyncio
 from utils_ak.coder import JsonCoder
 from utils_ak.id_generator import IncrementalIDGenerator
+import websockets
 
 
 class WebSocketsClient:
@@ -24,6 +25,7 @@ class WebSocketsClient:
         :param request: {"jsonrpc": "2.0", "method": "post.like", "params": {"post": "12345"}, "id": 1}
         """
         request = self._prepare_request(method, generate_id=not notify, **kwargs)
+
         await self.websocket_client.send(self.coder.encode(request))
 
         if not notify:
@@ -44,6 +46,12 @@ class WebSocketsClient:
             except asyncio.TimeoutError:
                 await asyncio.sleep(0)
                 continue
+            except websockets.ConnectionClosedOK:
+                return
+
+            if response_text == "connection_closed":
+                return
+
             data = self.coder.decode(response_text)
             self.responses[data["id"]] = data
             await asyncio.sleep(0)
