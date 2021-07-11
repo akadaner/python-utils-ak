@@ -91,6 +91,12 @@ class Block:
             for b in child.iter(**query):
                 yield b
 
+    def find_one(self, **query):
+        for obj in self.iter(**query):
+            # return first value found
+            return obj
+        raise Exception("Nothing found.")
+
     def add_child(self, block):
         block.parent = self
         self.children.append(block)
