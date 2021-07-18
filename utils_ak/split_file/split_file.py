@@ -14,7 +14,8 @@ class SplitFile:
             pattern=os.path.join(
                 os.path.dirname(self.fn), os.path.splitext(os.path.basename(self.fn))[0]
             )
-            + "*",
+            + "*"
+            + os.path.splitext(self.fn)[1],
         )
 
     def get_indexes(self):

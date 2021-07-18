@@ -91,6 +91,9 @@ class Block:
             for b in child.iter(**query):
                 yield b
 
+    def find(self, **query):
+        return list(self.iter(**query))
+
     def find_one(self, **query):
         for obj in self.iter(**query):
             # return first value found
@@ -110,6 +113,10 @@ class Block:
         self.children_by_cls[block.props["cls"]].remove(block)
         self.props.remove_child(block.props)
         return block
+
+    def detach_from_parent(self):
+        if self.parent:
+            self.parent.remove_child(self)
 
 
 def test_block():

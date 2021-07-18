@@ -117,6 +117,29 @@ class AxisPusher(IterativePusher):
         self.block.props.update(x=self.cur_x)
 
 
+class ShiftPusher(IterativePusher):
+    def __init__(self, period, start_from=None, validator=None):
+        super().__init__(validator=validator)
+        self.period = period
+        self.start_from = start_from
+        print("__init__", self.block)
+
+    def _shift(self, period):
+        print("shift", self.block)
+        self.block.props.update(
+            x=[self.block.props["x_rel"][0] + period, self.block.x[1]]
+        )
+
+    def init(self):
+        print("init before", self.block)
+        if self.start_from:
+            self.block.props.update(x=[self.start_from, self.block.x[1]])
+        print("init", self.block)
+
+    def update(self, results):
+        self._shift(self.period)
+
+
 def test_axis_pusher():
     from utils_ak.loguru import configure_loguru_stdout
 
