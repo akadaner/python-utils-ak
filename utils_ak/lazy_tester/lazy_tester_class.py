@@ -84,7 +84,7 @@ class LazyTester:
 
             if contents1 != contents2:
                 # dump second content nearby
-                with open(fn2 + ".2.tmp", "w") as f:
+                with open(fn2 + ".test.tmp", "w") as f:
                     f.write(contents1)
 
                 assert contents1 == contents2
