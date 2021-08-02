@@ -66,7 +66,9 @@ class LazyTester:
         dir2 = os.path.abspath(dir2)  # normalize
 
         local_fns1 = [trim(fn, dir1 + "/") for fn in list_files(dir1)]
+        local_fns1 = [fn for fn in local_fns1 if not fn.endswith(".tmp")]
         local_fns2 = [trim(fn, dir2 + "/") for fn in list_files(dir2)]
+        local_fns2 = [fn for fn in local_fns2 if not fn.endswith(".tmp")]
 
         assert set(local_fns1) == set(local_fns2)
 
@@ -79,7 +81,13 @@ class LazyTester:
 
             with open(fn2, "r") as f:
                 contents2 = f.read()
-            assert contents1 == contents2
+
+            if contents1 != contents2:
+                # dump second content nearby
+                with open(fn2 + ".2.tmp", "w") as f:
+                    f.write(contents1)
+
+                assert contents1 == contents2
 
     def assert_logs(self, reset=False):
         if reset and os.path.exists(self.path):
