@@ -475,5 +475,5 @@ if __name__ == "__main__":
     # test_tree()
     # test_read_write()
     # test_crop_invalid_edges()
-    # test_split_into_sum_groups()
-    test_loc_non_inclusive()
+    test_split_into_sum_groups()
+    # test_loc_non_inclusive()
