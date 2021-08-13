@@ -10,7 +10,6 @@ def optimize(maker, value_function, *args, **kwargs):
     permutations = {
         k: list(set(itertools.permutations(v, len(v)))) for k, v in maker_kwargs.items()
     }
-
     values = []
 
     for props in iter_props(permutations):
