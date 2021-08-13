@@ -4,7 +4,7 @@ import numpy as np
 
 def is_none_like(v):
     if v is None:
-        return
+        return True
 
     try:
         if np.isnan(v):
