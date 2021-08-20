@@ -14,6 +14,8 @@ from utils_ak.str import cast_bytes
 
 
 def make_directories(path):
+    if not path:
+        return
     dirname = os.path.dirname(path)
     if not dirname:
         return
