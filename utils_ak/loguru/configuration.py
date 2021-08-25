@@ -106,10 +106,21 @@ def format_with_trace(
     separator=" | ",
 ):
     # workaround for custom extra
-    record["extra"]["_extra"] = dict(record["extra"])
+    record["extra"]["_extra"] = {
+        k: v for k, v in dict(record["extra"]).items() if not k.startswith("_")
+    }
     values = [formatter(record) for formatter in formatters]
     values = [value for value in values if value]
     return separator.join(values) + "\n"
+
+
+def configure_loguru(
+    sink=sys.stdout, level="DEBUG", remove_others=True, formatter=format_with_trace
+):
+    if remove_others:
+        logger.remove()
+
+    logger.add(sink, level=level, format=formatter)
 
 
 def configure_loguru_stdout(
@@ -117,18 +128,17 @@ def configure_loguru_stdout(
     remove_others=True,
     formatter=format_with_trace,
 ):
-    if remove_others:
-        logger.remove()
-
-    logger.add(
-        sys.stdout,
-        level=level,
-        format=formatter,
+    return configure_loguru(
+        level=level, remove_others=remove_others, formatter=formatter
     )
 
 
 def test():
     configure_loguru_stdout(formatter=format_as_json)
+    from utils_ak.os import makedirs
+
+    makedirs("logs/")
+    logger.add("logs/output.log", format=format_with_trace)
 
     logger.info("Info message", foo="bar")
     a = 1
