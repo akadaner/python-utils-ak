@@ -31,22 +31,24 @@ class Block:
 
     def __getitem__(self, item):
         res = self.get(item)
-        if not res:
-            if isinstance(res, str):
+        if res is None:
+            if isinstance(item, str):
                 raise KeyError(item)
-            elif isinstance(res, int):
+            elif isinstance(item, int):
                 return IndexError(item)
             else:
                 raise Exception(f"Not found: {item}")
         return res
 
+    def children_classes(self):
+        return [child.props["cls"] for child in self.children]
+
     def get(self, item):
         return_list = False
         if isinstance(item, tuple):
             item, return_list = item
-
         if isinstance(item, str):
-            res = self.children_by_cls[item]
+            res = self.children_by_cls.get(item, [])
             # res = [b for b in self.children if b.props["cls"] == item]
         elif isinstance(item, int):
             res = [self.children[item]]
