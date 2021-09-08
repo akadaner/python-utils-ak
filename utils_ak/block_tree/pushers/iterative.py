@@ -1,3 +1,5 @@
+from utils_ak.imports.external import *
+
 import copy
 
 from utils_ak.coder import cast_dict_or_list
@@ -9,8 +11,6 @@ from utils_ak.block_tree.block import Block
 from utils_ak.block_tree.validation import validate_disjoint_by_axis
 
 from utils_ak.block_tree.pushers.pushers import *
-
-from loguru import logger
 
 
 class IterativePusher:
@@ -66,10 +66,13 @@ class IterativePusher:
 
 
 class AxisPusher(IterativePusher):
-    def __init__(self, start_from="last_end", start_shift=0, validator=None):
+    def __init__(
+        self, start_from="last_end", start_shift=0, min_start=None, validator=None
+    ):
         super().__init__(validator=validator)
         self.start_from = start_from
         self.start_shift = start_shift
+        self.min_start = min_start
 
     def _resolve_start_from(self, start_from):
         if isinstance(start_from, list):
@@ -103,7 +106,10 @@ class AxisPusher(IterativePusher):
         self.axis = self.parent.props["axis"]
         cur_start = self._resolve_start_from(self.start_from)
         cur_start += self.start_shift
-        cur_start = max(cur_start, 0)
+
+        if self.min_start is not None:
+            cur_start = max(cur_start, self.min_start)
+
         self.cur_x = cast_simple_vector(self.block.n_dims)
         self.cur_x[self.axis] = cur_start
         self.block.props.update(x=self.cur_x)
