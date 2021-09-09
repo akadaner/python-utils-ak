@@ -48,8 +48,8 @@ class Block:
         if isinstance(item, tuple):
             item, return_list = item
         if isinstance(item, str):
-            res = self.children_by_cls.get(item, [])
-            # res = [b for b in self.children if b.props["cls"] == item]
+            default_value = [] if return_list else None
+            res = self.children_by_cls.get(item, default_value)
         elif isinstance(item, int):
             res = [self.children[item]]
         elif isinstance(item, slice):
