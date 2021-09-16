@@ -43,6 +43,12 @@ class Block:
     def children_classes(self):
         return [child.props["cls"] for child in self.children]
 
+    def reorder_children(self, key):
+        self.children = list(sorted(self.children, key=key))
+
+        for k, v in self.children_by_cls.items():
+            self.children_by_cls[k] = list(sorted(v, key=key))
+
     def get(self, item):
         return_list = False
         if isinstance(item, tuple):
