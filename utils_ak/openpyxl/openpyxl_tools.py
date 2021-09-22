@@ -58,6 +58,12 @@ def set_border(sheet, x, y, w, h, border):
         )
 
 
+def set_border_grid(sheet, x, y, w, h, border):
+    for _x in range(x, x + w):
+        for _y in range(y, y + h):
+            set_border(sheet, _x, _y, 1, 1, border)
+
+
 def draw_cell(
     sheet, x, y, text, color=None, font_size=None, text_rotation=None, alignment=None
 ):
@@ -126,4 +132,10 @@ def draw_row(sheet, y, values, color=None, **kwargs):
 
 if __name__ == "__main__":
     wb = init_workbook(["a", "b"], active_sheet_name="b")
-    wb.save("text.xlsx")
+    set_border_grid(wb.worksheets[0], 1, 1, 10, 10, Side(border_style=BORDER_THIN))
+
+    wb.save("test.xlsx")
+    from utils_ak.imports.interactive import open_file_in_os
+    from openpyxl.styles.borders import Border, Side, BORDER_THIN
+
+    open_file_in_os("test.xlsx")
