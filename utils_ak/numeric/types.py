@@ -34,6 +34,18 @@ def cast_int(obj, allow_none=False):
     return int(float(obj))
 
 
+def is_float_like(obj):
+    if is_float(obj):
+        return True
+    elif isinstance(obj, str):
+        try:
+            float(obj)
+            return True
+        except:
+            return False
+    return False
+
+
 def test_is_int_like():
     print(is_int_like(1))
     print(is_int_like("1"))
@@ -44,6 +56,9 @@ def test_is_int_like():
     print(cast_int(1.0))
     print(cast_int(1))
     print(cast_int(np.int64(1)))
+
+    print(is_float_like("1.2;;"))
+    print(is_float_like("1.2"))
 
 
 def is_none(obj):
