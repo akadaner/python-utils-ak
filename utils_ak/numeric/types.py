@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 
 
 def is_float(obj):
@@ -70,6 +71,13 @@ def is_none(obj):
                 return True
         except:
             pass
+
+        try:
+            if pd.isnull(obj):
+                return True
+
+        except:
+            return False
 
     return False
 
