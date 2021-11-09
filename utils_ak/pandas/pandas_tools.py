@@ -1,14 +1,11 @@
-import pandas as pd
-import numpy as np
-
-import os
 import base64
-
 from io import BytesIO
 
-from utils_ak.os import *
-from utils_ak.builtin import iter_get, remove_neighbor_duplicates, delistify
+import numpy as np
+import pandas as pd
+from utils_ak.builtin import remove_neighbor_duplicates, delistify
 from utils_ak.iteration import *
+from utils_ak.os import *
 
 pd.set_option("display.max_colwidth", None)
 
@@ -138,7 +135,7 @@ def merge_by_columns(dfs):
     return res_df
 
 
-def merge(dfs, by, keep="last", sort_index=True):
+def merge(dfs, by, keep="last", sort_index=True, sorting=None):
     """
     :param dfs: list(`pd.DataFrame`)
     :param by: name of column or list of columns names. 'all' for all columns. 'columns' for merge_by_columns method
@@ -165,6 +162,9 @@ def merge(dfs, by, keep="last", sort_index=True):
 
     df = pd.concat(dfs, axis=0)
 
+    if sorting:
+        df = df.sort_values(by=sorting)
+
     masks = []
     if by == "all":
         masks.append(df)
@@ -174,6 +174,7 @@ def merge(dfs, by, keep="last", sort_index=True):
     if by_index:
         masks.append(pd.Series(df.index, index=df.index))
     mask = pd.concat(masks, axis=1)
+
     df = df[~mask.duplicated(keep=keep)]
 
     if sort_index:
@@ -431,7 +432,7 @@ def test_tree():
 
 
 def test_read_write():
-    from datetime import datetime, timedelta
+    from datetime import datetime
 
     df = pd.DataFrame.from_dict(
         {"a": [datetime(2020, 1, 1)] * 3, "b": [4, 5, 6], "c": [1, 1, 1]}
