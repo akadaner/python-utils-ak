@@ -1,14 +1,20 @@
 """ Miscellaneous functionality with basic python built-in objects. """
 import collections
-import numpy
 import itertools
+
+import numpy
+import pandas as pd
 
 
 def delistify(lst_obj, single=False):
-    if isinstance(lst_obj, list):
+    if hasattr(lst_obj, '__len__'):
         if single:
             assert len(lst_obj) == 1
+
+    if isinstance(lst_obj, list):
         return lst_obj if (len(lst_obj) > 1 or not lst_obj) else lst_obj[0]
+    elif isinstance(lst_obj, pd.DataFrame):
+        return lst_obj if len(lst_obj) > 1 else lst_obj.iloc[0]
     else:
         return lst_obj
 
@@ -95,7 +101,7 @@ def update_dic(dic, new_dic):
 def crop_to_chunks(lst, n):
     """Yield successive n-sized chunks from l."""
     for i in range(0, len(lst), n):
-        yield lst[i : i + n]
+        yield lst[i: i + n]
 
 
 def split_list(lst, n):
@@ -112,7 +118,7 @@ def unfold_dic(dic, keys, get=False, default=None):
 
 
 def recycle_list(lst, idx):
-    return (lst * 2)[idx % len(lst) :][: len(lst)]
+    return (lst * 2)[idx % len(lst):][: len(lst)]
 
 
 def test_collection():
