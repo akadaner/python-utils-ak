@@ -1,8 +1,11 @@
 import os
 import openpyxl as opx
+import pandas as pd
+
 from openpyxl.styles import Alignment, PatternFill, Font
 from openpyxl.styles.borders import Border, Side, BORDER_THIN
 from openpyxl.utils import get_column_letter
+
 from utils_ak.color import cast_color
 
 
@@ -26,6 +29,16 @@ def cast_workbook(wb_obj):
         return init_workbook(sheet_names=wb_obj)
     else:
         raise Exception("Unknown workbook format")
+
+
+def cast_worksheet(ws_obj):
+    if isinstance(ws_obj, opx.worksheet.worksheet.Worksheet):
+        return ws_obj
+
+    elif isinstance(ws_obj, (tuple, list)):
+        wb_obj, sheet_name = ws_obj
+        wb = cast_workbook(wb_obj)
+        return wb.worksheets[wb.sheetnames.index(sheet_name)]
 
 
 def set_border(sheet, x, y, w, h, border):
@@ -67,8 +80,10 @@ def set_border_grid(sheet, x, y, w, h, border):
 def get_sheet_by_name(wb, sheet_name):
     return wb.worksheets[wb.sheetnames.index(sheet_name)]
 
+
 def set_zoom(sheet, zoom_scale):
     sheet.sheet_view.zoomScale = zoom_scale
+
 
 def set_dimensions(sheet, orientation, rng, length):
     if orientation == 'column':
@@ -98,7 +113,7 @@ def draw_cell(
     return cell
 
 
-def draw_block(
+def draw_merged_cell(
     sheet,
     x1,
     x2,
@@ -145,13 +160,72 @@ def draw_row(sheet, y, values, color=None, **kwargs):
         draw_cell(sheet, i, y, text=v, color=color, **kwargs)
 
 
+def _cast_alpha_hex_to_hex(alpha_hex):
+    if alpha_hex[:2] == '00':
+        return cast_color('white')
+    else:
+        return cast_color('#' + alpha_hex[2:])
+
+
+
+def read_merged_cells_df(ws_obj, basic_features=True):
+    ws = cast_worksheet(ws_obj)
+    df = pd.DataFrame()
+    df["cell"] = ws.merged_cells.ranges
+
+    bound_names = ("x0", "x1", "y0", "y1")
+    df["bounds"] = df["cell"].apply(lambda cell: cell.bounds)
+    for i in range(4):
+        df[bound_names[i]] = df["bounds"].apply(lambda bound: bound[i])
+
+    df["y0"] += 1
+    df["y1"] += 1
+    df["label"] = df["cell"].apply(lambda cell: cell.start_cell.value)
+
+    df['font_size'] = df["cell"].apply(lambda cell: cell.start_cell.font.sz)
+    df['is_bold'] = df["cell"].apply(lambda cell: cell.start_cell.font.b)
+    df['color'] = df["cell"].apply(lambda cell: _cast_alpha_hex_to_hex(cell.start_cell.fill.fgColor.rgb))
+    df['text_rotation'] = df["cell"].apply(lambda cell: cell.start_cell.alignment.textRotation)
+    df = df.sort_values(by=["x1", "x0", "y1", "y0"])
+    if basic_features:
+        df = df[['x0', 'x1', 'y0', 'y1', 'label']]
+    return df
+
+
+def draw_merged_cells(ws_obj, merged_cells_df):
+    ws = cast_worksheet(ws_obj)
+    for i, row in merged_cells_df.iterrows():
+        draw_merged_cell(
+            ws,
+            row['x0'],
+            row['x1'],
+            row['y0'] - row['x0'],
+            row['y1'] - row['x1'],
+            row['label'],
+            cast_color(row['color']),
+            bold=row['is_bold'],
+            border={"border_style": "thin", "color": "000000"},
+            text_rotation=row['text_rotation'],
+            font_size=row['font_size'],
+            alignment="center")
+    return ws
+
+
+def draw_sheet_sequence(ws_obj, sheet_objs):
+    cur_y_axis_shift = 0
+    for sheet_obj in sheet_objs:
+        merged_cells_df = read_merged_cells_df(sheet_obj, False)
+        merged_cells_df['x1'] += cur_y_axis_shift
+        merged_cells_df['y1'] += cur_y_axis_shift
+        draw_merged_cells(ws_obj, merged_cells_df)
+        cur_y_axis_shift += merged_cells_df['x1'].max()
+
 
 if __name__ == "__main__":
+    print(read_merged_cells_df(('sample.xlsx', 'Sheet1'), basic_features=False))
     wb = init_workbook(["a", "b"], active_sheet_name="b")
     set_border_grid(wb.worksheets[0], 1, 1, 10, 10, Side(border_style=BORDER_THIN))
 
-    wb.save("test.xlsx")
-    from utils_ak.imports.interactive import open_file_in_os
-    from openpyxl.styles.borders import Border, Side, BORDER_THIN
+    draw_sheet_sequence((wb, 'b'), (('sample.xlsx', 'Sheet1'), ('sample.xlsx', 'Sheet1')))
 
-    open_file_in_os("test.xlsx")
+    wb.save('output.xlsx')
