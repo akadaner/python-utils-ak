@@ -21,6 +21,7 @@ def init_workbook(sheet_names=None, active_sheet_name=None):
 
 
 def cast_workbook(wb_obj):
+    wb_obj = wb_obj or ['Sheet1']
     if isinstance(wb_obj, str):
         return opx.load_workbook(filename=wb_obj, data_only=True)
     elif isinstance(wb_obj, opx.Workbook):
@@ -161,11 +162,10 @@ def draw_row(sheet, y, values, color=None, **kwargs):
 
 
 def _cast_alpha_hex_to_hex(alpha_hex):
-    if alpha_hex[:2] == '00':
+    if str(alpha_hex).lower() == '00000000': # consider transparent black as white (sometimes it is the case for some reason)
         return cast_color('white')
     else:
         return cast_color('#' + alpha_hex[2:])
-
 
 
 def read_merged_cells_df(ws_obj, basic_features=True):
@@ -189,6 +189,7 @@ def read_merged_cells_df(ws_obj, basic_features=True):
     df = df.sort_values(by=["x1", "x0", "y1", "y0"])
     if basic_features:
         df = df[['x0', 'x1', 'y0', 'y1', 'label']]
+
     return df
 
 
@@ -215,10 +216,11 @@ def draw_sheet_sequence(ws_obj, sheet_objs):
     cur_y_axis_shift = 0
     for sheet_obj in sheet_objs:
         merged_cells_df = read_merged_cells_df(sheet_obj, False)
+        height = merged_cells_df['y1'].max()
         merged_cells_df['x1'] += cur_y_axis_shift
         merged_cells_df['y1'] += cur_y_axis_shift
         draw_merged_cells(ws_obj, merged_cells_df)
-        cur_y_axis_shift += merged_cells_df['x1'].max()
+        cur_y_axis_shift += height
 
 
 if __name__ == "__main__":
@@ -226,6 +228,6 @@ if __name__ == "__main__":
     wb = init_workbook(["a", "b"], active_sheet_name="b")
     set_border_grid(wb.worksheets[0], 1, 1, 10, 10, Side(border_style=BORDER_THIN))
 
-    draw_sheet_sequence((wb, 'b'), (('sample.xlsx', 'Sheet1'), ('sample.xlsx', 'Sheet1')))
+    draw_sheet_sequence((wb, 'b'), (('sample1.xlsx', 'Расписание'), ('sample1.xlsx', 'Расписание')))
 
     wb.save('output.xlsx')
