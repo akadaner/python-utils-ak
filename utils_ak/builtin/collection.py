@@ -9,7 +9,7 @@ import pandas as pd
 def delistify(lst_obj, single=False):
     if hasattr(lst_obj, '__len__'):
         if single:
-            assert len(lst_obj) == 1
+            assert len(lst_obj) == 1, f"Single object expected. {len(lst_obj)} found."
 
     if isinstance(lst_obj, list):
         return lst_obj if (len(lst_obj) > 1 or not lst_obj) else lst_obj[0]

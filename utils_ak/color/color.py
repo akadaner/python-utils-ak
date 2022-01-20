@@ -20,3 +20,5 @@ if __name__ == "__main__":
     print(cast_color((1.0, 0.0, 1.0)))
     print(cast_color((15, 15, 16)))
     print(cast_color("#808081"))
+    print(cast_color("#FFC000"))
+

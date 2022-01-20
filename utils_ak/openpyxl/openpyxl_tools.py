@@ -64,6 +64,21 @@ def set_border_grid(sheet, x, y, w, h, border):
             set_border(sheet, _x, _y, 1, 1, border)
 
 
+def get_sheet_by_name(wb, sheet_name):
+    return wb.worksheets[wb.sheetnames.index(sheet_name)]
+
+def set_zoom(sheet, zoom_scale):
+    sheet.sheet_view.zoomScale = zoom_scale
+
+def set_dimensions(sheet, orientation, rng, length):
+    if orientation == 'column':
+        for i in rng:
+            sheet.column_dimensions[get_column_letter(i)].width = length
+    else:
+        for i in rng:
+            sheet.row_dimensions[i].height = length
+
+
 def draw_cell(
     sheet, x, y, text, color=None, font_size=None, text_rotation=None, alignment=None
 ):
@@ -128,6 +143,7 @@ def draw_block(
 def draw_row(sheet, y, values, color=None, **kwargs):
     for i, v in enumerate(values, 1):
         draw_cell(sheet, i, y, text=v, color=color, **kwargs)
+
 
 
 if __name__ == "__main__":
