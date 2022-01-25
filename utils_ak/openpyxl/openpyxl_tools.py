@@ -162,11 +162,14 @@ def draw_row(sheet, y, values, color=None, **kwargs):
 
 
 def _cast_alpha_hex_to_hex(alpha_hex):
-    if str(alpha_hex).lower() == '00000000': # consider transparent black as white (sometimes it is the case for some reason)
+    try:
+        if str(alpha_hex).lower() == '00000000': # consider transparent black as white (sometimes it is the case for some reason)
+            return cast_color('white')
+        else:
+            return cast_color('#' + alpha_hex[2:])
+    except:
+        # if something is wrong - return white
         return cast_color('white')
-    else:
-        return cast_color('#' + alpha_hex[2:])
-
 
 def read_merged_cells_df(ws_obj, basic_features=True):
     ws = cast_worksheet(ws_obj)
