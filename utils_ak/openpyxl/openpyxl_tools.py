@@ -1,6 +1,7 @@
 import os
 import openpyxl as opx
 import pandas as pd
+import ujson as json
 
 from openpyxl.styles import Alignment, PatternFill, Font
 from openpyxl.styles.borders import Border, Side, BORDER_THIN
@@ -29,7 +30,7 @@ def cast_workbook(wb_obj):
     elif isinstance(wb_obj, list):
         return init_workbook(sheet_names=wb_obj)
     else:
-        raise Exception("Unknown workbook format")
+        raise Exception(f"Unknown workbook format {type(wb_obj)}")
 
 
 def cast_worksheet(ws_obj):
@@ -39,6 +40,10 @@ def cast_worksheet(ws_obj):
     elif isinstance(ws_obj, (tuple, list)):
         wb_obj, sheet_name = ws_obj
         wb = cast_workbook(wb_obj)
+
+        if sheet_name not in wb.sheetnames:
+            wb.create_sheet(sheet_name)
+
         return wb.worksheets[wb.sheetnames.index(sheet_name)]
 
 
@@ -171,6 +176,17 @@ def _cast_alpha_hex_to_hex(alpha_hex):
         # if something is wrong - return white
         return cast_color('white')
 
+
+def write_metadata(wb, s):
+    ws = cast_worksheet((wb, '_metadata'))
+    ws.sheet_state = 'hidden'
+    ws.cell(1, 1).value = s
+
+def read_metadata(wb):
+    ws = cast_worksheet((wb, '_metadata'))
+    return ws.cell(1, 1).value
+
+
 def read_merged_cells_df(ws_obj, basic_features=True):
     ws = cast_worksheet(ws_obj)
     df = pd.DataFrame()
@@ -224,13 +240,30 @@ def draw_sheet_sequence(ws_obj, sheet_objs):
         merged_cells_df['y1'] += cur_y_axis_shift
         draw_merged_cells(ws_obj, merged_cells_df)
         cur_y_axis_shift += height
+    return ws_obj
+
+def set_active_sheet(wb, sheetname):
+    for sheet in wb:
+        wb[sheet.title].views.sheetView[0].tabSelected = False
+    wb.active = wb.sheetnames.index(sheetname)
+    return wb
+
+def set_visible_sheets(wb, sheetnames):
+    for sheetname in wb.sheetnames:
+        ws = cast_worksheet((wb, sheetname))
+        if sheetname in sheetnames:
+            ws.sheet_state = 'visible'
+        else:
+            ws.sheet_state = 'hidden'
+    return wb
 
 
 if __name__ == "__main__":
     print(read_merged_cells_df(('sample.xlsx', 'Sheet1'), basic_features=False))
     wb = init_workbook(["a", "b"], active_sheet_name="b")
     set_border_grid(wb.worksheets[0], 1, 1, 10, 10, Side(border_style=BORDER_THIN))
-
+    ws = cast_worksheet((wb, 'b'))
+    print(ws.sheet_state)
     draw_sheet_sequence((wb, 'b'), (('sample1.xlsx', 'Расписание'), ('sample1.xlsx', 'Расписание')))
 
     wb.save('output.xlsx')

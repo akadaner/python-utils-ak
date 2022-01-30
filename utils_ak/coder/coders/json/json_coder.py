@@ -94,3 +94,8 @@ def cast_dict_or_list(obj, *args, **kwargs):
 
     raise Exception("Unknown type")
 
+
+if __name__ == '__main__':
+    coder = JsonCoder()
+    print(coder.encode({'asdf': 1234}))
+    print(coder.decode(b'{"asdf": 1234}'))

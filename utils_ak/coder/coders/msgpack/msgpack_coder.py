@@ -1,3 +1,5 @@
+import codecs
+
 import msgpack
 import decimal
 import datetime as datetime_module
@@ -66,6 +68,5 @@ class MsgPackCoder(Coder):
 
 
 if __name__ == "__main__":
-    from utils_ak.coder import _test_coder
-
-    test_coder(MsgPackCoder())
+    coder = MsgPackCoder()
+    print(coder.encode({'asdf': 123}))
