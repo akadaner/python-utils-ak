@@ -62,6 +62,9 @@ def cast_hts(dt_obj):
     return int(dt_obj.strftime("%Y%m%d%H%M%S%f")[:-3])
 
 
+to_hts = cast_hts
+
+
 def cast_datetime(dt_obj, none_invariant=True):
     """
     :param dt_obj: datetime-like object: datetime.datetime or str
@@ -119,12 +122,12 @@ def cast_datetime(dt_obj, none_invariant=True):
         except:
             pass
 
-        return datetime.fromtimestamp(dt_obj / 1000, tz=timezone.utc).replace(
-            tzinfo=None
-        )
+        return datetime.fromtimestamp(dt_obj / 1000, tz=timezone.utc).replace(tzinfo=None)
     else:
         raise Exception("Unknown datetime-like object type")
 
+
+to_datetime = cast_datetime
 
 cast_dt = cast_datetime
 
@@ -139,11 +142,16 @@ def cast_timestamp(dt_obj):
     return dt_obj.replace(tzinfo=timezone.utc).timestamp()
 
 
+to_timestamp = cast_timestamp
 cast_ts = cast_timestamp
+to_ts = cast_timestamp
 
 
 def cast_mts(dt_obj):
     return cast_timestamp(dt_obj) * 1000
+
+
+to_mts = cast_mts
 
 
 def cast_str(dt, format=None):
@@ -155,6 +163,9 @@ def cast_str(dt, format=None):
         return dt.strftime(format)
     else:
         raise Exception("Unsupported type")
+
+
+to_datetime_str = cast_datetime
 
 
 def get_strptime_pattern(s):
@@ -224,10 +235,15 @@ def cast_datetime_series(s):
     return pd.to_datetime(s, infer_datetime_format=True)
 
 
+to_datetime_series = cast_datetime_series
+
+
 def cast_datetime_many(lst):
     # NOTE: THIS CODE INFERS DATETIME FORMAT! In other words, all passed values should have the same format
     return cast_datetime_series(pd.Series(lst)).tolist()
 
+
+to_datetime_many = cast_datetime_many
 
 cast_dt_series = cast_datetime_series
 
@@ -250,6 +266,9 @@ def cast_freq(td_obj, keys=None):
         if vals[i] != 0:
             res += f"{vals[i]}{keys[i]}"
     return res
+
+
+to_freq = cast_freq
 
 
 def parse_freq(freq_str, keys=None):
@@ -302,6 +321,8 @@ def cast_timedelta(td_obj):
         raise Exception("Unknown td_obj format")
 
 
+to_timedelta = cast_timedelta
+
 cast_td = cast_timedelta
 
 
@@ -311,15 +332,19 @@ def cast_sec(td_obj):
     return cast_timedelta(td_obj).total_seconds()
 
 
+to_seconds = cast_sec
+
+
 def cast_dateoffset(td_obj):
     # https://pandas.pydata.org/pandas-docs/stable/timeseries.html
     return cast_freq(td_obj, keys=["D", "H", "T", "S"])
 
 
+to_dateoffset = cast_dateoffset
+
+
 def round_datetime(dt_obj, td_obj, rounding="nearest_half_even"):
-    assert cast_timedelta(td_obj) < timedelta(
-        days=1
-    ), "Only rounding less than a day is supported."
+    assert cast_timedelta(td_obj) < timedelta(days=1), "Only rounding less than a day is supported."
     ts = cast_timestamp(dt_obj)
     ts = custom_round(ts, cast_sec(td_obj), rounding)
     return cast_datetime(ts)
