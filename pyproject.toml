@@ -17,3 +17,16 @@ python = "^3.7.1"
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+# black --line-length 120
+line-length = 120
+
+[tool.isort]
+# isort **/*.py --multi-line 3 --trailing-comma --force-grid-wrap 0 --use-parentheses --ensure-newline-before-comments --line-length 120
+multi_line_output = 3
+include_trailing_comma = True
+force_grid_wrap = 0
+use_parentheses = True
+ensure_newline_before_comments = True
+line_length = 120
