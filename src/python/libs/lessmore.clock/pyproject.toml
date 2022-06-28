@@ -12,8 +12,7 @@ python = "^3.9"
 pandas = "^1.4.3"
 
 [tool.poetry.dev-dependencies]
-code-block = {path = "../lessmore.code_block", develop = true}
-"lessmore.code_block" = {path = "../abc.core"}  # other namespaced modules work, too.
+"lessmore.code_block" = {path = "../lessmore.code_block", develop = true}  # other namespaced modules work, too.
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

@@ -1,4 +1,17 @@
 [[package]]
+name = "lessmore.code-block"
+version = "0.1.0"
+description = ""
+category = "dev"
+optional = false
+python-versions = "^3.9"
+develop = true
+
+[package.source]
+type = "directory"
+url = "../lessmore.code_block"
+
+[[package]]
 name = "numpy"
 version = "1.23.0"
 description = "NumPy is the fundamental package for array computing with Python."
@@ -57,9 +70,10 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "2cae5310efce7a0a463e1788e8787d92f75d2cbb77f99081a0f6f1d81618629a"
+content-hash = "9cea5b79cd8215ad38d37c236f1976d8039dc481f70b083d535b28af874c0b87"
 
 [metadata.files]
+"lessmore.code-block" = []
 numpy = [
     {file = "numpy-1.23.0-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:58bfd40eb478f54ff7a5710dd61c8097e169bc36cc68333d00a9bcd8def53b38"},
     {file = "numpy-1.23.0-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:196cd074c3f97c4121601790955f915187736f9cf458d3ee1f1b46aff2b1ade0"},
