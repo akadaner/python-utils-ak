@@ -1,1 +1,1 @@
-from .clock import Clock, clockify, clock
+from .clock import Clock, clock, clockify
