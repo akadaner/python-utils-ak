@@ -221,12 +221,14 @@ def clockify(key=None):
             _key = "/".join(_values)
 
             clock.start(_key)
-            try:
-                res = f(*args, **kwargs)
-                clock.stop(_key)
-            except:
-                clock.stop(_key)
-                raise
+
+            with code("tmp code"):  # todo next: del
+                try:
+                    res = f(*args, **kwargs)
+                    clock.stop(_key)
+                except:
+                    clock.stop(_key)
+                    raise
             return res
 
         return inner
