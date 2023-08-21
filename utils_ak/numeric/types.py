@@ -3,7 +3,7 @@ import pandas as pd
 
 
 def is_float(obj):
-    return np.issubdtype(type(obj), np.float)
+    return np.issubdtype(type(obj), np.float64)
 
 
 def is_int(obj):
