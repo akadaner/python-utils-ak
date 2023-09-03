@@ -73,38 +73,42 @@ class BlockMaker:
         return self.block(*args, **kwargs)
 
     def row(self, *args, **kwargs):
-        with code("size"):
-            key = "size"
-            if key in kwargs:
-                if isinstance(kwargs[key], (list, tuple, SimpleVector)):
-                    assert kwargs[key][1] == self.default_row_width
-                else:
-                    kwargs[key] = (kwargs[key], self.default_row_width)
+        # - Size
+        key = "size"
+        if key in kwargs:
+            if isinstance(kwargs[key], (list, tuple, SimpleVector)):
+                assert kwargs[key][1] == self.default_row_width
+            else:
+                kwargs[key] = (kwargs[key], self.default_row_width)
 
-        with code("x"):
-            key = "x"
-            if key in kwargs:
-                if not isinstance(kwargs[key], (list, tuple, SimpleVector)):
-                    kwargs[key] = (kwargs[key], 0)
+        # - X
+        key = "x"
+        if key in kwargs:
+            if not isinstance(kwargs[key], (list, tuple, SimpleVector)):
+                kwargs[key] = (kwargs[key], 0)
+
+        # - Return block
 
         return self.block(*args, **kwargs)
 
     def col(self, *args, **kwargs):
-        with code("size"):
-            key = "size"
-            if key in kwargs:
-                if isinstance(kwargs[key], (list, tuple, SimpleVector)):
-                    assert kwargs[key][1] == self.default_row_width
-                else:
-                    kwargs[key] = (self.default_row_width, kwargs[key])
+        # - Size
+        key = "size"
+        if key in kwargs:
+            if isinstance(kwargs[key], (list, tuple, SimpleVector)):
+                assert kwargs[key][1] == self.default_row_width
+            else:
+                kwargs[key] = (self.default_row_width, kwargs[key])
 
-        with code("x"):
-            key = "x"
-            if key in kwargs:
-                if isinstance(kwargs[key], (list, tuple, SimpleVector)):
-                    assert kwargs[key][1] == 0
-                else:
-                    kwargs[key] = (0, kwargs[key])
+        # - X
+        key = "x"
+        if key in kwargs:
+            if isinstance(kwargs[key], (list, tuple, SimpleVector)):
+                assert kwargs[key][1] == 0
+            else:
+                kwargs[key] = (0, kwargs[key])
+
+        # - Return block
         return self.block(*args, **kwargs)
 
 
