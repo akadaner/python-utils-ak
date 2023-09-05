@@ -67,7 +67,11 @@ class IterativePusher:
 
 class AxisPusher(IterativePusher):
     def __init__(
-        self, start_from="last_end", start_shift=0, min_start=None, validator=None
+        self,
+        start_from="last_end",
+        start_shift=0,
+        min_start=None,
+        validator=None,
     ):
         super().__init__(validator=validator)
         self.start_from = start_from
@@ -86,19 +90,9 @@ class AxisPusher(IterativePusher):
                 return 0
             else:
                 if start_from == "last_beg":
-                    return max(
-                        [
-                            child.props["x_rel"][self.axis]
-                            for child in self.parent.children
-                        ]
-                    )
+                    return max([child.props["x_rel"][self.axis] for child in self.parent.children])
                 elif start_from == "last_end":
-                    return max(
-                        [
-                            (child.props["x_rel"] + child.size)[self.axis]
-                            for child in self.parent.children
-                        ]
-                    )
+                    return max([(child.props["x_rel"] + child.size)[self.axis] for child in self.parent.children])
                 else:
                     raise Exception("Unknown beg type")
 
@@ -118,6 +112,7 @@ class AxisPusher(IterativePusher):
         dispositions = [result.get("disposition", None) for result in results]
         dispositions = [d for d in dispositions if d is not None]
         disposition = min(dispositions) if len(dispositions) == len(results) else 1
+
         # logger.debug("Disposition", disposition=disposition)
         self.cur_x[self.axis] += disposition
         self.block.props.update(x=self.cur_x)
@@ -130,9 +125,7 @@ class ShiftPusher(IterativePusher):
         self.start_from = start_from
 
     def _shift(self, period):
-        self.block.props.update(
-            x=[self.block.props["x_rel"][0] + period, self.block.x[1]]
-        )
+        self.block.props.update(x=[self.block.props["x_rel"][0] + period, self.block.x[1]])
 
     def init(self):
         if self.start_from:
