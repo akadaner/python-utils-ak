@@ -13,7 +13,7 @@ from loguru import logger
 
 
 def dummy_push(
-    parent, block, validator, max_tries=24, start_from="last_end", iter_props=None
+    parent, block, validator, max_tries=24, start_from="max_end", iter_props=None
 ):
     axis = parent.props["axis"]
 
@@ -25,11 +25,11 @@ def dummy_push(
         if not parent.children:
             cur_start = 0
         else:
-            if start_from == "last_beg":
+            if start_from == "max_beg":
                 cur_start = max(
                     [child.props["x_rel"][axis] for child in parent.children]
                 )
-            elif start_from == "last_end":
+            elif start_from == "max_end":
                 cur_start = max(
                     [
                         (child.props["x_rel"] + child.size)[axis]

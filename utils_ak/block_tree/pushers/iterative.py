@@ -68,7 +68,7 @@ class IterativePusher:
 class AxisPusher(IterativePusher):
     def __init__(
         self,
-        start_from="last_end",
+        start_from="max_end",
         start_shift=0,
         min_start=None,
         validator=None,
@@ -89,10 +89,14 @@ class AxisPusher(IterativePusher):
             if not self.parent.children:
                 return 0
             else:
-                if start_from == "last_beg":
+                if start_from == "max_beg":
                     return max([child.props["x_rel"][self.axis] for child in self.parent.children])
-                elif start_from == "last_end":
+                if start_from == "last_beg":
+                    return self.parent.children[-1].props["x_rel"][self.axis]
+                elif start_from == "max_end":
                     return max([(child.props["x_rel"] + child.size)[self.axis] for child in self.parent.children])
+                if start_from == "last_end":
+                    return (self.parent.children[-1].props["x_rel"] + + self.parent.children[-1].size)[self.axis]
                 else:
                     raise Exception("Unknown beg type")
 
