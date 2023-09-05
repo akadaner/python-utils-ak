@@ -32,7 +32,7 @@ class BlockMaker:
     def create_block(self, block_obj, **kwargs):
         return self.block_factory(block_obj, **kwargs)
 
-    def copy(self, block, with_children=True, with_props=False, prop_keys=None):
+    def copy(self, block, with_children=True, with_props=False, prop_keys=None, size=None):
         res = self.create_block(block.props["cls"], **block.props.relative_props)
 
         if with_children:
@@ -46,6 +46,23 @@ class BlockMaker:
                 props = {k: v for k, v in props if k in prop_keys}
             props = {k: v for k, v in props.items() if v is not None}
             res.props.update(**props)
+
+        if size:
+            # - Convert to mutable
+
+            size = list(size)
+
+            # - Replace with defaults
+
+            if size[0] is None:
+                size[0] = res.props["size"][0]
+
+            if size[1] is None:
+                size[1] = res.props["size"][1]
+
+            # - Update size
+
+            res.update_size(size)
         return res
 
     def block(
