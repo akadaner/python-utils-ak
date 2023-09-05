@@ -189,7 +189,21 @@ def test_copy():
     print(maker.copy(maker.root["a1"]["b2"], with_props=True))
 
 
+def test_shift_element():
+    maker, make = init_block_maker("root", axis=1)
+    with make("a1", size=[0, 3]):
+        with make("b1", size=[5, 0]):
+            make("c1", size=[2, 0])
+    with make("a2", size=[0, 2]):
+        make("b2")
+
+    c1 = maker.root['a1']['b1']['c1']
+    c1.props.update(x=[c1.props["x_rel"][0] + 2, c1.x[1]])
+
+    print(maker.root)
+
 if __name__ == "__main__":
-    test_block_maker1()
-    test_block_maker2()
-    test_copy()
+    # test_block_maker1()
+    # test_block_maker2()
+    # test_copy()
+    test_shift_element()
