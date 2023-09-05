@@ -11,7 +11,7 @@ class BlockMaker:
         block_factory=None,
         default_row_width=0,
         default_col_width=0,
-        **props
+        **props,
     ):
         self.block_factory = block_factory or ParallelepipedBlock
 
@@ -49,7 +49,12 @@ class BlockMaker:
         return res
 
     def block(
-        self, block_obj=None, push_func=None, push_kwargs=None, inplace=True, **kwargs
+        self,
+        block_obj=None,
+        push_func=None,
+        push_kwargs=None,
+        inplace=True,
+        **kwargs,
     ):
         push_func = push_func or self.default_push_func
         push_kwargs = push_kwargs or {}
@@ -68,12 +73,13 @@ class BlockMaker:
         push_func(self.blocks[-1], block, **push_kwargs)
         return BlockMakerContext(self, block)
 
-    # todo: del
+    # todo later: del [@marklidenberg]
     def make(self, *args, **kwargs):
         return self.block(*args, **kwargs)
 
     def row(self, *args, **kwargs):
         # - Size
+
         key = "size"
         if key in kwargs:
             if isinstance(kwargs[key], (list, tuple, SimpleVector)):
@@ -82,6 +88,7 @@ class BlockMaker:
                 kwargs[key] = (kwargs[key], self.default_row_width)
 
         # - X
+
         key = "x"
         if key in kwargs:
             if not isinstance(kwargs[key], (list, tuple, SimpleVector)):
@@ -93,6 +100,7 @@ class BlockMaker:
 
     def col(self, *args, **kwargs):
         # - Size
+
         key = "size"
         if key in kwargs:
             if isinstance(kwargs[key], (list, tuple, SimpleVector)):
@@ -101,6 +109,7 @@ class BlockMaker:
                 kwargs[key] = (self.default_row_width, kwargs[key])
 
         # - X
+
         key = "x"
         if key in kwargs:
             if isinstance(kwargs[key], (list, tuple, SimpleVector)):
@@ -109,6 +118,7 @@ class BlockMaker:
                 kwargs[key] = (0, kwargs[key])
 
         # - Return block
+
         return self.block(*args, **kwargs)
 
 
@@ -125,7 +135,7 @@ class BlockMakerContext:
         self.maker.blocks.pop()
 
 
-# todo: del
+# todo later: del [@marklidenberg]
 def init_block_maker(root_obj, default_push_func=stack_push, **kwargs):
     block_maker = BlockMaker(root_obj, default_push_func, **kwargs)
     return block_maker, block_maker.block
