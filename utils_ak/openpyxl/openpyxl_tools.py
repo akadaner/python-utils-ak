@@ -190,7 +190,7 @@ def read_metadata(wb):
 def read_merged_cells_df(ws_obj, basic_features=True):
     ws = cast_worksheet(ws_obj)
     df = pd.DataFrame()
-    df["cell"] = ws.merged_cells.ranges
+    df["cell"] = list(ws.merged_cells.ranges)
 
     bound_names = ("x0", "x1", "y0", "y1")
     df["bounds"] = df["cell"].apply(lambda cell: cell.bounds)
