@@ -1,5 +1,6 @@
 import os
 import openpyxl as opx
+import openpyxl.worksheet.worksheet
 import pandas as pd
 import ujson as json
 
@@ -210,6 +211,46 @@ def read_merged_cells_df(ws_obj, basic_features=True):
         df = df[['x0', 'x1', 'y0', 'y1', 'label']]
 
     return df
+
+
+def read_merged_and_colored_cells_df(
+        ws_obj: openpyxl.worksheet.worksheet.Worksheet,
+        basic_features=True
+) -> pd.DataFrame:
+    ws = cast_worksheet(ws_obj)
+
+    merged_cells = []
+    for merged_range in ws.merged_cells.ranges:
+        for cell in merged_range:
+            merged_cells.add(cell.coordinate)
+
+    for row in ws.iter_rows():
+        for cell in row:
+            if cell.coordinate not in merged_cells and cell.fill.start_color.index != '00000000':
+                ws.merge_cells(cell.coordinate + ':' + cell.coordinate)
+
+    df = pd.DataFrame()
+    df["cell"] = list(ws.merged_cells.ranges)
+
+    bound_names = ("x0", "x1", "y0", "y1")
+    df["bounds"] = df["cell"].apply(lambda cell: cell.bounds)
+    for i in range(4):
+        df[bound_names[i]] = df["bounds"].apply(lambda bound: bound[i])
+
+    df["y0"] += 1
+    df["y1"] += 1
+    df["label"] = df["cell"].apply(lambda cell: cell.start_cell.value)
+
+    df['font_size'] = df["cell"].apply(lambda cell: cell.start_cell.font.sz)
+    df['is_bold'] = df["cell"].apply(lambda cell: cell.start_cell.font.b)
+    df['color'] = df["cell"].apply(lambda cell: _cast_alpha_hex_to_hex(cell.start_cell.fill.fgColor.rgb))
+    df['text_rotation'] = df["cell"].apply(lambda cell: cell.start_cell.alignment.textRotation)
+    df = df.sort_values(by=["x1", "x0", "y1", "y0"])
+    if basic_features:
+        df = df[['x0', 'x1', 'y0', 'y1', 'label']]
+
+    return df
+
 
 
 def draw_merged_cells(ws_obj, merged_cells_df):
