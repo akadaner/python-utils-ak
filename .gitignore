@@ -3,3 +3,4 @@ dist
 # python unnecessary files
 **/__pycache__/
 **/.ipynb_checkpoints/
+.DS_Store
