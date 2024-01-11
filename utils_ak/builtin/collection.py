@@ -1,4 +1,4 @@
-""" Miscellaneous functionality with basic python built-in objects. """
+""" Miscellaneous functionality with basic_example python built-in objects. """
 import collections
 import itertools
 

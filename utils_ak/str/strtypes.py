@@ -1,4 +1,4 @@
-"""Declare basic string types unambiguously for various Python versions.
+"""Declare basic_example string types unambiguously for various Python versions.
 Authors
 -------
 * MinRK
