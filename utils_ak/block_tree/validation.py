@@ -19,6 +19,17 @@ def validate_disjoint_by_axis(b1, b2, axis=0, distance=0, ordered=False):
     )
 
 
+def is_disjoint(b1, b2):
+    """ Check if two rectangles are disjoint. """
+    def _is_disjoint_by_axis(b1, b2, axis=0):
+        try:
+            validate_disjoint_by_axis(b1, b2, axis)
+            return True
+        except:
+            return False
+    return any(_is_disjoint_by_axis(b1, b2, axis) for axis in range(b1.n_dims))
+
+
 def validate_order_by_axis(b1, b2, axis=0, equal_allowed=False):
     i1_single = (
         (b1.x[axis] - 1, b1.x[axis]) if equal_allowed else (b1.x[axis], b1.x[axis] + 1)

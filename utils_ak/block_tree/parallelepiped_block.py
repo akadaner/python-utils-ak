@@ -1,4 +1,6 @@
 from functools import partial
+
+from app.scheduler.time_utils import cast_t, cast_time
 from utils_ak.simple_vector import *
 from utils_ak.properties import *
 from utils_ak.block_tree import Block
@@ -8,19 +10,11 @@ from utils_ak.clock import *
 
 def x_cumsum_acc(parent, child, key, default=None, formatter=None):
     if parent:
-        return parent[key].add(
-            relative_acc(parent, child, key, default=default, formatter=formatter)
-        )
-    return SimpleVector(
-        list(
-            relative_acc(
-                parent, child, key, default=default, formatter=formatter
-            ).values
-        )
-    )
+        return parent[key].add(relative_acc(parent, child, key, default=default, formatter=formatter))
+    return SimpleVector(list(relative_acc(parent, child, key, default=default, formatter=formatter).values))
 
 
-# todo: put outside for pickle compatability
+# todo later: put outside for pickle compatability [@marklidenberg]
 def x_rel_acc(parent, child, key):
     return relative_acc(parent, child, "x")
 
@@ -90,9 +84,7 @@ class ParallelepipedBlock(Block):
                         values.append(0)
                     else:
                         start = min([c.x_rel[axis] for c in self.children] + [0])
-                        values.append(
-                            max([c.y_rel[axis] - start for c in self.children])
-                        )
+                        values.append(max([c.y_rel[axis] - start for c in self.children]))
                 else:
                     values.append(size[axis])
             self.size_cached = SimpleVector(values)
@@ -119,10 +111,7 @@ class ParallelepipedBlock(Block):
 
         if not props:
             rel_props = dict(self.props.relative_props)
-            rel_props = {
-                k: list(v) if isinstance(v, SimpleVector) else v
-                for k, v in rel_props.items()
-            }
+            rel_props = {k: list(v) if isinstance(v, SimpleVector) else v for k, v in rel_props.items()}
             res["props"] = rel_props
         else:
             res["props"] = {}
@@ -132,9 +121,7 @@ class ParallelepipedBlock(Block):
                     res["props"][prop] = self.props.get(prop)
 
                 elif isinstance(prop, dict):
-                    if "cls" not in prop or (
-                        "cls" in prop and self.props["cls"] == prop["cls"]
-                    ):
+                    if "cls" not in prop or ("cls" in prop and self.props["cls"] == prop["cls"]):
                         key = prop["key"]
                         value = prop.get("value", key)
                         if isinstance(value, str):
@@ -145,23 +132,35 @@ class ParallelepipedBlock(Block):
                             raise Exception("Value should be either callable or string")
 
         if with_children:
-            res["children"] = [
-                child.to_dict(props, with_children=True) for child in self.children
-            ]
+            res["children"] = [child.to_dict(props, with_children=True) for child in self.children]
         return res
 
-    def __str__(self):
+    def __str__(self, props: list = []):
         res = self.props["cls"]
 
         if self.props["label"]:
             res += ": " + self.props["label"]
 
+        def _format_coordinate(value, axis=0):
+            if axis == 0 and value:
+                return cast_time(value)
+            elif axis != 0 and value:
+                return value
+            else:
+                return "-"
+
         res += " " + " x ".join(
-            [f"({self.x[i]}, {self.y[i]}]" for i in range(self.n_dims)]
+            [
+                f"({_format_coordinate(self.x[i], axis=i)}, {_format_coordinate(self.y[i], axis=i)}]"
+                for i in range(self.n_dims)
+            ]
         )
 
+        if props:
+            res += " " + " ".join([f"{prop}: {self.props[prop]}" for prop in props])
+
         for child in self.children:
-            for line in str(child).split("\n"):
+            for line in child.__str__(props=props).split("\n"):
                 if not line:
                     continue
                 res += "\n  " + line
