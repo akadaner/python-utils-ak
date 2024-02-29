@@ -59,7 +59,7 @@ def validate_disjoint_by_intervals(i1, i2, distance=0, ordered=False):
     # add neighborhood to the first interval
     i1 = (i1[0] - distance, i1[1] + distance)
 
-    if i1[0] >= i2[0]:
+    if i1[0] >= i1[1]:
         return
 
     if _calc_interval_intersection(i1, i2) != 0 or (ordered and i2[0] <= i1[0]):
