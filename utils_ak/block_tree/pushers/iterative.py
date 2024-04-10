@@ -96,7 +96,7 @@ class AxisPusher(IterativePusher):
                 elif start_from == "max_end":
                     return max([(child.props["x_rel"] + child.size)[self.axis] for child in self.parent.children])
                 if start_from == "last_end":
-                    return (self.parent.children[-1].props["x_rel"] + + self.parent.children[-1].size)[self.axis]
+                    return (self.parent.children[-1].props["x_rel"] + self.parent.children[-1].size)[self.axis]
                 else:
                     raise Exception("Unknown beg type")
 
