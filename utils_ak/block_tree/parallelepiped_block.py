@@ -1,11 +1,8 @@
 from functools import partial
 
-from app.scheduler.time_utils import cast_t, cast_time
 from utils_ak.simple_vector import *
 from utils_ak.properties import *
 from utils_ak.block_tree import Block
-
-from utils_ak.clock import *
 
 
 def x_cumsum_acc(parent, child, key, default=None, formatter=None):
@@ -142,6 +139,12 @@ class ParallelepipedBlock(Block):
             res += ": " + self.props["label"]
 
         def _format_coordinate(value, axis=0):
+            # todo later: remove, hardcode: load cast_time from unagrande project
+            try:
+                from app.scheduler.common.time_utils import cast_time
+            except ImportError:
+                cast_time = lambda x: x
+
             if axis == 0 and value:
                 return cast_time(value)
             elif axis != 0 and value:
