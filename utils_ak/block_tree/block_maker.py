@@ -105,7 +105,7 @@ class BlockMaker:
     def make(self, *args, **kwargs):
         return self.push(*args, **kwargs)
 
-    def row(self, width: int = None, *args, **kwargs):
+    def push_row(self, width: int = None, *args, **kwargs):
         """Block wrapper for adding x-axis blocks
 
         m.row(... x=3, size=5) <=> m.block(... x=(3, 0), size=[5, self.default_row_width])
