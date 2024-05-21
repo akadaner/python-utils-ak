@@ -136,7 +136,7 @@ class BlockMaker:
 
         return self.push(*args, **kwargs)
 
-    def col(
+    def push_column(
         self,
         width: Optional[int] = None,
         *args,
