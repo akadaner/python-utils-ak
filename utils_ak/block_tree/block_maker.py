@@ -105,25 +105,21 @@ class BlockMaker:
     def make(self, *args, **kwargs):
         return self.push(*args, **kwargs)
 
-    def push_row(self, width: int = None, *args, **kwargs):
+    def push_row(self, *args, **kwargs):
         """Block wrapper for adding x-axis blocks
 
         m.row(... x=3, size=5) <=> m.block(... x=(3, 0), size=[5, self.default_row_width])
 
         """
 
-        # - Set width
-
-        width = width or self.default_row_width
-
         # - Size
 
         key = "size"
         if key in kwargs:
             if isinstance(kwargs[key], (list, tuple, SimpleVector)):
-                assert kwargs[key][1] == width
+                assert kwargs[key][1] == self.default_row_width
             else:
-                kwargs[key] = (kwargs[key], width)
+                kwargs[key] = (kwargs[key], self.default_row_width)
 
         # - X
 
@@ -138,22 +134,17 @@ class BlockMaker:
 
     def push_column(
         self,
-        width: Optional[int] = None,
         *args,
         **kwargs,
     ):
-        # - Set width
-
-        width = width or self.default_column_width
-
         # - Size
 
         key = "size"
         if key in kwargs:
             if isinstance(kwargs[key], (list, tuple, SimpleVector)):
-                assert kwargs[key][1] == width
+                assert kwargs[key][1] == self.default_column_width
             else:
-                kwargs[key] = (width, kwargs[key])
+                kwargs[key] = (self.default_column_width, kwargs[key])
 
         # - X
 
