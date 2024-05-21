@@ -95,6 +95,11 @@ class BlockMaker:
         return self.block(*args, **kwargs)
 
     def row(self, *args, **kwargs):
+        """ Block wrapper for adding x-axis blocks
+
+        m.row(... x=3, size=5) <=> m.block(... x=(3, 0), size=[5, self.default_row_width])
+
+        """
         # - Size
 
         key = "size"
@@ -140,16 +145,16 @@ class BlockMaker:
 
 
 class BlockMakerContext:
-    def __init__(self, maker, block):
-        self.maker = maker
+    def __init__(self, m, block):
+        self.m = m
         self.block = block
 
     def __enter__(self):
-        self.maker.blocks.append(self.block)
+        self.m.blocks.append(self.block)
         return self.block
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self.maker.blocks.pop()
+        self.m.blocks.pop()
 
 
 # todo later: del [@marklidenberg]
@@ -158,52 +163,69 @@ def init_block_maker(root_obj, default_push_func=stack_push, **kwargs):
     return block_maker, block_maker.block
 
 
-def test_block_maker1():
-    maker, make = init_block_maker("root", axis=0)
-    make("a", size=[1, 0])
-    make("b", size=[5, 0])
-    make(maker.create_block("c", size=[2, 0]), test=5)
-    print(maker.root)
-    print(maker.root["c"].props.all())
+def test_block_m1():
+    m = BlockMaker("root", axis=0, foo='bar')
+    m.block("a", size=[1, 0])
+    m.block("b", size=[5, 0])
+    m.block(m.create_block("c", size=[2, 0]), test=5)
+    print(m.root.props.all())
+    print(m.root["c"].props.all())
+
+    # - Getting child elements mechanics
+
+    print(m.root['c'])
+    print(m.root['c', True])
+    m.block(m.create_block("c", size=[2, 0]), test=5)
+    print(m.root['c'])
+    print(m.root['c', True])
+
+    # - Iterate mechanics
+
+    for child in m.root.iter(cls='c'):
+        print(child)
+
+    for child in m.root.iter(cls=lambda cls: cls == 'c'):
+        print(child)
 
 
-def test_block_maker2():
-    maker, make = init_block_maker("root", axis=1)
-    with make("a1", size=[0, 3]):
-        with make("b1", size=[5, 0]):
-            make("c1", size=[2, 0])
-    with make("a2", size=[0, 2]):
-        make("b2")
+def test_block_m2():
+    m = BlockMaker("root", axis=1)
 
-    print(maker.root)
+    with m.block("a1", size=[0, 3]):
+        with m.block("b1", size=[5, 0]):
+            m.block("c1", size=[2, 0])
+    with m.block("a2", size=[0, 2]):
+        m.block("b2")
+
+    print(m.root)
 
 
 def test_copy():
-    maker, make = init_block_maker("root")
-    with make("a1", x=[1, 1], size=[1, 1], push_func=add_push):
-        make("b1", size=[1, 1])
-        with make("b2", size=[1, 1]):
-            make("c1", size=[1, 1])
-    print(maker.root)
-    print(maker.copy(maker.root["a1"]["b2"]))
-    print(maker.copy(maker.root["a1"]["b2"], with_props=True))
-
+    m  = BlockMaker("root")
+    with m.block("a1", x=[1, 1], size=[1, 1], push_func=add_push):
+        m.block("b1", size=[1, 1])
+        with m.block("b2", size=[1, 1]):
+            m.block("c1", size=[1, 1])
+    print(m.root)
+    print(m.copy(m.root["a1"]["b2"]))
+    print(m.copy(m.root["a1"]["b2"], with_props=True))
+    print(m.root["a1"]["b2"].props['x'], m.root["a1"]["b2"].props['x_rel'])
 
 def test_shift_element():
-    maker, make = init_block_maker("root", axis=1)
-    with make("a1", size=[0, 3]):
-        with make("b1", size=[5, 0]):
-            make("c1", size=[2, 0])
-    with make("a2", size=[0, 2]):
-        make("b2")
+    m = BlockMaker("root", axis=1)
+    with m.block("a1", size=[0, 3]):
+        with m.block("b1", size=[5, 0]):
+            m.block("c1", size=[2, 0])
+    with m.block("a2", size=[0, 2]):
+        m.block("b2")
 
-    c1 = maker.root['a1']['b1']['c1']
+    c1 = m.root['a1']['b1']['c1']
     c1.props.update(x=[c1.props["x_rel"][0] + 2, c1.x[1]])
 
-    print(maker.root)
+    print(m.root)
 
 if __name__ == "__main__":
-    # test_block_maker1()
-    # test_block_maker2()
-    # test_copy()
+    test_block_m1()
+    test_block_m2()
+    test_copy()
     test_shift_element()

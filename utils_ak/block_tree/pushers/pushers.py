@@ -6,19 +6,23 @@ from utils_ak.block_tree.parallelepiped_block import ParallelepipedBlock
 
 
 def stack_push(parent, block):
+    # - Calculate new x for block
+
     axis = parent.props["axis"]
-    cur_end = (
-        0
-        if not parent.children
-        else max(c.y[axis] - parent.x[axis] for c in parent.children)
-    )
+    cur_end = 0 if not parent.children else max(c.y[axis] - parent.x[axis] for c in parent.children)
 
     x = block.props.get("x", cast_simple_vector(block.n_dims))
 
     assert not x[axis], "Cannot push non-zero axis"
 
     x[axis] = cur_end
+
+    # - Update x in block
+
     block.props.update(x=x)
+
+    # - Add block to parent
+
     return add_push(parent, block)
 
 
@@ -46,6 +50,7 @@ def simple_push(parent, block, validator=None, new_props=None):
             try:
                 # reset parent
                 parent.remove_child(block)
+
                 # extract assertion message json
                 res = cast_dict_or_list(e.__str__())  # {'disposition': 2}
                 res = res or {}
