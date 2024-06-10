@@ -83,18 +83,22 @@ class AxisPusher(IterativePusher):
         start_from:
             Where we start to push
 
-            - "beg" - start from the beginning of the parent
-            - "max_beg" - start from the maximum beginning of the children of the parent
-            - "last_beg" - start from the last child beginning
-            - "max_end" - start from the maximum end of the children
-            - "last_end" - start from the last child end
-            - int - start from this point
-            - list - start from the maximum of the list
+        - block is the new block that we are pushing
+        - parent is the parent block
+        - children are the children of the parent block
+
+        - "beg" - start from current block relative position (block.props["x_rel"]) (if 0, then start from 0). Note (2024-06-10): this one is used ONLY once in all the codebase, so it's not really that important
+        - "max_beg" - start from the maximum of the children's relative positions
+        - "last_beg" - start from the last child's relative position
+        - "max_end" - start from the maximum of the children's relative positions + their sizes
+        - "last_end" - start from the last child's relative position + its size
+        - int - start from this value
+        - list - start from the maximum of the list values
 
         start_shift:
             Shift start_from to this amount
         min_start: int
-            Minimal start point
+            Minimal start point. start can't be less than this value
         validator
         """
         super().__init__(validator=validator)
