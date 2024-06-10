@@ -1,3 +1,5 @@
+from typing import Union, Optional, Any
+
 from utils_ak.imports.external import *
 
 import copy
@@ -42,12 +44,14 @@ class IterativePusher:
         while cur_try < max_tries:
             results = []
             for props in iter_props:
+
                 # try to push
                 props = copy.deepcopy(props)
 
                 res = simple_push(parent, block, validator=validator, new_props=props)
 
                 if isinstance(res, Block):
+
                     # success
                     return block
                 else:
@@ -68,17 +72,37 @@ class IterativePusher:
 class AxisPusher(IterativePusher):
     def __init__(
         self,
-        start_from="max_end",
-        start_shift=0,
-        min_start=None,
-        validator=None,
+        start_from: Union[str, int, list] = "max_end",
+        start_shift: int = 0,
+        min_start: Optional[int] = None,
+        validator: Optional[Any] = None,
     ):
+        """
+        Parameters
+        ----------
+        start_from:
+            Where we start to push
+
+            - "beg" - start from the beginning of the parent
+            - "max_beg" - start from the maximum beginning of the children of the parent
+            - "last_beg" - start from the last child beginning
+            - "max_end" - start from the maximum end of the children
+            - "last_end" - start from the last child end
+            - int - start from this point
+            - list - start from the maximum of the list
+
+        start_shift:
+            Shift start_from to this amount
+        min_start: int
+            Minimal start point
+        validator
+        """
         super().__init__(validator=validator)
         self.start_from = start_from
         self.start_shift = start_shift
         self.min_start = min_start
 
-    def _resolve_start_from(self, start_from):
+    def _resolve_start_from(self, start_from: Union[str, int, list]):
         if isinstance(start_from, list):
             return max([self._resolve_start_from(x) for x in start_from])
         elif is_int_like(start_from):
