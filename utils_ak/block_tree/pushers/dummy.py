@@ -6,7 +6,7 @@ from utils_ak.simple_vector import *
 
 from utils_ak.block_tree.parallelepiped_block import ParallelepipedBlock
 from utils_ak.block_tree.block import Block
-from utils_ak.block_tree.validation import validate_disjoint_by_axis
+from utils_ak.block_tree.validation import validate_disjoint
 from utils_ak.block_tree.pushers.pushers import simple_push
 
 from loguru import logger
@@ -80,7 +80,7 @@ def test_dummy_push():
 
     def brute_validator(parent, block):
         for c in parent.children[:-1]:
-            validate_disjoint_by_axis(c, block, axis=parent.props["axis"])
+            validate_disjoint(c, block, axis=parent.props["axis"])
 
     logger.debug("Dummy push test")
     root = ParallelepipedBlock("root", n_dims=1, x=[2], axis=0)
