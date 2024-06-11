@@ -1,4 +1,4 @@
-from typing import Callable, Optional
+from typing import Callable, Optional, Sequence
 
 from utils_ak.block_tree.pushers import *
 from utils_ak.block_tree.parallelepiped_block import ParallelepipedBlock
@@ -42,7 +42,7 @@ class BlockMaker:
         with_children: bool = True,
         with_props: bool = False,
         prop_keys: list = None,
-        size: list = [],
+        size: Sequence = [],
     ):
         res = self.create_block(block.props["cls"], **block.props.relative_props)
 
