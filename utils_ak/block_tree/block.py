@@ -1,3 +1,5 @@
+from typing import Union
+
 from utils_ak.properties import *
 from utils_ak.architecture import delistify
 from collections import defaultdict
@@ -6,12 +8,12 @@ from collections import defaultdict
 class Block:
     def __init__(
         self,
-        block_class=None,
-        default_block_class="block",
-        props_formatters=None,
-        props_accumulators=None,
-        props_required_keys=None,
-        props_cache_keys=None,
+        block_class: Optional[str] = None,
+        default_block_class: str = "block",
+        props_formatters: Optional[dict] = None,
+        props_accumulators: Optional[dict] = None,
+        props_required_keys: Optional[list] = None,
+        props_cache_keys: Optional[list] = None,
         **props,
     ):
         block_class = block_class or default_block_class
@@ -29,7 +31,7 @@ class Block:
             cache_keys=props_cache_keys,
         )
 
-    def __getitem__(self, item):
+    def __getitem__(self, item: Union[str, int]):
         res = self.get(item)
         if res is None:
             if isinstance(item, str):
@@ -132,9 +134,7 @@ def test_block():
         return Block(
             block_class,
             props_accumulators={
-                "t": lambda parent, child, key: cumsum_acc(
-                    parent, child, key, default=0, formatter=int
-                )
+                "t": lambda parent, child, key: cumsum_with_ancestors(parent, child, key, default=0, formatter=int)
             },
             **kwargs,
         )

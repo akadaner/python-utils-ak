@@ -7,13 +7,13 @@ from utils_ak.block_tree import Block
 
 def x_cumsum_acc(parent, child, key, default=None, formatter=None):
     if parent:
-        return parent[key].add(relative_acc(parent, child, key, default=default, formatter=formatter))
-    return SimpleVector(list(relative_acc(parent, child, key, default=default, formatter=formatter).values))
+        return parent[key].add(get_relative_prop(parent, child, key, default=default, formatter=formatter))
+    return SimpleVector(list(get_relative_prop(parent, child, key, default=default, formatter=formatter).values))
 
 
 # todo later: put outside for pickle compatability [@marklidenberg]
 def x_rel_acc(parent, child, key):
-    return relative_acc(parent, child, "x")
+    return get_relative_prop(parent=parent, child=child, key="x")
 
 
 def _init_simple_vector(k, v):
@@ -21,7 +21,7 @@ def _init_simple_vector(k, v):
 
 
 class ParallelepipedBlock(Block):
-    def __init__(self, block_class, n_dims=2, **props):
+    def __init__(self, block_class, n_dims: int = 2, **props):
         self.n_dims = n_dims
 
         if "x" not in props:
@@ -43,8 +43,8 @@ class ParallelepipedBlock(Block):
 
         self.props.accumulators["x"] = x_cumsum_acc
         self.props.accumulators["x_rel"] = x_rel_acc
-        self.props.accumulators["size"] = relative_acc
-        self.props.accumulators["axis"] = partial(relative_acc, default=0)
+        self.props.accumulators["size"] = get_relative_prop
+        self.props.accumulators["axis"] = partial(get_relative_prop, default=0)
 
     @property
     def x(self):
@@ -139,7 +139,7 @@ class ParallelepipedBlock(Block):
             res += ": " + self.props["label"]
 
         def _format_coordinate(value, axis=0):
-            # todo later: remove, hardcode: load cast_time from unagrande project
+            # todo later: remove, hardcode: load cast_time from unagrande project [@marklidenberg]
             try:
                 from app.scheduler.common.time_utils import cast_time
             except ImportError:
