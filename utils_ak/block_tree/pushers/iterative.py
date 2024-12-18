@@ -45,7 +45,7 @@ class IterativePusher:
         logger.trace(
             f"Pushing block",
             name=block.props['cls'],
-            n_props={len(iter_props)},
+            n_props=len(iter_props),
             iter_props=iter_props,
         )
 

@@ -98,7 +98,7 @@ def format_with_trace(
     record,
     formatters=(
         time_formatter,
-        module_formatter,
+        # module_formatter,
         message_formatter,
         extra_formatter,
         exception_formatter,
