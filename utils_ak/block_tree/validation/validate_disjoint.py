@@ -2,13 +2,16 @@ from utils_ak.block_tree import ParallelepipedBlock
 from utils_ak.block_tree.validation.validate_disjoint_by_intervals import validate_disjoint_by_intervals
 from utils_ak.lazy_tester import lazy_tester
 
+import json
+from loguru import logger
+
 
 def validate_disjoint(
-        b1: ParallelepipedBlock,
-        b2: ParallelepipedBlock,
-        axis: int = 0,
-        distance: int = 0,
-        ordered: bool = False,
+    b1: ParallelepipedBlock,
+    b2: ParallelepipedBlock,
+    axis: int = 0,
+    distance: int = 0,
+    ordered: bool = False,
 ) -> None:
     """
     Raises AssertionError if two rectangles are not disjoint by axis
@@ -34,13 +37,27 @@ def validate_disjoint(
     This disposition is used in `AxisPusher` to insert blocks efficiently.
 
     """
-    validate_disjoint_by_intervals(
-        (b1.x[axis], b1.y[axis]),
-        (b2.x[axis], b2.y[axis]),
-        distance=distance,
-        ordered=ordered,
-    )
-
+    try:
+        validate_disjoint_by_intervals(
+            (b1.x[axis], b1.y[axis]),
+            (b2.x[axis], b2.y[axis]),
+            distance=distance,
+            ordered=ordered,
+        )
+    except AssertionError as e:
+        # [DISJOINT TRACE]
+        logger.trace(
+            "Disjoint",
+            b1=b1.props["cls"],
+            b1_boiling_id=b1.props["boiling_id"],
+            b2=b2.props["cls"],
+            b2_boiling_id=b2.props["boiling_id"],
+            disposition=json.loads(str(e))["disposition"],
+            axis=axis,
+            distance=distance,
+            ordered=ordered,
+        )
+        raise
 
 
 def test():
