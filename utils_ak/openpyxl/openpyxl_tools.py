@@ -23,7 +23,7 @@ def init_workbook(sheet_names=None, active_sheet_name=None):
 
 
 def cast_workbook(wb_obj):
-    wb_obj = wb_obj or ['Sheet1']
+    wb_obj = wb_obj or ["Sheet1"]
     if isinstance(wb_obj, str):
         return opx.load_workbook(filename=wb_obj, data_only=True)
     elif isinstance(wb_obj, opx.Workbook):
@@ -49,11 +49,7 @@ def cast_worksheet(ws_obj):
 
 
 def set_border(sheet, x, y, w, h, border):
-    rows = sheet[
-        "{}{}".format(get_column_letter(x), y) : "{}{}".format(
-            get_column_letter(x + w - 1), y + h - 1
-        )
-    ]
+    rows = sheet["{}{}".format(get_column_letter(x), y) : "{}{}".format(get_column_letter(x + w - 1), y + h - 1)]
 
     for row in rows:
         row[0].border = Border(
@@ -69,13 +65,9 @@ def set_border(sheet, x, y, w, h, border):
             right=border,
         )
     for c in rows[0]:
-        c.border = Border(
-            left=c.border.left, top=border, bottom=c.border.bottom, right=c.border.right
-        )
+        c.border = Border(left=c.border.left, top=border, bottom=c.border.bottom, right=c.border.right)
     for c in rows[-1]:
-        c.border = Border(
-            left=c.border.left, top=c.border.top, bottom=border, right=c.border.right
-        )
+        c.border = Border(left=c.border.left, top=c.border.top, bottom=border, right=c.border.right)
 
 
 def set_border_grid(sheet, x, y, w, h, border):
@@ -93,7 +85,7 @@ def set_zoom(sheet, zoom_scale):
 
 
 def set_dimensions(sheet, orientation, rng, length):
-    if orientation == 'column':
+    if orientation == "column":
         for i in rng:
             sheet.column_dimensions[get_column_letter(i)].width = length
     else:
@@ -101,9 +93,7 @@ def set_dimensions(sheet, orientation, rng, length):
             sheet.row_dimensions[i].height = length
 
 
-def draw_cell(
-    sheet, x, y, text, color=None, font_size=None, text_rotation=None, alignment=None
-):
+def draw_cell(sheet, x, y, text, color=None, font_size=None, text_rotation=None, alignment=None):
     cell = sheet.cell(row=y, column=x)
     cell.font = Font(size=font_size)
     if alignment == "center":
@@ -135,9 +125,7 @@ def draw_merged_cell(
     bold=False,
 ):
     color = color or cast_color("white")
-    sheet.merge_cells(
-        start_row=x2, start_column=x1, end_row=x2 + h2 - 1, end_column=x1 + h1 - 1
-    )
+    sheet.merge_cells(start_row=x2, start_column=x1, end_row=x2 + h2 - 1, end_column=x1 + h1 - 1)
     merged_cell = sheet.cell(row=x2, column=x1)
     merged_cell.font = Font(size=font_size, bold=bold)
     if alignment == "center":
@@ -169,31 +157,43 @@ def draw_row(sheet, y, values, color=None, **kwargs):
 
 def _cast_alpha_hex_to_hex(alpha_hex):
     try:
-        if str(alpha_hex).lower() == '00000000': # consider transparent black as white (sometimes it is the case for some reason)
-            return cast_color('white')
+        if (
+            str(alpha_hex).lower() == "00000000"
+        ):  # consider transparent black as white (sometimes it is the case for some reason)
+            return cast_color("white")
         else:
-            return cast_color('#' + alpha_hex[2:])
+            return cast_color("#" + alpha_hex[2:])
     except:
         # if something is wrong - return white
-        return cast_color('white')
+        return cast_color("white")
 
 
 def write_metadata(wb, s):
-    ws = cast_worksheet((wb, '_metadata'))
-    ws.sheet_state = 'hidden'
+    ws = cast_worksheet((wb, "_metadata"))
+    ws.sheet_state = "hidden"
     ws.cell(1, 1).value = s
 
+
 def read_metadata(wb):
-    ws = cast_worksheet((wb, '_metadata'))
+    ws = cast_worksheet((wb, "_metadata"))
     return ws.cell(1, 1).value
 
 
-def read_merged_cells_df(ws_obj, basic_features=True):
+def read_merged_cells_df(
+    ws_obj,
+    basic_features: bool = True,
+    include_single_cells: bool = False,
+):
+    # - Init
+
     ws = cast_worksheet(ws_obj)
     df = pd.DataFrame()
+
+    # - Read merged cells first
+
     df["cell"] = list(ws.merged_cells.ranges)
 
-    bound_names = ("x0", "x1", "y0", "y1")
+    bound_names = ("x0", "x1", "y0", "y1")  # ("column_start", "row_start", "column_end", "row_end")
     df["bounds"] = df["cell"].apply(lambda cell: cell.bounds)
     for i in range(4):
         df[bound_names[i]] = df["bounds"].apply(lambda bound: bound[i])
@@ -202,20 +202,55 @@ def read_merged_cells_df(ws_obj, basic_features=True):
     df["y1"] += 1
     df["label"] = df["cell"].apply(lambda cell: cell.start_cell.value)
 
-    df['font_size'] = df["cell"].apply(lambda cell: cell.start_cell.font.sz)
-    df['is_bold'] = df["cell"].apply(lambda cell: cell.start_cell.font.b)
-    df['color'] = df["cell"].apply(lambda cell: _cast_alpha_hex_to_hex(cell.start_cell.fill.fgColor.rgb))
-    df['text_rotation'] = df["cell"].apply(lambda cell: cell.start_cell.alignment.textRotation)
+    df["font_size"] = df["cell"].apply(lambda cell: cell.start_cell.font.sz)
+    df["is_bold"] = df["cell"].apply(lambda cell: cell.start_cell.font.b)
+    df["color"] = df["cell"].apply(lambda cell: _cast_alpha_hex_to_hex(cell.start_cell.fill.fgColor.rgb))
+    df["text_rotation"] = df["cell"].apply(lambda cell: cell.start_cell.alignment.textRotation)
+
+    row_and_columns_merged_cells = [_cell for _range in ws.merged_cells.ranges for _cell in _range.cells]
+
+    # - Collect single-cell values with non-empty values or color
+
+    if include_single_cells:
+        single_cells = []
+        for row in ws.iter_rows():
+            for cell in row:
+                if (cell.row, cell.column) not in row_and_columns_merged_cells and (
+                    cell.value is not None or cell.fill.fgColor.rgb != "00000000" or cell.fill.bgColor.rgb != "00000000"
+                ):
+                    single_cells.append(
+                        {
+                            "x0": cell.column,
+                            "x1": cell.row,
+                            "y0": cell.column + 1,
+                            "y1": cell.row + 1,
+                            "label": cell.value,
+                            "font_size": cell.font.sz,
+                            "is_bold": cell.font.b,
+                            "color": _cast_alpha_hex_to_hex(cell.fill.fgColor.rgb),
+                            "text_rotation": cell.alignment.textRotation,
+                        }
+                    )
+
+        single_cells_df = pd.DataFrame(single_cells)
+
+        if not single_cells_df.empty:
+            df = pd.concat([df, single_cells_df], ignore_index=True)
+
+    # - Sort
+
     df = df.sort_values(by=["x1", "x0", "y1", "y0"])
+
+    # - Return only basic features if needed
+
     if basic_features:
-        df = df[['x0', 'x1', 'y0', 'y1', 'label']]
+        df = df[["x0", "x1", "y0", "y1", "label"]]
 
     return df
 
 
 def read_merged_and_colored_cells_df(
-        ws_obj: openpyxl.worksheet.worksheet.Worksheet,
-        basic_features=True
+    ws_obj: openpyxl.worksheet.worksheet.Worksheet, basic_features=True
 ) -> pd.DataFrame:
     ws = cast_worksheet(ws_obj)
 
@@ -226,8 +261,8 @@ def read_merged_and_colored_cells_df(
 
     for row in ws.iter_rows():
         for cell in row:
-            if cell.coordinate not in merged_cells and cell.fill.start_color.index != '00000000':
-                ws.merge_cells(cell.coordinate + ':' + cell.coordinate)
+            if cell.coordinate not in merged_cells and cell.fill.start_color.index != "00000000":
+                ws.merge_cells(cell.coordinate + ":" + cell.coordinate)
 
     df = pd.DataFrame()
     df["cell"] = list(ws.merged_cells.ranges)
@@ -241,16 +276,15 @@ def read_merged_and_colored_cells_df(
     df["y1"] += 1
     df["label"] = df["cell"].apply(lambda cell: cell.start_cell.value)
 
-    df['font_size'] = df["cell"].apply(lambda cell: cell.start_cell.font.sz)
-    df['is_bold'] = df["cell"].apply(lambda cell: cell.start_cell.font.b)
-    df['color'] = df["cell"].apply(lambda cell: _cast_alpha_hex_to_hex(cell.start_cell.fill.fgColor.rgb))
-    df['text_rotation'] = df["cell"].apply(lambda cell: cell.start_cell.alignment.textRotation)
+    df["font_size"] = df["cell"].apply(lambda cell: cell.start_cell.font.sz)
+    df["is_bold"] = df["cell"].apply(lambda cell: cell.start_cell.font.b)
+    df["color"] = df["cell"].apply(lambda cell: _cast_alpha_hex_to_hex(cell.start_cell.fill.fgColor.rgb))
+    df["text_rotation"] = df["cell"].apply(lambda cell: cell.start_cell.alignment.textRotation)
     df = df.sort_values(by=["x1", "x0", "y1", "y0"])
     if basic_features:
-        df = df[['x0', 'x1', 'y0', 'y1', 'label']]
+        df = df[["x0", "x1", "y0", "y1", "label"]]
 
     return df
-
 
 
 def draw_merged_cells(ws_obj, merged_cells_df):
@@ -258,30 +292,36 @@ def draw_merged_cells(ws_obj, merged_cells_df):
     for i, row in merged_cells_df.iterrows():
         draw_merged_cell(
             ws,
-            row['x0'],
-            row['x1'],
-            row['y0'] - row['x0'],
-            row['y1'] - row['x1'],
-            row['label'],
-            cast_color(row['color']),
-            bold=row['is_bold'],
+            row["x0"],
+            row["x1"],
+            row["y0"] - row["x0"],
+            row["y1"] - row["x1"],
+            row["label"],
+            cast_color(row["color"]),
+            bold=row["is_bold"],
             border={"border_style": "thin", "color": "000000"},
-            text_rotation=row['text_rotation'],
-            font_size=row['font_size'],
-            alignment="center")
+            text_rotation=row["text_rotation"],
+            font_size=row["font_size"],
+            alignment="center",
+        )
     return ws
 
 
 def draw_sheet_sequence(ws_obj, sheet_objs):
     cur_y_axis_shift = 0
     for sheet_obj in sheet_objs:
-        merged_cells_df = read_merged_cells_df(sheet_obj, False)
-        height = merged_cells_df['y1'].max()
-        merged_cells_df['x1'] += cur_y_axis_shift
-        merged_cells_df['y1'] += cur_y_axis_shift
+        merged_cells_df = read_merged_cells_df(
+            sheet_obj,
+            basic_features=False,
+            include_single_cells=True,
+        )
+        height = merged_cells_df["y1"].max()
+        merged_cells_df["x1"] += cur_y_axis_shift
+        merged_cells_df["y1"] += cur_y_axis_shift
         draw_merged_cells(ws_obj, merged_cells_df)
         cur_y_axis_shift += height
     return ws_obj
+
 
 def set_active_sheet(wb, sheetname):
     for sheet in wb:
@@ -289,22 +329,25 @@ def set_active_sheet(wb, sheetname):
     wb.active = wb.sheetnames.index(sheetname)
     return wb
 
+
 def set_visible_sheets(wb, sheetnames):
     for sheetname in wb.sheetnames:
         ws = cast_worksheet((wb, sheetname))
         if sheetname in sheetnames:
-            ws.sheet_state = 'visible'
+            ws.sheet_state = "visible"
         else:
-            ws.sheet_state = 'hidden'
+            ws.sheet_state = "hidden"
     return wb
 
 
 if __name__ == "__main__":
-    print(read_merged_cells_df(('sample.xlsx', 'Sheet1'), basic_features=False))
+    print(read_merged_cells_df(("sample.xlsx", "Sheet1"), basic_features=True, include_single_cells=True))
     wb = init_workbook(["a", "b"], active_sheet_name="b")
     set_border_grid(wb.worksheets[0], 1, 1, 10, 10, Side(border_style=BORDER_THIN))
-    ws = cast_worksheet((wb, 'b'))
-    print(ws.sheet_state)
-    draw_sheet_sequence((wb, 'b'), (('sample1.xlsx', 'Расписание'), ('sample1.xlsx', 'Расписание')))
+    ws = cast_worksheet((wb, "b"))
+    draw_sheet_sequence(
+        ws_obj=(wb, "b"),
+        sheet_objs=(("sample.xlsx", "Sheet1"),),
+    )
 
-    wb.save('output.xlsx')
+    wb.save("output.xlsx")
