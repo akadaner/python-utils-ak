@@ -41,22 +41,34 @@ class IterativePusher:
 
         cur_try = 0
 
+        # [DISJOINT TRACE]
+        logger.trace(
+            f"Pushing block",
+            name=block.props['cls'],
+            n_props=len(iter_props),
+            iter_props=iter_props,
+        )
+
         while cur_try < max_tries:
             results = []
             for props in iter_props:
-
                 # try to push
                 props = copy.deepcopy(props)
 
                 res = simple_push(parent, block, validator=validator, new_props=props)
 
                 if isinstance(res, Block):
-
                     # success
+
+                    # [DISJOINT TRACE]
+                    logger.trace(f"Successfully pushed", name=block.props['cls'])
                     return block
                 else:
                     assert isinstance(res, dict)
                     results.append(res)
+
+            # [DISJOINT TRACE]
+            logger.trace(f"Failed to push block, trying again", results=results)
 
             self.update(results)
             cur_try += 1
