@@ -122,7 +122,7 @@ class Block:
         self.props.remove_child(block.props)
         return block
 
-    def detach_from_parent(self, kept_props: list[str] = None):
+    def detach_from_parent(self, kept_props: list[str] = []):
         # - Keep parent in the local context
 
         _parent = self.parent
@@ -134,8 +134,7 @@ class Block:
 
         # - Keep props
 
-        for prop in kept_props or []:
-            self.props.update(kept_prop=_parent.props[prop])
+        self.props.update(**{k: _parent.props[k] for k in kept_props})
 
 
 def test_block():
