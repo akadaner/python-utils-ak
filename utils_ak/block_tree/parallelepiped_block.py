@@ -194,6 +194,9 @@ class ParallelepipedBlock(Block):
 
         return res
 
+    def children_classes(self):
+        return list(set([child.props["cls"] for child in self.children]))
+
 
 def test_parallelepiped_block():
     a = ParallelepipedBlock("a", n_dims=2, x=[1, 2])
