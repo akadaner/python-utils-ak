@@ -9,16 +9,32 @@ from loguru import logger
 from utils_ak.block_tree.validation.class_validator import ClassValidator
 from utils_ak.block_tree.validation.validate_disjoint import validate_disjoint
 from utils_ak.color import cast_color
-from utils_ak.openpyxl import init_workbook, cast_worksheet, set_active_sheet, draw_merged_cell
+from utils_ak.openpyxl import (
+    init_workbook,
+    cast_worksheet,
+    set_active_sheet,
+    draw_merged_cell,
+    set_zoom,
+    set_dimensions,
+)
 from utils_ak.os import open_file_in_os
 
+random.seed(42)
 
-def draw_nested_line_blocks(block: ParallelepipedBlock):
+
+def draw_nested_line_blocks(block: ParallelepipedBlock, skipped: list[str] = []):
     # - Init excel workbook
 
     wb = init_workbook(["Default"])
     ws = cast_worksheet((wb, "Default"))
     set_active_sheet(wb, "Default")
+
+    # - Prepare excel workbook
+
+    set_zoom(ws, 55)
+    set_dimensions(ws, "column", range(1, 5), 21)
+    set_dimensions(ws, "column", range(5, 288 * 2), 2.4)
+    set_dimensions(ws, "row", range(1, 220), 25)
 
     # - Create frontend block
 
@@ -60,7 +76,7 @@ def draw_nested_line_blocks(block: ParallelepipedBlock):
                     - max(_rectangle["x"], rectangle["x"]),
                     0,
                 )
-                > 0
+                == 0
                 for _rectangle in level_rectangles
             ):
                 rectangles_by_y_axis[y_axis].append(rectangle)
@@ -75,13 +91,21 @@ def draw_nested_line_blocks(block: ParallelepipedBlock):
     # - Add blocks
 
     for block in block.iter():
-        add_block(block)
+        # - Skip if needed
 
-    print(json.dumps(rectangles_by_y_axis, indent=2))
+        if block.props["cls"] in skipped:
+            continue
+
+        # - Add block
+
+        add_block(block)
 
     # - Draw schedule
 
     for rectangle in sum(rectangles_by_y_axis.values(), []):
+        if rectangle["width"] == 0:
+            continue
+
         draw_merged_cell(
             ws,
             rectangle["x"],
@@ -93,6 +117,7 @@ def draw_nested_line_blocks(block: ParallelepipedBlock):
             bold=True,
             font_size=9,
             alignment="center",
+            border={"border_style": "thin", "color": "000000"},
         )
 
     # - Save file
