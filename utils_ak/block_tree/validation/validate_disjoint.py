@@ -12,6 +12,7 @@ def validate_disjoint(
     axis: int = 0,
     distance: int = 0,
     ordered: bool = False,
+    label: str = "",
 ) -> None:
     """
     Raises AssertionError if two rectangles are not disjoint by axis
@@ -52,6 +53,7 @@ def validate_disjoint(
             b1_boiling_id=b1.props["boiling_id"],
             b2=b2.props["cls"],
             b2_boiling_id=b2.props["boiling_id"],
+            label=label,
             disposition=json.loads(str(e))["disposition"],
             axis=axis,
             distance=distance,
