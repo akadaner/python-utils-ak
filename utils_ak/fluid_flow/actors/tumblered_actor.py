@@ -40,8 +40,7 @@ class TumbleredActor(Actor, Piped):
         self,
         name: str,
         actor: Actor,
-        tumbler_func: Callable,
-        stop_at: float,  # specify for event manager to know when # todo later: change event manager, make it stop when all repeating events are only whats left
+        tumbler_func: Callable,  # if returns None, tumbler is disabled
         working_on_start: bool = False,
     ):
         super().__init__(name)
@@ -50,7 +49,6 @@ class TumbleredActor(Actor, Piped):
 
         self.actor = actor
         self.tumbler_func = tumbler_func
-        self.stop_at = stop_at
 
         # - State
 
@@ -72,16 +70,23 @@ class TumbleredActor(Actor, Piped):
     def update_values(self, ts):
         """Apply state changes when event occurs, then update values."""
 
-        # - Process tumbler
+        # - Switch tumbler on/off if needed
 
         if self.next_toggle_time and ts >= self.next_toggle_time:
             self.working = not self.working
             self.current_actor = self.actor if self.working else self.plug
             self.next_toggle_time = None
 
-        if not self.next_toggle_time and (not self.last_ts or self.last_ts < self.stop_at):
+        # - Try to get the next toggle time or stop the tumbler
+
+        if not self.next_toggle_time and self.tumbler_func:
             self.next_toggle_time = self.tumbler_func(ts)
-            self.add_event("tumbler.toggle", self.next_toggle_time, {})
+
+            if self.next_toggle_time is None:
+                # stopping the tumbler
+                self.tumbler_func = None
+            else:
+                self.add_event("tumbler.toggle", self.next_toggle_time, {})
 
         # - Switch the pipes to the current actor temporarily
 
@@ -121,8 +126,7 @@ def test():
     container2 = TumbleredActor(
         "Tumbler",
         actor=Container("Output"),
-        stop_at=10,
-        tumbler_func=lambda ts: ts + 1,
+        tumbler_func=lambda ts: ts + 1 if ts < 10 else None,
         working_on_start=False,
     )
     pipe_connect(container1, container2)
