@@ -1,25 +1,31 @@
+from datetime import datetime
+from typing import Callable
+
 from utils_ak.architecture import PrefixHandler
 from sortedcollections import SortedList
-import logging
+
+from utils_ak.loguru import configure_loguru
+from utils_ak.time import cast_ts
+from loguru import logger
 
 
 class SimpleEventManager:
     def __init__(self):
         self.events = SortedList(key=lambda v: v[1])  # sorted(topic, ts, event)])
-        self.prefix_handler = PrefixHandler()
+        self.prefix_handler = PrefixHandler()  # run events on topics with the specified prefix
         self.last_ts = None
 
-    def subscribe(self, topic, callback):
+    def subscribe(self, topic: str, callback: Callable):
         self.prefix_handler.add(topic, callback)
 
-    def add_event(self, topic, ts, event, duplicates_allowed=False):
+    def add_event(self, topic: str, ts: float, event: dict, duplicates_allowed: bool = False):
         if not duplicates_allowed:
             if self.is_event_present(topic, ts, event):
                 return False
         self.events.add((topic, ts, event))
         return topic, ts, event
 
-    def is_event_present(self, topic, ts, event, ts_error=1e-5):
+    def is_event_present(self, topic: str, ts: float, event: dict, ts_error: float = 1e-5):
         if not self.events:
             return False
 
@@ -37,11 +43,7 @@ class SimpleEventManager:
                 if increment == -1 and cur_event[1] < ts - ts_error:
                     break
 
-                if (
-                    cur_event[0] == topic
-                    and abs(cur_event[1] - ts) < ts_error
-                    and cur_event[2] == event
-                ):
+                if cur_event[0] == topic and abs(cur_event[1] - ts) < ts_error and cur_event[2] == event:
                     return True
 
                 cur_ind += increment
@@ -50,53 +52,86 @@ class SimpleEventManager:
 
     def run(self):
         while True:
+            # - Return if no events left
+
             if not self.events:
                 return
+
+            # - Get the next event
+
             topic, ts, event = self.events.pop(0)
 
+            # - Log warning if event is older than the last event
+
             if self.last_ts is not None and ts < self.last_ts:
-                logging.warning("Old event was added to the events timeline")
-            self.prefix_handler(topic, ts, event)
+                logger.warning("Old event was added to the events timeline")
+
+            # - Process event with prefix handler
+
+            self.prefix_handler(topic, ts, event)  # todo later: switch to kwargs
+
+            # - Update last ts
+
             self.last_ts = max(ts, self.last_ts or 0)
 
 
-def test_simple_event_manager():
-    em = SimpleEventManager()
+def test():
+    # - Configure logging
+
+    configure_loguru()
+
+    # - Init event manager
+
+    event_manager = SimpleEventManager()
+
+    # - Init counter stateful object
 
     class Counter:
         def __init__(self):
-            self.counter = 0
+            self.value = 0
 
-        def on_count(self, topic, ts, event):
-            self.counter += event["num"]
-            print("Current counter", topic, ts, event, self.counter)
+        def on_count(
+            self,
+            topic: str,
+            ts: float,
+            event: dict,
+        ):
+            logger.info("On count, before", topic=topic, ts=ts, event=event, value=self.value)
+            self.value += event["num"]
+            logger.info("On count, after ", topic=topic, ts=ts, event=event, value=self.value)
+
 
     counter = Counter()
 
-    em.subscribe("count", counter.on_count)
+    # - Subscribe to count
 
-    from utils_ak.time import cast_ts
-    from datetime import datetime
+    event_manager.subscribe("count", counter.on_count)
+
+    # - Spawn a couple of simple events
 
     now_ts = cast_ts(datetime.now())
-    em.add_event("count.up", now_ts, {"num": 3})
-    em.add_event("count.down", now_ts + 2, {"num": -11})
+    event_manager.add_event("count.up", now_ts, {"num": 3})
+    event_manager.add_event("count.down", now_ts + 2, {"num": -11})
 
-    # test is_event_prent
-    assert em.is_event_present("count.up", now_ts, {"num": 3})
-    assert em.is_event_present("count.up", now_ts + 1e-10, {"num": 3})
-    assert em.is_event_present("count.up", now_ts - 1e-10, {"num": 3})
-    assert not em.is_event_present("count.up", now_ts + 1, {"num": 3})
-    assert not em.is_event_present("different topic", now_ts + 1e-10, {"num": 3})
-    assert not em.is_event_present("count.up", now_ts + 1e-10, {"different event": 10})
+    # - Test event present
 
-    # test duplicate addition
-    events_count_before = len(em.events)
-    em.add_event("count.up", now_ts, {"num": 3})
-    assert len(em.events) == events_count_before
+    assert event_manager.is_event_present("count.up", now_ts, {"num": 3})
+    assert event_manager.is_event_present("count.up", now_ts + 1e-10, {"num": 3})
+    assert event_manager.is_event_present("count.up", now_ts - 1e-10, {"num": 3})
+    assert not event_manager.is_event_present("count.up", now_ts + 1, {"num": 3})
+    assert not event_manager.is_event_present("different topic", now_ts + 1e-10, {"num": 3})
+    assert not event_manager.is_event_present("count.up", now_ts + 1e-10, {"different event": 10})
 
-    em.run()
+    # - Test duplicate addition
+
+    events_count_before = len(event_manager.events)
+    event_manager.add_event("count.up", now_ts, {"num": 3})
+    assert len(event_manager.events) == events_count_before
+
+    # - Run event manage
+
+    event_manager.run()
 
 
 if __name__ == "__main__":
-    test_simple_event_manager()
+    test()

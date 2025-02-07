@@ -1,4 +1,4 @@
-from utils_ak.fluid_flow import *
+from utils_ak.fluid_flow import Container, pipe_connect, FluidFlow, run_fluid_flow
 
 
 def test_flow_container_1():
@@ -8,7 +8,7 @@ def test_flow_container_1():
     pipe_connect(container1, container2)
 
     flow = FluidFlow(container1, verbose=True)
-    run_flow(flow)
+    run_fluid_flow(flow)
 
 
 def test_flow_container_2():
@@ -20,7 +20,7 @@ def test_flow_container_2():
     pipe_connect(container1, container2)
 
     flow = FluidFlow(container1, verbose=True)
-    run_flow(flow)
+    run_fluid_flow(flow)
 
 
 def test_flow_container_3():
@@ -32,7 +32,7 @@ def test_flow_container_3():
     pipe_connect(container1, container2)
 
     flow = FluidFlow(container1, verbose=True)
-    run_flow(flow)
+    run_fluid_flow(flow)
 
 
 if __name__ == "__main__":

@@ -14,7 +14,7 @@ def test_flow_sequence_1():
     pipe_connect(c1, sequence)
     pipe_connect(sequence, c2)
     flow = FluidFlow(c1, verbose=True)
-    run_flow(flow)
+    run_fluid_flow(flow)
 
 
 def test_flow_sequence_2():
@@ -30,7 +30,7 @@ def test_flow_sequence_2():
     pipe_connect(c1, sequence)
     pipe_connect(sequence, c2)
     flow = FluidFlow(c1, verbose=True)
-    run_flow(flow)
+    run_fluid_flow(flow)
 
 
 if __name__ == "__main__":

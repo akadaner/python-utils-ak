@@ -14,7 +14,7 @@ def test_flow_hub_1():
     pipe_connect(hub, child2, "hub-child2")
 
     flow = FluidFlow(parent, verbose=True)
-    run_flow(flow)
+    run_fluid_flow(flow)
 
 
 def test_flow_hub_2():
@@ -30,7 +30,7 @@ def test_flow_hub_2():
     pipe_connect(hub, child2, "hub-child2")
 
     flow = FluidFlow(parent, verbose=True)
-    run_flow(flow)
+    run_fluid_flow(flow)
 
 
 def test_flow_hub_3():
@@ -46,7 +46,7 @@ def test_flow_hub_3():
     pipe_connect(hub, child2, "hub-child2")
 
     flow = FluidFlow(parent, verbose=True)
-    run_flow(flow)
+    run_fluid_flow(flow)
 
 
 if __name__ == "__main__":

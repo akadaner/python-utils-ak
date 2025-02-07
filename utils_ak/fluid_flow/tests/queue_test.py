@@ -12,7 +12,7 @@ def test_flow_queue_1_in():
     pipe_connect(parent, queue, "parent-queue")
 
     flow = FluidFlow(parent, verbose=True)
-    run_flow(flow)
+    run_fluid_flow(flow)
 
 
 def test_flow_queue_2_out():
@@ -28,7 +28,7 @@ def test_flow_queue_2_out():
     pipe_connect(queue, child, "parent-queue")
 
     flow = FluidFlow(queue, verbose=True)
-    run_flow(flow)
+    run_fluid_flow(flow)
 
 
 def test_flow_queue_3():
@@ -46,7 +46,7 @@ def test_flow_queue_3():
     pipe_connect(parent, queue, "parent-queue")
 
     flow = FluidFlow(parent, verbose=True)
-    run_flow(flow)
+    run_fluid_flow(flow)
 
 
 def test_flow_queue_4_different_items():
@@ -66,7 +66,7 @@ def test_flow_queue_4_different_items():
     pipe_connect(hub, child1, "hub-child1")
     pipe_connect(hub, child2, "hub-child2")
     flow = FluidFlow(queue, verbose=True)
-    run_flow(flow)
+    run_fluid_flow(flow)
 
 
 if __name__ == "__main__":

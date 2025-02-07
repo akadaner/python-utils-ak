@@ -1,11 +1,8 @@
 import logging
 
-from utils_ak.clock import *
-from utils_ak.dag import *
 from utils_ak.coder import cast_js
 from utils_ak.simple_event_manager import SimpleEventManager
 
-from utils_ak.fluid_flow.actor import Actor
 from utils_ak.fluid_flow.actors import pipe_connect, Stub
 
 
@@ -27,9 +24,7 @@ class FluidFlow:
         for node in self.root.iterate("down"):
             # values.append(' ' * 4 + str(node) + ': ' + cast_js(node.stats()))
             if node.display_stats():
-                values.append(
-                    " " * 4 + str(node) + ": " + cast_js(node.display_stats())
-                )
+                values.append(" " * 4 + str(node) + ": " + cast_js(node.display_stats()))
         return "\n".join(values)
 
     def __repr__(self):
@@ -53,13 +48,16 @@ class FluidFlow:
             # self.log(f'Procedure {method}')
             for node in self.root.iterate("down"):
                 getattr(node, method, lambda ts: None)(ts)
+
             # self.log(self)
         self.log(self)
 
         self.log()
 
 
-def run_flow(flow):
+def run_fluid_flow(flow: FluidFlow):
+    # - Init event manager
+
     event_manager = SimpleEventManager()
     for node in flow.root.iterate("down"):
         node.set_event_manager(event_manager)

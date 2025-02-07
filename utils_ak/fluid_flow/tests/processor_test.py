@@ -11,7 +11,7 @@ def test_flow_processor_1():
 
     pipe_connect(container, processor)
     flow = FluidFlow(container, verbose=True)
-    run_flow(flow)
+    run_fluid_flow(flow)
 
 
 def test_flow_processor_2():
@@ -21,7 +21,7 @@ def test_flow_processor_2():
     )
     pipe_connect(container, processor)
     flow = FluidFlow(container, verbose=True)
-    run_flow(flow)
+    run_fluid_flow(flow)
 
 
 def test_flow_processor_zero_pressure():
@@ -29,7 +29,7 @@ def test_flow_processor_zero_pressure():
     processor = Processor("Output", max_pressures=[0, 0])
     pipe_connect(container, processor)
     flow = FluidFlow(container, verbose=True)
-    run_flow(flow)
+    run_fluid_flow(flow)
 
 
 def test_flow_processor_limit():
@@ -37,7 +37,7 @@ def test_flow_processor_limit():
     processor = Processor("Output", limits=[50, None])
     pipe_connect(container, processor)
     flow = FluidFlow(container, verbose=True)
-    run_flow(flow)
+    run_fluid_flow(flow)
 
 
 if __name__ == "__main__":
