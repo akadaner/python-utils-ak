@@ -19,7 +19,7 @@ Each of the methods is defined within the Actor
 
 
 class FluidFlow:
-    def __init__(self, root: Actor, verbose:bool=False):
+    def __init__(self, root: Actor, verbose: bool = False):
         # - Set attributes
 
         self.root = root
@@ -61,6 +61,14 @@ class FluidFlow:
             if self.verbose:
                 logger.info(f"Updated {method}")
                 print(self)
+
+    def state_snapshot(self):
+        result = {}
+
+        for node in self.root.iterate("down"):
+            result[node.name] = node.state_snapshot()
+
+        return result
 
 
 def run_fluid_flow(flow: FluidFlow):

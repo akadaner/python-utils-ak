@@ -44,6 +44,9 @@ class Actor(DAGNode):
     def display_stats(self):
         return {}
 
+    def state_snapshot(self):
+        return {}
+
     # - Updaters
 
     def update_last_ts(self, ts):

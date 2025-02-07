@@ -4,10 +4,9 @@ from inline_snapshot import snapshot
 from numpy import nan
 
 from app.lessmore.utils.run_snapshot_tests.run_inline_snapshot_tests import run_inline_snapshot_tests
-from utils_ak.clock import *
+from utils_ak.fluid_flow.calculations import ERROR, nanmin
 from utils_ak.fluid_flow.actor import Actor
 from utils_ak.fluid_flow.actors.pipe import PipeMixin
-from utils_ak.fluid_flow.calculations import *
 import pandas as pd
 
 
@@ -59,6 +58,13 @@ class Container(Actor, PipeMixin):
 
     def display_stats(self):
         return self.value
+
+    def state_snapshot(self):
+        return {
+            "value": self.value,
+            "df": str(self.df.reset_index().to_dict(orient="records")),
+            "transactions": str(self.transactions),
+        }
 
     # - Updaters
 
@@ -147,8 +153,23 @@ def test():
     flow = FluidFlow(container1)
     run_fluid_flow(flow)
 
-    assert container1.value == 0
-    assert container2.value == 100
+    assert flow.state_snapshot() == snapshot(
+        {
+            "Input": {
+                "value": 0.0,
+                "df": "[{'index': 'in', 'max_pressure': nan, 'limit': None, 'collected': 0.0}, {'index': 'out', 'max_pressure': 50.0, 'limit': None, 'collected': 100.0}]",
+                "transactions": "[[0, 2.0, -100.0]]",
+            },
+            "Container Input:default -> Container Output:default": {},
+            "Output": {
+                "value": 100.0,
+                "df": "[{'index': 'in', 'max_pressure': None, 'limit': None, 'collected': 100.0}, {'index': 'out', 'max_pressure': None, 'limit': None, 'collected': 0.0}]",
+                "transactions": "[[0, 2.0, 100.0]]",
+            },
+            "Top parent 0": {},
+            "Top": {},
+        }
+    )
 
     # - Test 2
 
@@ -160,20 +181,22 @@ def test():
     flow = FluidFlow(container1)
     run_fluid_flow(flow)
 
-    assert container1.value == 70
-    assert str(container1.df.to_dict(orient="records")) == str(
-        [
-            {"max_pressure": nan, "limit": nan, "collected": 0.0},
-            {"max_pressure": 50.0, "limit": 30.0, "collected": 30.0},
-        ]
-    )
-
-    assert container2.value == 30
-    assert str(container2.df.to_dict(orient="records")) == str(
-        [
-            {"max_pressure": None, "limit": None, "collected": 30.0},
-            {"max_pressure": None, "limit": None, "collected": 0.0},
-        ]
+    assert flow.state_snapshot() == snapshot(
+        {
+            "Input": {
+                "value": 70.0,
+                "df": "[{'index': 'in', 'max_pressure': nan, 'limit': nan, 'collected': 0.0}, {'index': 'out', 'max_pressure': 50.0, 'limit': 30.0, 'collected': 30.0}]",
+                "transactions": "[[0, 0.6, -30.0]]",
+            },
+            "Container Input:default -> Container Output:default": {},
+            "Output": {
+                "value": 30.0,
+                "df": "[{'index': 'in', 'max_pressure': None, 'limit': None, 'collected': 30.0}, {'index': 'out', 'max_pressure': None, 'limit': None, 'collected': 0.0}]",
+                "transactions": "[[0, 0.6, 30.0]]",
+            },
+            "Top parent 0": {},
+            "Top": {},
+        }
     )
 
     # - Test 3
@@ -186,8 +209,24 @@ def test():
     flow = FluidFlow(container1)
     run_fluid_flow(flow)
 
-    assert container1.value == snapshot(80.0)
+    assert flow.state_snapshot() == snapshot(
+        {
+            "Input": {
+                "value": 80.0,
+                "df": "[{'index': 'in', 'max_pressure': nan, 'limit': nan, 'collected': 0.0}, {'index': 'out', 'max_pressure': 50.0, 'limit': 30.0, 'collected': 20.0}]",
+                "transactions": "[[0, 4.0, -20.0]]",
+            },
+            "Container Input:default -> Container Output:default": {},
+            "Output": {
+                "value": 20.0,
+                "df": "[{'index': 'in', 'max_pressure': 5.0, 'limit': 20.0, 'collected': 20.0}, {'index': 'out', 'max_pressure': nan, 'limit': nan, 'collected': 0.0}]",
+                "transactions": "[[0, 4.0, 20.0]]",
+            },
+            "Top parent 0": {},
+            "Top": {},
+        }
+    )
 
 
 if __name__ == "__main__":
-    run_inline_snapshot_tests()
+    run_inline_snapshot_tests(mode="update_all")
