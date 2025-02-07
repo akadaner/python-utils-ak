@@ -54,6 +54,10 @@ class Queue(Actor, Piped):
         super().__init__(name)
         self.lines = lines
 
+        # todo later: legacy hardcode
+        for line in lines:
+            assert hasattr(line, "is_limit_reached"), "All lines in queue must have `is_limit_reached` method"
+
         # - State dataframe
 
         self.df = pd.DataFrame(index=["in", "out"], columns=["iterator", "break_func", "paused"])
