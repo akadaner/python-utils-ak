@@ -221,6 +221,51 @@ Flow:
         }
     )
 
+    # - Test 4: two pipes out
+
+    parent = Container("Parent", value=90)
+
+    hub = Hub("Hub")
+
+    child1 = Container("Child1", max_pressures=[20, None])
+    child2 = Container("Child2", max_pressures=[10, None])
+
+    pipe_connect(parent, hub)
+    pipe_connect(hub, child1)
+    pipe_connect(hub, child2)
+
+    assert FluidFlow(parent).run().state_snapshot() == snapshot(
+        {
+            "schema": """\
+Container (Parent) -> Hub (Hub) -> [Pipe (17), Pipe (18)]
+Pipe (17) -> Container (Child1) -> [Plug (Bottom)]
+Pipe (18) -> Container (Child2) -> [Plug (Bottom)]
+""",
+            "str(self)": """\
+Flow:
+    Container (Child1): 60.0
+    Container (Child2): 30.0\
+""",
+            "nodes": {
+                "Container (Parent)": {
+                    "value": 0.0,
+                    "df": "[{'index': 'in', 'max_pressure': None, 'limit': None, 'collected': 0.0}, {'index': 'out', 'max_pressure': None, 'limit': None, 'collected': 90.0}]",
+                    "transactions": "[[0, 3.0, -90.0]]",
+                },
+                "Container (Child1)": {
+                    "value": 60.0,
+                    "df": "[{'index': 'in', 'max_pressure': 20.0, 'limit': None, 'collected': 60.0}, {'index': 'out', 'max_pressure': nan, 'limit': None, 'collected': 0.0}]",
+                    "transactions": "[[0, 3.0, 60.0]]",
+                },
+                "Container (Child2)": {
+                    "value": 30.0,
+                    "df": "[{'index': 'in', 'max_pressure': 10.0, 'limit': None, 'collected': 30.0}, {'index': 'out', 'max_pressure': nan, 'limit': None, 'collected': 0.0}]",
+                    "transactions": "[[0, 3.0, 30.0]]",
+                },
+            },
+        }
+    )
+
 
 if __name__ == "__main__":
     run_inline_snapshot_tests(mode="update_all")
