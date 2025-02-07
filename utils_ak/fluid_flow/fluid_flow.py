@@ -46,22 +46,14 @@ class FluidFlow:
     def update(self, topic: str, ts: float, event: dict):
         """Iterate updates for all children nodes (BFS) sequentially for each method"""
         for method in [
-            "update_value",
+            "update_values",
             "update_pressure",
             "update_speed",
             "update_triggers",
             "update_last_ts",
         ]:
-            if self.verbose:
-                logger.info(f"Updating {method}")
-                print(self)
-
             for node in self.root.iterate("down"):
                 getattr(node, method, lambda ts: None)(ts)
-
-            if self.verbose:
-                logger.info(f"Updated {method}")
-                print(self)
 
     def state_snapshot(self):
         result = {"schema": self.root.schema(), "str(flow)": str(self), "nodes": {}}
@@ -71,26 +63,29 @@ class FluidFlow:
 
         return result
 
+    def run(self):
+        # - Init event manager
 
-def run_fluid_flow(flow: FluidFlow):
-    # - Init event manager
+        event_manager = SimpleEventManager()
 
-    event_manager = SimpleEventManager()
+        # - Subscribe to all nodes of the flow
 
-    # - Subscribe to all nodes of the flow
+        for node in self.root.iterate("down"):
+            node.set_event_manager(event_manager)
+            node.subscribe()
 
-    for node in flow.root.iterate("down"):
-        node.set_event_manager(event_manager)
-        node.subscribe()
+        # - Subscribe to all events for flow.update
 
-    # - Subscribe to all events for flow.update
+        event_manager.subscribe("", self.update)
 
-    event_manager.subscribe("update", flow.update)
+        # - Add start event
 
-    # - Add start event
+        event_manager.add_event("update", 0, {})
 
-    event_manager.add_event("update", 0, {})
+        # - Run event manager
 
-    # - Run event manager
+        event_manager.run()
 
-    event_manager.run()
+        # - Return self
+
+        return self

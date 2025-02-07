@@ -298,7 +298,7 @@ Flow:
     #
     # pipe_connect(parent, queue, "parent-queue")
     #
-    # flow = FluidFlow(parent, verbose=True)
+    # flow = FluidFlow(parent)
     # run_fluid_flow(flow)
     #
     # # - Test 4 with different items
@@ -314,7 +314,7 @@ Flow:
     # pipe_connect(queue, hub, "parent-hub")
     # pipe_connect(hub, child1, "hub-child1")
     # pipe_connect(hub, child2, "hub-child2")
-    # flow = FluidFlow(queue, verbose=True)
+    # flow = FluidFlow(queue)
     # run_fluid_flow(flow)
 
 

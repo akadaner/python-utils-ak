@@ -70,6 +70,8 @@ class SimpleEventManager:
 
             topic, ts, event = self.events.pop(0)
 
+            # logger.debug("Processing event", topic=topic, ts=ts, event=event)
+
             # - Log warning if event is older than the last event
 
             if self.last_ts is not None and ts < self.last_ts:

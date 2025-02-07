@@ -79,7 +79,7 @@ def test_water_line_flow_1():
     pipe_connect(packing_hub, packing_queue1, "hub-packing_queue1")
     pipe_connect(packing_hub, packing_queue2, "hub-packing_queue2")
 
-    flow = FluidFlow(drenator, verbose=True)
+    flow = FluidFlow(drenator)
     run_fluid_flow(flow)
 
     maker, make = init_block_maker("root", axis=1)
@@ -193,7 +193,7 @@ def test_water_line_flow_2_multiple_boilings():
         pipe_connect(packing_hub, packing_queue1, "hub-packing_queue1")
         pipe_connect(packing_hub, packing_queue2, "hub-packing_queue2")
 
-        flow = FluidFlow(drenator, verbose=True)
+        flow = FluidFlow(drenator)
         run_fluid_flow(flow)
 
         maker, make = init_block_maker("root", axis=1)

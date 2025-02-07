@@ -13,7 +13,7 @@ def test_flow_hub_1():
     pipe_connect(hub, child1, "hub-child1")
     pipe_connect(hub, child2, "hub-child2")
 
-    flow = FluidFlow(parent, verbose=True)
+    flow = FluidFlow(parent)
     run_fluid_flow(flow)
 
 
@@ -29,7 +29,7 @@ def test_flow_hub_2():
     pipe_connect(hub, child1, "hub-child1")
     pipe_connect(hub, child2, "hub-child2")
 
-    flow = FluidFlow(parent, verbose=True)
+    flow = FluidFlow(parent)
     run_fluid_flow(flow)
 
 
@@ -45,7 +45,7 @@ def test_flow_hub_3():
     pipe_connect(hub, child1, "hub-child1")
     pipe_connect(hub, child2, "hub-child2")
 
-    flow = FluidFlow(parent, verbose=True)
+    flow = FluidFlow(parent)
     run_fluid_flow(flow)
 
 
