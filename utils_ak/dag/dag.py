@@ -41,7 +41,7 @@ class DAGNode:
     def oriented_parents(self, orient="down"):
         return {"down": self.parents, "up": self.children}[orient]
 
-    def oriented_children(self, orient="upwards"):
+    def oriented_children(self, orient="up"):
         return {"down": self.children, "up": self.parents}[orient]
 
     def iterate(self, orient="down"):

@@ -1,23 +1,22 @@
-import logging
-
 from utils_ak.coder import cast_js
+from utils_ak.dag import DAGNode
 from utils_ak.simple_event_manager import SimpleEventManager
 
 from utils_ak.fluid_flow.actors import pipe_connect, Stub
+from loguru import logger
 
 
 class FluidFlow:
-    def __init__(self, root, verbose=False):
+    def __init__(self, root: DAGNode):
+        # - Set attributes
+
         self.root = root
 
-        # create top if needed
-        if len(self.root.leaves()) > 1:
-            top = Stub("Top")
-            for i, leaf in enumerate(self.root.leaves()):
-                pipe_connect(leaf, top, f"Top parent {i}")
+        # - Create a single top node or each leaf
 
-        self.verbose = verbose
-        self.logger = logging.getLogger()
+        top = Stub("Top")
+        for i, leaf in enumerate(self.root.leaves()):
+            pipe_connect(leaf, top, f"Top parent {i}")
 
     def __str__(self):
         values = ["Flow:"]
@@ -30,14 +29,7 @@ class FluidFlow:
     def __repr__(self):
         return str(self)
 
-    def log(self, *args):
-        if self.verbose:
-            # self.logger.debug(args)
-            print(*args)
-
-    def update(self, topic, ts, event):
-        self.log("Processing time", ts)
-
+    def update(self, topic: str, ts: float, event: dict):
         for method in [
             "update_value",
             "update_pressure",
@@ -45,14 +37,8 @@ class FluidFlow:
             "update_triggers",
             "update_last_ts",
         ]:
-            # self.log(f'Procedure {method}')
             for node in self.root.iterate("down"):
                 getattr(node, method, lambda ts: None)(ts)
-
-            # self.log(self)
-        self.log(self)
-
-        self.log()
 
 
 def run_fluid_flow(flow: FluidFlow):
