@@ -17,13 +17,22 @@ from functools import wraps
 def switch(f):
     @wraps(f)
     def inner(self, *args, **kwargs):
+        # - Switch the pipes to the inner lines temporarily
+
         pipe_switch(self, self.current("in"), "in")
         pipe_switch(self, self.current("out"), "out")
+
+        # - Run function
 
         res = f(self, *args, **kwargs)
 
+        # - Switch the pipes back
+
         pipe_switch(self, self.current("in"), "in")
         pipe_switch(self, self.current("out"), "out")
+
+        # - Return decorated function result
+
         return res
 
     return inner
@@ -32,7 +41,12 @@ def switch(f):
 class Queue(Actor, PipeMixin):
     """Queue receives or outputs values sequentially."""
 
-    def __init__(self, name: str, lines: list[Actor], break_funcs_by_orient: dict = {}):
+    def __init__(
+        self,
+        name: str,
+        lines: list[Actor],
+        break_funcs_by_orient: dict = {},  # {"in": lambda old, new: float = 0, "out": lambda old, new: float = 0}
+    ):
         # - Arguments
 
         super().__init__(name)
@@ -56,7 +70,7 @@ class Queue(Actor, PipeMixin):
 
     # - Private methods
 
-    def default_break_func(self, old, new):
+    def default_break_func(self, old: Actor, new: Actor) -> float:
         return 0
 
     def current(self, orient):
@@ -109,18 +123,30 @@ class Queue(Actor, PipeMixin):
         for line in self.lines:
             line.update_values(ts)
 
-        # -
+        # - Process reaching limits for current lines
 
         for orient in ["in", "out"]:
             if self.current(orient).is_limit_reached(orient):
+                # - If already paused, just leave it be
+
                 if self.df.at[orient, "paused"]:
                     continue
-                old = self.current(orient)
-                new = self.df.at[orient, "iterator"].next(return_out_strategy="last", update_index=False)
-                break_period = self.df.at[orient, "break_func"](old, new)
 
-                if old != new:
+                # - Get old and new line
+
+                old_line = self.current(orient)
+                new_line = self.df.at[orient, "iterator"].next(return_out_strategy="last", update_index=False)
+
+                # - Get break period
+
+                break_period = self.df.at[orient, "break_func"](old_line, new_line)
+
+                # - Process switch
+
+                if old_line != new_line:
                     if break_period:
+                        # - Add break event, pause
+
                         self.breaks.append([ts, ts + break_period])
                         self.df.at[orient, "paused"] = True
                         self.add_event(
@@ -129,11 +155,13 @@ class Queue(Actor, PipeMixin):
                             {"orient": orient},
                         )
                     else:
-                        pipe_switch(old, new, orient)
-                        self.df.at[orient, "iterator"].next(return_out_strategy="last", update_index=True)
+                        # - Switch the pipe to the new line
 
-            # todo: del
-            # print('Current', self.id, orient, self.current(orient), self.current(orient).is_limit_reached(orient), self.current(orient).containers['out'].df)
+                        pipe_switch(old_line, new_line, orient)
+
+                        # - Update iterator
+
+                        self.df.at[orient, "iterator"].next(return_out_strategy="last", update_index=True)
 
     @switch
     def update_pressure(self, ts):
@@ -259,7 +287,6 @@ Flow:
         }
     )
 
-    #
     # # - Test 3
     #
     # parent = Container("Parent", value=100, max_pressures=[None, 20])
