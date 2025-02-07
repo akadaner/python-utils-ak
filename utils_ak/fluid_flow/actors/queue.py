@@ -1,11 +1,9 @@
 """NOTE: renamed this file since some modules stop working if there is a file named queue.py in the same folder"""
-import pandas as pd
-from utils_ak.dag import *
 
-from utils_ak.fluid_flow.actor import Actor
-from utils_ak.fluid_flow.actors.pipe import *
+import pandas as pd
+from utils_ak.fluid_flow import FluidFlow, run_fluid_flow, Processor, Hub, pipe_switch, Actor, PipeMixin, pipe_connect
+
 from utils_ak.fluid_flow.actors.container import Container
-from utils_ak.fluid_flow.calculations import *
 from utils_ak.iteration import SimpleIterator
 
 from functools import wraps
@@ -31,9 +29,7 @@ class Queue(Actor, PipeMixin):
         super().__init__(name)
         self.lines = lines
 
-        self.df = pd.DataFrame(
-            index=["in", "out"], columns=["iterators", "break_funcs", "paused"]
-        )
+        self.df = pd.DataFrame(index=["in", "out"], columns=["iterators", "break_funcs", "paused"])
         self.df["iterator"] = [SimpleIterator(lines, 0) for _ in range(2)]
         self.df["break_func"] = self.default_break_func
         self.df["paused"] = False
@@ -63,9 +59,7 @@ class Queue(Actor, PipeMixin):
                 if self.df.at[orient, "paused"]:
                     continue
                 old = self.current(orient)
-                new = self.df.at[orient, "iterator"].next(
-                    return_out_strategy="last", update_index=False
-                )
+                new = self.df.at[orient, "iterator"].next(return_out_strategy="last", update_index=False)
                 break_period = self.df.at[orient, "break_func"](old, new)
 
                 if old != new:
@@ -79,9 +73,7 @@ class Queue(Actor, PipeMixin):
                         )
                     else:
                         pipe_switch(old, new, orient)
-                        self.df.at[orient, "iterator"].next(
-                            return_out_strategy="last", update_index=True
-                        )
+                        self.df.at[orient, "iterator"].next(return_out_strategy="last", update_index=True)
 
             # todo: del
             # print('Current', self.id, orient, self.current(orient), self.current(orient).is_limit_reached(orient), self.current(orient).containers['out'].df)
@@ -90,9 +82,7 @@ class Queue(Actor, PipeMixin):
     def on_resume(self, topic, ts, event):
         self.df.at[event["orient"], "paused"] = False
         old = self.current(event["orient"])
-        new = self.df.at[event["orient"], "iterator"].next(
-            return_out_strategy="last", update_index=True
-        )
+        new = self.df.at[event["orient"], "iterator"].next(return_out_strategy="last", update_index=True)
         pipe_switch(old, new, event["orient"])
 
     @switch
@@ -129,3 +119,65 @@ class Queue(Actor, PipeMixin):
     def reset(self):
         super().reset()
         self.breaks = []
+
+
+def test():
+    # - Test  1
+
+    parent = Container("Parent", value=100, max_pressures=[None, 20])
+
+    child1 = Container("Child1", max_pressures=[20, None], limits=[40, None])
+    child2 = Container("Child2", max_pressures=[10, None], limits=[50, None])
+
+    queue = Queue("Queue", [child1, child2])
+
+    pipe_connect(parent, queue, "parent-queue")
+
+    flow = FluidFlow(parent, verbose=True)
+    run_fluid_flow(flow)
+
+    # - Test 2
+
+    parent1 = Container("Parent1", value=100, max_pressures=[None, 10], limits=[None, 100])
+    parent2 = Container("Parent2", value=100, max_pressures=[None, 20], limits=[None, 100])
+    queue = Queue("Parent", [parent1, parent2])
+
+    child = Container("Child", max_pressures=[None, None])
+    pipe_connect(queue, child, "parent-queue")
+
+    flow = FluidFlow(queue, verbose=True)
+    run_fluid_flow(flow)
+
+    # - Test 3
+
+    parent = Container("Parent", value=100, max_pressures=[None, 20])
+
+    child1 = Processor("Child1", max_pressures=[20, None], processing_time=5, limits=[40, None])
+    child2 = Processor("Child2", max_pressures=[10, None], processing_time=5, limits=[50, None])
+
+    queue = Queue("Queue", [child1, child2])
+
+    pipe_connect(parent, queue, "parent-queue")
+
+    flow = FluidFlow(parent, verbose=True)
+    run_fluid_flow(flow)
+
+    # - Test 4 with different items
+
+    parent1 = Container("Parent1", item="a", value=100, max_pressures=[None, 10], limits=[None, 100])
+    parent2 = Container("Parent2", item="b", value=100, max_pressures=[None, 20], limits=[None, 100])
+    queue = Queue("Parent", [parent1, parent2])
+
+    hub = Hub("hub")
+    child1 = Container("Child1", item="a", max_pressures=[None, None])
+    child2 = Container("Child2", item="b", max_pressures=[None, None])
+
+    pipe_connect(queue, hub, "parent-hub")
+    pipe_connect(hub, child1, "hub-child1")
+    pipe_connect(hub, child2, "hub-child2")
+    flow = FluidFlow(queue, verbose=True)
+    run_fluid_flow(flow)
+
+
+if __name__ == "__main__":
+    test()
