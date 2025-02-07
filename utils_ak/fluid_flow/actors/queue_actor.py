@@ -201,7 +201,7 @@ def test():
     assert FluidFlow(parent).run().state_snapshot() == snapshot(
         {
             "schema": """\
-Container (Parent) -> Pipe (parent-queue) -> Queue (Queue) -> Pipe (1) -> Stub (Top) -> [None]
+Container (Parent) -> Queue (Queue)
 """,
             "str(flow)": """\
 Flow:
@@ -245,7 +245,7 @@ Flow:
     assert FluidFlow(queue).run().state_snapshot() == snapshot(
         {
             "schema": """\
-Queue (Parent) -> Pipe (parent-queue) -> Container (Child) -> Pipe (2) -> Stub (Top) -> [None]
+Queue (Parent) -> Container (Child)
 """,
             "str(flow)": """\
 Flow:
@@ -276,7 +276,6 @@ Flow:
             },
         }
     )
-
 
 
 if __name__ == "__main__":

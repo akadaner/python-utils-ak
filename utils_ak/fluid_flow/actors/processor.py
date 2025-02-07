@@ -177,7 +177,7 @@ def test():
     assert FluidFlow(container).run().state_snapshot() == snapshot(
         {
             "schema": """\
-Container (Input) -> Pipe (1) -> Processor: Output -> Pipe (2) -> Stub (Top) -> [None]
+Container (Input) -> Processor: Output
 """,
             "str(flow)": """\
 Flow:
@@ -213,7 +213,7 @@ Flow:
     assert FluidFlow(container).run().state_snapshot() == snapshot(
         {
             "schema": """\
-Container (Input) -> Pipe (3) -> Processor: Output -> Pipe (4) -> Stub (Top) -> [None]
+Container (Input) -> Processor: Output
 """,
             "str(flow)": """\
 Flow:
@@ -249,7 +249,7 @@ Flow:
     assert FluidFlow(container).run().state_snapshot() == snapshot(
         {
             "schema": """\
-Container (Input) -> Pipe (5) -> Processor: Output -> Pipe (6) -> Stub (Top) -> [None]
+Container (Input) -> Processor: Output
 """,
             "str(flow)": """\
 Flow:
@@ -286,7 +286,7 @@ Flow:
     assert FluidFlow(container).run().state_snapshot() == snapshot(
         {
             "schema": """\
-Container (Input) -> Pipe (7) -> Processor: Output -> Pipe (8) -> Stub (Top) -> [None]
+Container (Input) -> Processor: Output
 """,
             "str(flow)": """\
 Flow:

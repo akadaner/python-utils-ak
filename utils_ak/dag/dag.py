@@ -1,6 +1,7 @@
 """LEGACY CODE (2025-02-07)"""
 
 from collections import deque
+from typing import Callable, Optional
 
 from inline_snapshot import snapshot
 
@@ -98,7 +99,7 @@ class DAGNode:
         for node in self._iter_node_as_tree_recursive(self):
             yield node
 
-    def schema(self):
+    def schema(self, skip_rule: Optional[Callable] = None):
         """Prints the entire DAG from this node using BFS with proper chain handling."""
         result = ""
         visited = set()
@@ -106,6 +107,7 @@ class DAGNode:
 
         while queue:
             node = queue.popleft()
+
             if node in visited:
                 continue
 
@@ -114,11 +116,21 @@ class DAGNode:
 
             while len(node.children) == 1 and len(node.children[0].parents) == 1:
                 node = node.children[0]
+
+                if skip_rule and skip_rule(node):
+                    continue
+
                 chain.append(str(node))
                 visited.add(node)
 
-            child_names = ", ".join(str(c) for c in node.children) if node.children else "None"
-            result += f"{' -> '.join(chain)} -> [{child_names}]\n"
+            child_names = ", ".join(str(c) for c in node.children) if node.children else None
+
+            if len(chain) + (1 if child_names else 0) >= 2:
+                result += f"{' -> '.join(chain)}"
+                if child_names:
+                    result += f" -> [{child_names}]\n"
+                else:
+                    result += "\n"
 
             for child in node.children:
                 if child not in visited:
@@ -167,7 +179,9 @@ def test():
     connect(node2, node3)
     connect(node3, node4)
 
-    assert root.schema() == snapshot("root -> 1 -> 2 -> 3 -> 4 -> [None]\n")
+    assert root.schema() == snapshot("""\
+root -> 1 -> 2 -> 3 -> 4
+""")
 
     # - Test diamond: root_up -> node1, node2 -> root_down
 
@@ -187,7 +201,6 @@ def test():
 root_up -> [1, 2]
 1 -> [root_down]
 2 -> [root_down]
-root_down -> [None]
 """)
 
     # -- Test iteration
@@ -225,8 +238,6 @@ root_down -> [None]
 
     assert root_up.schema() == snapshot("""\
 root_up -> [1, 2]
-1 -> [None]
-2 -> [None]
 """)
 
     # -- Test leaves
@@ -250,4 +261,4 @@ root_up -> [1, 2]
 
 
 if __name__ == "__main__":
-    run_inline_snapshot_tests()
+    run_inline_snapshot_tests(mode="update_all")

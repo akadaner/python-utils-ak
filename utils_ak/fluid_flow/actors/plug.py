@@ -15,4 +15,4 @@ class Plug(Actor):
             pipe.pressures["out"] = 0
 
     def __str__(self):
-        return f"Stub ({self.name})"
+        return f"Plug ({self.name})"

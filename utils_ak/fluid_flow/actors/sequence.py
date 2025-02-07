@@ -122,11 +122,11 @@ def test():
     assert FluidFlow(c1).run().state_snapshot() == snapshot(
         {
             "schema": """\
-Container (Input) -> Pipe (3) -> Sequence: Sequence -> Pipe (4) -> Container (Ouput) -> Pipe (5) -> Stub Top -> [None]
+Container (Input) -> Sequence (Sequence) -> Container (Ouput)
 """,
             "str(flow)": """\
 Flow:
-    Sequence: Sequence: [0.0, 0.0, 0.0]
+    Sequence (Sequence): [0.0, 0.0, 0.0]
     Container (Ouput): 100.0\
 """,
             "nodes": {
@@ -135,9 +135,7 @@ Flow:
                     "df": "[{'index': 'in', 'max_pressure': nan, 'limit': None, 'collected': 0.0}, {'index': 'out', 'max_pressure': 10.0, 'limit': None, 'collected': 100.0}]",
                     "transactions": "[[0, 20.0, -100.0]]",
                 },
-                "Pipe (3)": {},
-                "Pipe (4)": {},
-                "Sequence: Sequence": [
+                "Sequence (Sequence)": [
                     {
                         "value": 0.0,
                         "df": "[{'index': 'in', 'max_pressure': 5.0, 'limit': None, 'collected': 100.0}, {'index': 'out', 'max_pressure': nan, 'limit': None, 'collected': 100.0}]",
@@ -156,13 +154,11 @@ Flow:
                         "transactions": "[[0, 20.0, 100.0], [0, 20.0, -100.0]]",
                     },
                 ],
-                "Pipe (5)": {},
                 "Container (Ouput)": {
                     "value": 100.0,
                     "df": "[{'index': 'in', 'max_pressure': None, 'limit': None, 'collected': 100.0}, {'index': 'out', 'max_pressure': None, 'limit': None, 'collected': 0.0}]",
                     "transactions": "[[0, 20.0, 100.0]]",
                 },
-                "Stub Top": {},
             },
         }
     )
@@ -187,11 +183,11 @@ Flow:
     assert FluidFlow(c1).run().state_snapshot() == snapshot(
         {
             "schema": """\
-Container (Input) -> Pipe (7) -> Sequence: Sequence -> Pipe (8) -> Container (Output) -> Pipe (9) -> Stub Top -> [None]
+Container (Input) -> Sequence (Sequence) -> Container (Output)
 """,
             "str(flow)": """\
 Flow:
-    Sequence: Sequence: [0.0, 0.0]
+    Sequence (Sequence): [0.0, 0.0]
     Container (Output): 100.0\
 """,
             "nodes": {
@@ -200,9 +196,7 @@ Flow:
                     "df": "[{'index': 'in', 'max_pressure': nan, 'limit': None, 'collected': 0.0}, {'index': 'out', 'max_pressure': 10.0, 'limit': None, 'collected': 100.0}]",
                     "transactions": "[[0, 50.0, -100.0]]",
                 },
-                "Pipe (7)": {},
-                "Pipe (8)": {},
-                "Sequence: Sequence": [
+                "Sequence (Sequence)": [
                     {
                         "value": 0.0,
                         "df": "[{'index': 'in', 'max_pressure': 2.0, 'limit': None, 'collected': 100.0}, {'index': 'out', 'max_pressure': nan, 'limit': None, 'collected': 100.0}]",
@@ -220,8 +214,6 @@ Flow:
                     "df": "[{'index': 'in', 'max_pressure': None, 'limit': None, 'collected': 100.0}, {'index': 'out', 'max_pressure': None, 'limit': None, 'collected': 0.0}]",
                     "transactions": "[[0, 50.0, 50.0], [50.0, 100.0, 50.0]]",
                 },
-                "Pipe (9)": {},
-                "Stub Top": {},
             },
         }
     )

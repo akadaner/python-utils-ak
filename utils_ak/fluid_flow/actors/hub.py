@@ -103,10 +103,9 @@ def test():
     assert FluidFlow(parent).run().state_snapshot() == snapshot(
         {
             "schema": """\
-Container (Parent) -> Pipe (1) -> Hub (Hub) -> [Pipe (2), Pipe (3)]
-Pipe (2) -> Container (Child1) -> Pipe (4) -> [Stub (Top)]
-Pipe (3) -> Container (Child2) -> Pipe (5) -> [Stub (Top)]
-Stub (Top) -> [None]
+Container (Parent) -> Hub (Hub) -> [Pipe (2), Pipe (3)]
+Pipe (2) -> Container (Child1) -> [Plug (Bottom)]
+Pipe (3) -> Container (Child2) -> [Plug (Bottom)]
 """,
             "str(flow)": """\
 Flow:
@@ -149,10 +148,9 @@ Flow:
     assert FluidFlow(parent).run().state_snapshot() == snapshot(
         {
             "schema": """\
-Container (Parent) -> Pipe (6) -> Hub (Hub) -> [Pipe (7), Pipe (8)]
-Pipe (7) -> Container (Child1) -> Pipe (9) -> [Stub (Top)]
-Pipe (8) -> Container (Child2) -> Pipe (10) -> [Stub (Top)]
-Stub (Top) -> [None]
+Container (Parent) -> Hub (Hub) -> [Pipe (7), Pipe (8)]
+Pipe (7) -> Container (Child1) -> [Plug (Bottom)]
+Pipe (8) -> Container (Child2) -> [Plug (Bottom)]
 """,
             "str(flow)": """\
 Flow:
@@ -195,10 +193,9 @@ Flow:
     assert FluidFlow(parent).run().state_snapshot() == snapshot(
         {
             "schema": """\
-Container (Parent:a) -> Pipe (11) -> Hub (Hub) -> [Pipe (12), Pipe (13)]
-Pipe (12) -> Container (Child1:b) -> Pipe (14) -> [Stub (Top)]
-Pipe (13) -> Container (Child2:a) -> Pipe (15) -> [Stub (Top)]
-Stub (Top) -> [None]
+Container (Parent:a) -> Hub (Hub) -> [Pipe (12), Pipe (13)]
+Pipe (12) -> Container (Child1:b) -> [Plug (Bottom)]
+Pipe (13) -> Container (Child2:a) -> [Plug (Bottom)]
 """,
             "str(flow)": """\
 Flow:

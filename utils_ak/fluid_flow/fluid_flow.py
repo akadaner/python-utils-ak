@@ -1,6 +1,6 @@
 from utils_ak.coder import cast_js
 from utils_ak.fluid_flow.actor import Actor
-from utils_ak.fluid_flow.actors.pipe import pipe_connect
+from utils_ak.fluid_flow.actors.pipe import pipe_connect, Pipe
 from utils_ak.fluid_flow.actors.plug import Plug
 from utils_ak.simple_event_manager import SimpleEventManager
 
@@ -57,7 +57,11 @@ class FluidFlow:
                 getattr(node, method, lambda ts: None)(ts)
 
     def state_snapshot(self):
-        result = {"schema": self.root.schema(), "str(flow)": str(self), "nodes": {}}
+        result = {
+            "schema": self.root.schema(skip_rule=lambda node: isinstance(node, Pipe) or isinstance(node, Plug)),
+            "str(flow)": str(self),
+            "nodes": {},
+        }
 
         for node in self.root.iterate("down"):
             if node.state_snapshot():

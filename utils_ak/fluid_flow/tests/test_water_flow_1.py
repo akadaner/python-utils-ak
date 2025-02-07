@@ -92,13 +92,20 @@ def test_water_flow_1():
         ],
     )
 
-    # using sequence as packing
-    container = Container("Container3", item="b", max_pressures=[200, None], limits=[150, None])
+    # - Packing queue2: slow
 
-    # slow packing
-    processor = Processor("Processor3", items=["b", "b2"], max_pressures=[50, None], lag=0)
-    packing3 = Sequence("Packing3", [container, processor])
-    packing_queue2 = Queue("PackingQueue1", [packing3])
+    packing_queue2 = Queue(
+        "PackingQueue2",
+        [
+            Sequence(
+                "Packing3",
+                [
+                    Container("Container3", item="b", max_pressures=[200, None], limits=[150, None]),
+                    Processor("Processor3", items=["b", "b2"], max_pressures=[50, None], lag=0),
+                ],
+            )
+        ],
+    )
 
     # - Connect actors
 
@@ -116,9 +123,9 @@ def test_water_flow_1():
     assert flow.state_snapshot() == snapshot(
         {
             "schema": """\
-Container (Drenator) -> Pipe (drenator-melting) -> Queue (MeltingQueue) -> Pipe (melting-cooling) -> Queue (CoolingQueue) -> Pipe (cooling-hub) -> Hub (Hub) -> [Pipe (hub-packing_queue1), Pipe (hub-packing_queue2)]
-Pipe (hub-packing_queue1) -> Queue (PackingQueue1) -> Pipe (2) -> [Stub (Bottom)]
-Pipe (hub-packing_queue2) -> Queue (PackingQueue1) -> Pipe (3) -> [Stub (Bottom)]
+Container (Drenator) -> Pipe (2) -> Queue (MeltingQueue) -> Pipe (3) -> Queue (CoolingQueue) -> Pipe (4) -> Hub (Hub) -> [Pipe (5), Pipe (6)]
+Pipe (5) -> Queue (PackingQueue1) -> Pipe (7) -> [Stub (Bottom)]
+Pipe (6) -> Queue (PackingQueue2) -> Pipe (8) -> [Stub (Bottom)]
 Stub (Bottom) -> [None]
 """,
             "str(flow)": """\
@@ -126,7 +133,7 @@ Flow:
     Queue (MeltingQueue): [["Melting1", [0.0, 0.0]], ["Melting2", [0.0, 0.0]]]
     Queue (CoolingQueue): [["Cooling1", [0.0, 0.0]], ["Cooling2", [0.0, 0.0]]]
     Queue (PackingQueue1): [["Packing1", [0.0, 750.0]], ["Packing2", [0.0, 100.0]]]
-    Queue (PackingQueue1): [["Packing3", [0.0, [0.0, 150.0]]]]\
+    Queue (PackingQueue2): [["Packing3", [0.0, [0.0, 150.0]]]]\
 """,
             "nodes": {
                 "Container (Drenator)": {
@@ -193,31 +200,55 @@ Flow:
                     "breaks": [],
                 },
                 "Queue (PackingQueue1)": {
-                    "queue": [
-                        [
-                            {
-                                "value": 0.0,
-                                "df": "[{'index': 'in', 'max_pressure': 200.0, 'limit': 150.0, 'collected': 150.0}, {'index': 'out', 'max_pressure': nan, 'limit': nan, 'collected': 150.0}]",
-                                "transactions": "[[4.25, 4.5, 50.0], [4.25, 4.5, -12.5], [4.5, 4.666666666666667, 33.33333333333339], [4.5, 4.666666666666667, -8.333333333333348], [4.666666666666667, 5.0, 66.6666666666666], [4.666666666666667, 5.0, -16.66666666666665], [5.0, 7.25, -112.5]]",
-                            },
-                            {},
-                            {
-                                "in": {
-                                    "value": 0.0,
-                                    "df": "[{'index': 'in', 'max_pressure': 50.0, 'limit': None, 'collected': 150.0}, {'index': 'out', 'max_pressure': nan, 'limit': None, 'collected': 150.0}]",
-                                    "transactions": "[[4.25, 4.5, 12.5], [4.25, 4.5, -12.5], [4.5, 4.666666666666667, 8.333333333333348], [4.5, 4.666666666666667, -8.333333333333348], [4.666666666666667, 5.0, 16.66666666666665], [4.666666666666667, 5.0, -16.66666666666665], [5.0, 7.25, 112.5], [5.0, 7.25, -112.5]]",
-                                },
-                                "out": {
-                                    "value": 150.0,
-                                    "df": "[{'index': 'in', 'max_pressure': None, 'limit': None, 'collected': 150.0}, {'index': 'out', 'max_pressure': None, 'limit': None, 'collected': 0.0}]",
-                                    "transactions": "[[4.25, 4.5, 12.5], [4.5, 4.666666666666667, 8.333333333333348], [4.666666666666667, 5.0, 16.66666666666665], [5.0, 7.25, 112.5]]",
-                                },
-                            },
-                        ]
-                    ],
+                    "queue": [{
+    "in": {
+        "value": 0.0,
+        "df": "[{'index': 'in', 'max_pressure': 200.0, 'limit': 750.0, 'collected': 750.0}, {'index': 'out', 'max_pressure': nan, 'limit': nan, 'collected': 750.0}]",
+        "transactions": "[[0.5, 0.75, 50.0], [0.5, 0.75, -50.0], [0.75, 1.0, 50.0], [0.75, 1.0, -50.0], [1.0, 1.25, 50.0], [1.0, 1.25, -50.0], [1.25, 1.75, 100.0], [1.25, 1.75, -100.0], [1.75, 2.0, 50.0], [1.75, 2.0, -50.0], [2.0, 2.25, 50.0], [2.0, 2.25, -50.0], [2.25, 2.5, 50.0], [2.25, 2.5, -50.0], [2.5, 4.25, 350.0], [2.5, 4.25, -350.0]]",
+    },
+    "out": {
+        "value": 750.0,
+        "df": "[{'index': 'in', 'max_pressure': None, 'limit': None, 'collected': 750.0}, {'index': 'out', 'max_pressure': None, 'limit': None, 'collected': 0.0}]",
+        "transactions": "[[0.5, 0.75, 50.0], [0.75, 1.0, 50.0], [1.0, 1.25, 50.0], [1.25, 1.75, 100.0], [1.75, 2.0, 50.0], [2.0, 2.25, 50.0], [2.25, 2.5, 50.0], [2.5, 4.25, 350.0]]",
+    },
+}, {
+    "in": {
+        "value": 0.0,
+        "df": "[{'index': 'in', 'max_pressure': 400.0, 'limit': 100.0, 'collected': 100.0}, {'index': 'out', 'max_pressure': nan, 'limit': nan, 'collected': 100.0}]",
+        "transactions": "[[4.25, 4.5, 100.0], [4.25, 4.5, -100.0]]",
+    },
+    "out": {
+        "value": 100.0,
+        "df": "[{'index': 'in', 'max_pressure': None, 'limit': None, 'collected': 100.0}, {'index': 'out', 'max_pressure': None, 'limit': None, 'collected': 0.0}]",
+        "transactions": "[[4.25, 4.5, 100.0]]",
+    },
+}],
                     "breaks": [],
+                }, "Queue (PackingQueue2)": {
+    "queue": [
+        [
+            {
+                "value": 0.0,
+                "df": "[{'index': 'in', 'max_pressure': 200.0, 'limit': 150.0, 'collected': 150.0}, {'index': 'out', 'max_pressure': nan, 'limit': nan, 'collected': 150.0}]",
+                "transactions": "[[4.25, 4.5, 50.0], [4.25, 4.5, -12.5], [4.5, 4.666666666666667, 33.33333333333339], [4.5, 4.666666666666667, -8.333333333333348], [4.666666666666667, 5.0, 66.6666666666666], [4.666666666666667, 5.0, -16.66666666666665], [5.0, 7.25, -112.5]]",
+            },
+            {},
+            {
+                "in": {
+                    "value": 0.0,
+                    "df": "[{'index': 'in', 'max_pressure': 50.0, 'limit': None, 'collected': 150.0}, {'index': 'out', 'max_pressure': nan, 'limit': None, 'collected': 150.0}]",
+                    "transactions": "[[4.25, 4.5, 12.5], [4.25, 4.5, -12.5], [4.5, 4.666666666666667, 8.333333333333348], [4.5, 4.666666666666667, -8.333333333333348], [4.666666666666667, 5.0, 16.66666666666665], [4.666666666666667, 5.0, -16.66666666666665], [5.0, 7.25, 112.5], [5.0, 7.25, -112.5]]",
+                },
+                "out": {
+                    "value": 150.0,
+                    "df": "[{'index': 'in', 'max_pressure': None, 'limit': None, 'collected': 150.0}, {'index': 'out', 'max_pressure': None, 'limit': None, 'collected': 0.0}]",
+                    "transactions": "[[4.25, 4.5, 12.5], [4.5, 4.666666666666667, 8.333333333333348], [4.666666666666667, 5.0, 16.66666666666665], [5.0, 7.25, 112.5]]",
                 },
             },
+        ]
+    ],
+    "breaks": [],
+}},
         }
     )
 
@@ -245,7 +276,7 @@ root (-, 0:07:15] x (-, 8]
   CoolingQueue-b (0:01:45, 0:02:30] x (4, 5]
   PackingQueue1-a (0:00:30, 0:04:15] x (5, 6]
   PackingQueue1-b (0:04:15, 0:04:30] x (6, 7]
-  PackingQueue1-b (0:04:15, 0:07:15] x (7, 8]\
+  PackingQueue2-b (0:04:15, 0:07:15] x (7, 8]\
 """)
 
 
