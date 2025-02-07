@@ -73,7 +73,8 @@ class PipeMixin:
                 return 0
             return self.pipe("out").current_speed
 
-    def drain(self):
+    def excess_speed(self):
+        """Excess flow"""
         return self.speed("in") - self.speed("out")
 
 

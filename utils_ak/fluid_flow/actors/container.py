@@ -1,5 +1,9 @@
 from typing import Optional
 
+from inline_snapshot import snapshot
+from numpy import nan
+
+from app.lessmore.utils.run_snapshot_tests.run_inline_snapshot_tests import run_inline_snapshot_tests
 from utils_ak.clock import *
 from utils_ak.fluid_flow.actor import Actor
 from utils_ak.fluid_flow.actors.pipe import PipeMixin
@@ -59,6 +63,7 @@ class Container(Actor, PipeMixin):
     # - Updaters
 
     def update_value(self, ts, factor=1):
+        """Something flowed in and out"""
         if self.last_ts is None:
             return
 
@@ -73,19 +78,24 @@ class Container(Actor, PipeMixin):
         add_value(ts, "out", -(ts - self.last_ts) * self.speed("out"))
 
     def update_pressure(self, ts, orients=("in", "out")):
+        """Disable pressure if limit is specified and limit is reached"""
         for orient in orients:
             if self.pipe(orient):
-                pressure = (
-                    self.df.at[orient, "max_pressure"]
-                    if not (
-                        limit_reached := self.df.at[orient, "limit"]
-                        and abs(self.df.at[orient, "collected"] - self.df.at[orient, "limit"]) < ERROR
-                    )
-                    else 0
+                self.pipe(orient).set_pressure(
+                    orient=orient,
+                    pressure=(
+                        self.df.at[orient, "max_pressure"]
+                        if not (
+                            limit_reached := self.df.at[orient, "limit"]
+                            and abs(self.df.at[orient, "collected"] - self.df.at[orient, "limit"]) < ERROR
+                        )
+                        else 0
+                    ),
+                    item=self.item,
                 )
-                self.pipe(orient).set_pressure(orient, pressure, self.item)
 
     def update_speed(self, ts, set_out_pressure=True):
+        """Set out pressure if there is a pipe out to minimum of input speed and out pressure"""
         input_speed = self.speed("in")
 
         if set_out_pressure:
@@ -97,9 +107,10 @@ class Container(Actor, PipeMixin):
                 )
 
     def update_triggers(self, ts):
+        """Add events for empty container and limits"""
         values = []
-        if self.drain() < 0:
-            values.append(["empty_container", self.value, self.drain()])
+        if self.excess_speed() < 0:
+            values.append(["empty_container", self.value, self.excess_speed()])
 
         for orient in ["in", "out"]:
             if self.df.at[orient, "limit"]:
@@ -120,6 +131,12 @@ class Container(Actor, PipeMixin):
 def test():
     from utils_ak.fluid_flow import Container, pipe_connect, FluidFlow, run_fluid_flow
 
+    # - Configure loguru
+
+    from utils_ak.loguru import configure_loguru
+
+    configure_loguru()
+
     # - Test 1
 
     container1 = Container("Input", value=100, max_pressures=[None, 50])
@@ -130,26 +147,47 @@ def test():
     flow = FluidFlow(container1)
     run_fluid_flow(flow)
 
-    # # - Test 2
-    #
-    # container1 = Container("Input", value=100, max_pressures=[None, 50], limits=[None, 30])
-    # container2 = Container("Output")
-    #
-    # pipe_connect(container1, container2)
-    #
-    # flow = FluidFlow(container1)
-    # run_fluid_flow(flow)
-    #
-    # # - Test 3
-    #
-    # container1 = Container("Input", value=100, max_pressures=[None, 50], limits=[None, 30])
-    # container2 = Container("Output", max_pressures=[5, None], limits=[20, None])
-    #
-    # pipe_connect(container1, container2)
-    #
-    # flow = FluidFlow(container1)
-    # run_fluid_flow(flow)
+    assert container1.value == 0
+    assert container2.value == 100
+
+    # - Test 2
+
+    container1 = Container("Input", value=100, max_pressures=[None, 50], limits=[None, 30])
+    container2 = Container("Output")
+
+    pipe_connect(container1, container2)
+
+    flow = FluidFlow(container1)
+    run_fluid_flow(flow)
+
+    assert container1.value == 70
+    assert str(container1.df.to_dict(orient="records")) == str(
+        [
+            {"max_pressure": nan, "limit": nan, "collected": 0.0},
+            {"max_pressure": 50.0, "limit": 30.0, "collected": 30.0},
+        ]
+    )
+
+    assert container2.value == 30
+    assert str(container2.df.to_dict(orient="records")) == str(
+        [
+            {"max_pressure": None, "limit": None, "collected": 30.0},
+            {"max_pressure": None, "limit": None, "collected": 0.0},
+        ]
+    )
+
+    # - Test 3
+
+    container1 = Container("Input", value=100, max_pressures=[None, 50], limits=[None, 30])
+    container2 = Container("Output", max_pressures=[5, None], limits=[20, None])
+
+    pipe_connect(container1, container2)
+
+    flow = FluidFlow(container1)
+    run_fluid_flow(flow)
+
+    assert container1.value == snapshot(80.0)
 
 
 if __name__ == "__main__":
-    test()
+    run_inline_snapshot_tests()

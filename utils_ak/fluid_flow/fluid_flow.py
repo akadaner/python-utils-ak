@@ -19,10 +19,11 @@ Each of the methods is defined within the Actor
 
 
 class FluidFlow:
-    def __init__(self, root: Actor):
+    def __init__(self, root: Actor, verbose:bool=False):
         # - Set attributes
 
         self.root = root
+        self.verbose = verbose
 
         # - Create a single top node or each leaf
 
@@ -50,8 +51,16 @@ class FluidFlow:
             "update_triggers",
             "update_last_ts",
         ]:
+            if self.verbose:
+                logger.info(f"Updating {method}")
+                print(self)
+
             for node in self.root.iterate("down"):
                 getattr(node, method, lambda ts: None)(ts)
+
+            if self.verbose:
+                logger.info(f"Updated {method}")
+                print(self)
 
 
 def run_fluid_flow(flow: FluidFlow):
@@ -67,7 +76,7 @@ def run_fluid_flow(flow: FluidFlow):
 
     # - Subscribe to all events for flow.update
 
-    event_manager.subscribe("", flow.update)
+    event_manager.subscribe("update", flow.update)
 
     # - Add start event
 
