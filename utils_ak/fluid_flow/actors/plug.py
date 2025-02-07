@@ -1,7 +1,7 @@
 from utils_ak.fluid_flow.actor import Actor
 
 
-class Stub(Actor):
+class Plug(Actor):
     """No input and output, just a plug."""
 
     def __init__(self, name=None):

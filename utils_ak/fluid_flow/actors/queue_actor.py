@@ -286,12 +286,12 @@ Flow:
 
     queue = Queue("Queue", [child1, child2])
 
-    pipe_connect(parent, queue, "parent-queue")
+    pipe_connect(parent, queue)
 
     assert FluidFlow(parent).run().state_snapshot() == snapshot(
         {
             "schema": """\
-Container (Parent) -> Pipe (parent-queue) -> Queue (Queue) -> Pipe (3) -> Stub (Top) -> [None]
+Container (Parent) -> Pipe (3) -> Queue (Queue) -> Pipe (4) -> Stub (Top) -> [None]
 """,
             "str(flow)": """\
 Flow:
@@ -355,8 +355,8 @@ Flow:
         {
             "schema": """\
 Queue (Parent) -> Pipe (parent-hub) -> Hub (hub) -> [Pipe (hub-child1), Pipe (hub-child2)]
-Pipe (hub-child1) -> Container (Child1:a) -> Pipe (4) -> [Stub (Top)]
-Pipe (hub-child2) -> Container (Child2:b) -> Pipe (5) -> [Stub (Top)]
+Pipe (hub-child1) -> Container (Child1:a) -> Pipe (5) -> [Stub (Top)]
+Pipe (hub-child2) -> Container (Child2:b) -> Pipe (6) -> [Stub (Top)]
 Stub (Top) -> [None]
 """,
             "str(flow)": """\

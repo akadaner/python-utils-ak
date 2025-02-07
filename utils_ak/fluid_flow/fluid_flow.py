@@ -1,7 +1,7 @@
 from utils_ak.coder import cast_js
 from utils_ak.fluid_flow.actor import Actor
 from utils_ak.fluid_flow.actors.pipe import pipe_connect
-from utils_ak.fluid_flow.actors.stub import Stub
+from utils_ak.fluid_flow.actors.plug import Plug
 from utils_ak.simple_event_manager import SimpleEventManager
 
 from loguru import logger
@@ -35,9 +35,9 @@ class FluidFlow:
 
         # - Create a single top node or each leaf
 
-        top = Stub("Top")
+        bottom = Plug("Bottom")
         for i, leaf in enumerate(self.root.leaves()):
-            pipe_connect(leaf, top)
+            pipe_connect(leaf, bottom)
 
     def __str__(self):
         values = ["Flow:"]
