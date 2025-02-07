@@ -15,57 +15,82 @@ from utils_ak.numeric import custom_round
 
 
 def test_water_flow_1():
+    # - Define actors
+
+    # -- Drenator
+
     drenator = Container("Drenator", value=1000, max_pressures=[None, None])
 
-    melting1 = Processor(
-        "Melting1",
-        items=["a", "a"],
-        max_pressures=[1000, 1000],
-        lag=0,
-        limits=[750, 750],
-    )
-    melting2 = Processor(
-        "Melting2",
-        items=["b", "b"],
-        max_pressures=[1000, 1000],
-        lag=0,
-        limits=[250, 250],
-    )
-    melting_queue = Queue("MeltingQueue", [melting1, melting2], break_funcs_by_orient={"in": lambda old, new: 1})
+    # -- Melting queue
 
-    cooling1 = Processor(
-        "Cooling1",
-        items=["a", "a"],
-        max_pressures=[None, None],
-        lag=0.5,
-        limits=[750, 750],
+    melting_queue = Queue(
+        "MeltingQueue",
+        [
+            Processor(
+                "Melting1",
+                items=["a", "a"],
+                max_pressures=[1000, 1000],
+                lag=0,
+                limits=[750, 750],
+            ),
+            Processor(
+                "Melting2",
+                items=["b", "b"],
+                max_pressures=[1000, 1000],
+                lag=0,
+                limits=[250, 250],
+            ),
+        ],
+        break_funcs_by_orient={"in": lambda old, new: 1},
     )
-    cooling2 = Processor(
-        "Cooling2",
-        items=["b", "b"],
-        max_pressures=[None, None],
-        lag=0.5,
-        limits=[250, 250],
+
+    # -- Cooling queue
+
+    cooling_queue = Queue(
+        "CoolingQueue",
+        [
+            Processor(
+                "Cooling1",
+                items=["a", "a"],
+                max_pressures=[None, None],
+                lag=0.5,
+                limits=[750, 750],
+            ),
+            Processor(
+                "Cooling2",
+                items=["b", "b"],
+                max_pressures=[None, None],
+                lag=0.5,
+                limits=[250, 250],
+            ),
+        ],
     )
-    cooling_queue = Queue("CoolingQueue", [cooling1, cooling2])
+
+    # -- Packing Hub
 
     packing_hub = Hub("Hub")
 
-    packing1 = Processor(
-        "Packing1",
-        items=["a", "a1"],
-        max_pressures=[200, None],
-        lag=0,
-        limits=[750, None],
+    # -- Packing queue1
+
+    packing_queue1 = Queue(
+        "PackingQueue1",
+        [
+            Processor(
+                "Packing1",
+                items=["a", "a1"],
+                max_pressures=[200, None],
+                lag=0,
+                limits=[750, None],
+            ),
+            Processor(
+                "Packing2",
+                items=["b", "b1"],
+                max_pressures=[400, None],
+                lag=0,
+                limits=[100, None],
+            ),
+        ],
     )
-    packing2 = Processor(
-        "Packing2",
-        items=["b", "b1"],
-        max_pressures=[400, None],
-        lag=0,
-        limits=[100, None],
-    )
-    packing_queue1 = Queue("PackingQueue1", [packing1, packing2])
 
     # using sequence as packing
     container = Container("Container3", item="b", max_pressures=[200, None], limits=[150, None])
@@ -75,12 +100,16 @@ def test_water_flow_1():
     packing3 = Sequence("Packing3", [container, processor])
     packing_queue2 = Queue("PackingQueue1", [packing3])
 
-    pipe_connect(drenator, melting_queue, "drenator-melting")
-    pipe_connect(melting_queue, cooling_queue, "melting-cooling")
-    pipe_connect(cooling_queue, packing_hub, "cooling-hub")
+    # - Connect actors
 
-    pipe_connect(packing_hub, packing_queue1, "hub-packing_queue1")
-    pipe_connect(packing_hub, packing_queue2, "hub-packing_queue2")
+    pipe_connect(drenator, melting_queue)
+    pipe_connect(melting_queue, cooling_queue)
+    pipe_connect(cooling_queue, packing_hub)
+
+    pipe_connect(packing_hub, packing_queue1)
+    pipe_connect(packing_hub, packing_queue2)
+
+    # - Run flow
 
     flow = FluidFlow(drenator).run()
 
@@ -195,8 +224,6 @@ Flow:
     # - Build blocks
 
     maker, make = init_block_maker("root", axis=1)
-
-    # - Build elements
 
     for node in drenator.iterate("down"):
         if node.active_periods():
