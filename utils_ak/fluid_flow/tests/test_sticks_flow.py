@@ -28,7 +28,7 @@ def test_sticks_flow():
             max_pressures=[200, 200],
             limits=[1000, 1000],
         ),
-        tumbler_func=lambda ts: 2 if ts == 0 else (9999999 if ts < 10 else None),  # wait N seconds before melting
+        tumbler_func=lambda ts: 3 if ts == 0 else (9999999 if ts < 10 else None),  # wait N seconds before melting
     )
 
     # -- Sticks melting
@@ -39,7 +39,7 @@ def test_sticks_flow():
             Container(
                 "SticksMelting1",
                 max_pressures=[100, 100],
-                limits=[1000, 1000],
+                limits=[100, 100],
             ),
             Container(
                 "SticksMelting2",
@@ -68,35 +68,35 @@ Pipe (3) -> Queue (SticksQueue) -> [Plug (Bottom)]
 """,
             "str(self)": """\
 Flow:
-    Queue (SticksQueue): [["SticksMelting1", 400.0], ["SticksMelting2", 0]]\
+    Queue (SticksQueue): [["SticksMelting1", 100.0], ["SticksMelting2", 300.0]]\
 """,
             "nodes": {
                 "Container (Drenator)": {
                     "value": 0.0,
                     "df": "[{'index': 'in', 'max_pressure': None, 'limit': None, 'collected': 0.0}, {'index': 'out', 'max_pressure': None, 'limit': None, 'collected': 800.0}]",
-                    "transactions": "[[0, 2, -200.0], [2, 4.0, -600.0]]",
+                    "transactions": "[[0, 1.0, -100.0], [2.0, 3, -100.0], [3, 5.0, -600.0]]",
                 },
                 "TumbleredActor (Tumbler)": {
                     "Container (PizzaMelting)": {
                         "value": 400.0,
                         "df": "[{'index': 'in', 'max_pressure': 200, 'limit': 1000, 'collected': 400.0}, {'index': 'out', 'max_pressure': 200, 'limit': 1000, 'collected': 0.0}]",
-                        "transactions": "[[2, 4.0, 400.0]]",
+                        "transactions": "[[3, 5.0, 400.0]]",
                     }
                 },
                 "Queue (SticksQueue)": {
                     "queue": [
                         {
-                            "value": 400.0,
-                            "df": "[{'index': 'in', 'max_pressure': 100, 'limit': 1000, 'collected': 400.0}, {'index': 'out', 'max_pressure': 100, 'limit': 1000, 'collected': 0.0}]",
-                            "transactions": "[[0, 2, 200.0], [2, 4.0, 200.0]]",
+                            "value": 100.0,
+                            "df": "[{'index': 'in', 'max_pressure': 100, 'limit': 100, 'collected': 100.0}, {'index': 'out', 'max_pressure': 100, 'limit': 100, 'collected': 0.0}]",
+                            "transactions": "[[0, 1.0, 100.0]]",
                         },
                         {
-                            "value": 0,
-                            "df": "[{'index': 'in', 'max_pressure': 100, 'limit': 1000, 'collected': 0.0}, {'index': 'out', 'max_pressure': 100, 'limit': 1000, 'collected': 0.0}]",
-                            "transactions": "[]",
+                            "value": 300.0,
+                            "df": "[{'index': 'in', 'max_pressure': 100, 'limit': 1000, 'collected': 300.0}, {'index': 'out', 'max_pressure': 100, 'limit': 1000, 'collected': 0.0}]",
+                            "transactions": "[[2.0, 3, 100.0], [3, 5.0, 200.0]]",
                         },
                     ],
-                    "breaks": [],
+                    "breaks": [[1.0, 2.0]],
                 },
             },
         }
