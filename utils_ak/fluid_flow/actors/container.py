@@ -85,20 +85,18 @@ class Container(Actor, PipeMixin):
         add_value(ts, "in", (ts - self.last_ts) * self.speed("in") * factor)
         add_value(ts, "out", -(ts - self.last_ts) * self.speed("out"))
 
+    def is_limit_reached(self, orient):
+        return (
+            self.df.at[orient, "limit"] and abs(self.df.at[orient, "collected"] - self.df.at[orient, "limit"]) < ERROR
+        )
+
     def update_pressure(self, ts, orients=("in", "out")):
         """Disable pressure if limit is specified and limit is reached"""
         for orient in orients:
             if self.pipe(orient):
                 self.pipe(orient).set_pressure(
                     orient=orient,
-                    pressure=(
-                        self.df.at[orient, "max_pressure"]
-                        if not (
-                            limit_reached := self.df.at[orient, "limit"]
-                            and abs(self.df.at[orient, "collected"] - self.df.at[orient, "limit"]) < ERROR
-                        )
-                        else 0
-                    ),
+                    pressure=(self.df.at[orient, "max_pressure"] if not self.is_limit_reached(orient) else 0),
                     item=self.item,
                 )
 

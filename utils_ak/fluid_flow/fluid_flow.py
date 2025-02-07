@@ -1,8 +1,9 @@
 from utils_ak.coder import cast_js
-from utils_ak.fluid_flow import Actor
+from utils_ak.fluid_flow.actor import Actor
+from utils_ak.fluid_flow.actors.pipe import pipe_connect
+from utils_ak.fluid_flow.actors.stub import Stub
 from utils_ak.simple_event_manager import SimpleEventManager
 
-from utils_ak.fluid_flow.actors import pipe_connect, Stub
 from loguru import logger
 
 """

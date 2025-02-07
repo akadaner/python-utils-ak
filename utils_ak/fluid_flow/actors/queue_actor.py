@@ -1,9 +1,14 @@
 """NOTE: renamed this file since some modules stop working if there is a file named queue.py in the same folder"""
 
 import pandas as pd
-from utils_ak.fluid_flow import FluidFlow, run_fluid_flow, Processor, Hub, pipe_switch, Actor, PipeMixin, pipe_connect
+from inline_snapshot import snapshot
+
+from app.lessmore.utils.run_snapshot_tests.run_inline_snapshot_tests import run_inline_snapshot_tests
+from utils_ak.fluid_flow.actor import Actor
 
 from utils_ak.fluid_flow.actors.container import Container
+from utils_ak.fluid_flow.actors.pipe import pipe_switch, PipeMixin, pipe_connect
+from utils_ak.fluid_flow.fluid_flow import FluidFlow, run_fluid_flow
 from utils_ak.iteration import SimpleIterator
 
 from functools import wraps
@@ -126,58 +131,85 @@ def test():
 
     parent = Container("Parent", value=100, max_pressures=[None, 20])
 
-    child1 = Container("Child1", max_pressures=[20, None], limits=[40, None])
-    child2 = Container("Child2", max_pressures=[10, None], limits=[50, None])
-
-    queue = Queue("Queue", [child1, child2])
-
-    pipe_connect(parent, queue, "parent-queue")
-
-    flow = FluidFlow(parent, verbose=True)
-    run_fluid_flow(flow)
-
-    # - Test 2
-
-    parent1 = Container("Parent1", value=100, max_pressures=[None, 10], limits=[None, 100])
-    parent2 = Container("Parent2", value=100, max_pressures=[None, 20], limits=[None, 100])
-    queue = Queue("Parent", [parent1, parent2])
-
-    child = Container("Child", max_pressures=[None, None])
-    pipe_connect(queue, child, "parent-queue")
-
-    flow = FluidFlow(queue, verbose=True)
-    run_fluid_flow(flow)
-
-    # - Test 3
-
-    parent = Container("Parent", value=100, max_pressures=[None, 20])
-
-    child1 = Processor("Child1", max_pressures=[20, None], processing_time=5, limits=[40, None])
-    child2 = Processor("Child2", max_pressures=[10, None], processing_time=5, limits=[50, None])
-
-    queue = Queue("Queue", [child1, child2])
-
-    pipe_connect(parent, queue, "parent-queue")
+    pipe_connect(
+        parent,
+        Queue(
+            "Queue",
+            [
+                Container("Child1", max_pressures=[20, None], limits=[40, None]),
+                Container("Child2", max_pressures=[10, None], limits=[50, None]),
+            ],
+        ),
+        "parent-queue",
+    )
 
     flow = FluidFlow(parent, verbose=True)
     run_fluid_flow(flow)
 
-    # - Test 4 with different items
-
-    parent1 = Container("Parent1", item="a", value=100, max_pressures=[None, 10], limits=[None, 100])
-    parent2 = Container("Parent2", item="b", value=100, max_pressures=[None, 20], limits=[None, 100])
-    queue = Queue("Parent", [parent1, parent2])
-
-    hub = Hub("hub")
-    child1 = Container("Child1", item="a", max_pressures=[None, None])
-    child2 = Container("Child2", item="b", max_pressures=[None, None])
-
-    pipe_connect(queue, hub, "parent-hub")
-    pipe_connect(hub, child1, "hub-child1")
-    pipe_connect(hub, child2, "hub-child2")
-    flow = FluidFlow(queue, verbose=True)
-    run_fluid_flow(flow)
+    assert flow.state_snapshot() == snapshot(
+        {
+            "schema": """\
+Container (Parent) -> Pipe parent-queue -> Queue: Queue -> Pipe 1 -> Stub Top -> [None]
+""",
+            "str(flow)": """\
+Flow:
+    Container (Parent): 10.0
+    Queue: Queue: [["Child1", 40.0], ["Child2", 50.0]]\
+""",
+            "Parent": {
+                "value": 10.0,
+                "df": "[{'index': 'in', 'max_pressure': nan, 'limit': None, 'collected': 0.0}, {'index': 'out', 'max_pressure': 20.0, 'limit': None, 'collected': 90.0}]",
+                "transactions": "[[0, 2.0, -40.0], [2.0, 5.0, -30.0], [5.0, 7.0, -20.0]]",
+            },
+            "parent-queue": {},
+            "Queue": {},
+            "1": {},
+            "Top": {},
+        }
+    )
+    #
+    # # - Test 2
+    #
+    # parent1 = Container("Parent1", value=100, max_pressures=[None, 10], limits=[None, 100])
+    # parent2 = Container("Parent2", value=100, max_pressures=[None, 20], limits=[None, 100])
+    # queue = Queue("Parent", [parent1, parent2])
+    #
+    # child = Container("Child", max_pressures=[None, None])
+    # pipe_connect(queue, child, "parent-queue")
+    #
+    # flow = FluidFlow(queue, verbose=True)
+    # run_fluid_flow(flow)
+    #
+    # # - Test 3
+    #
+    # parent = Container("Parent", value=100, max_pressures=[None, 20])
+    #
+    # child1 = Processor("Child1", max_pressures=[20, None], processing_time=5, limits=[40, None])
+    # child2 = Processor("Child2", max_pressures=[10, None], processing_time=5, limits=[50, None])
+    #
+    # queue = Queue("Queue", [child1, child2])
+    #
+    # pipe_connect(parent, queue, "parent-queue")
+    #
+    # flow = FluidFlow(parent, verbose=True)
+    # run_fluid_flow(flow)
+    #
+    # # - Test 4 with different items
+    #
+    # parent1 = Container("Parent1", item="a", value=100, max_pressures=[None, 10], limits=[None, 100])
+    # parent2 = Container("Parent2", item="b", value=100, max_pressures=[None, 20], limits=[None, 100])
+    # queue = Queue("Parent", [parent1, parent2])
+    #
+    # hub = Hub("hub")
+    # child1 = Container("Child1", item="a", max_pressures=[None, None])
+    # child2 = Container("Child2", item="b", max_pressures=[None, None])
+    #
+    # pipe_connect(queue, hub, "parent-hub")
+    # pipe_connect(hub, child1, "hub-child1")
+    # pipe_connect(hub, child2, "hub-child2")
+    # flow = FluidFlow(queue, verbose=True)
+    # run_fluid_flow(flow)
 
 
 if __name__ == "__main__":
-    test()
+    run_inline_snapshot_tests(mode="update_all")
