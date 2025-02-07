@@ -108,6 +108,12 @@ class Processor(Actor, PipeMixin):
     def active_periods(self, orient="in"):
         return self.io_containers[orient].active_periods()
 
+    def state_snapshot(self):
+        return {
+            "in": self.io_containers["in"].state_snapshot(),
+            "out": self.io_containers["out"].state_snapshot(),
+        }
+
     # - Updaters
 
     @switch
@@ -182,14 +188,25 @@ Flow:
                     "transactions": "[[0, 10.0, -100.0]]",
                 },
                 "1": {},
-                "Output": {},
+                "Output": {
+                    "in": {
+                        "value": 0.0,
+                        "df": "[{'index': 'in', 'max_pressure': None, 'limit': None, 'collected': 100.0}, {'index': 'out', 'max_pressure': None, 'limit': None, 'collected': 100.0}]",
+                        "transactions": "[[0, 10.0, 100.0], [0, 10.0, -100.0]]",
+                    },
+                    "out": {
+                        "value": 100.0,
+                        "df": "[{'index': 'in', 'max_pressure': None, 'limit': None, 'collected': 100.0}, {'index': 'out', 'max_pressure': None, 'limit': None, 'collected': 0.0}]",
+                        "transactions": "[[0, 10.0, 100.0]]",
+                    },
+                },
                 "2": {},
                 "Top": {},
             },
         }
     )
 
-    # - Test 2
+    # - Test 2: lag and transformation factor
 
     container = Container("Input", value=100)
     processor = Processor("Output", lag=5, max_pressures=[10, None], transformation_factor=2.0)
@@ -201,7 +218,7 @@ Container (Input) -> Pipe 3 -> Processor: Output -> Pipe 4 -> Stub Top -> [None]
 """,
             "str(flow)": """\
 Flow:
-    Processor: Output: [0.0, 100.0]\
+    Processor: Output: [0.0, 200.0]\
 """,
             "nodes": {
                 "Input": {
@@ -210,7 +227,18 @@ Flow:
                     "transactions": "[[0, 5, -50.0], [5, 10.0, -50.0]]",
                 },
                 "3": {},
-                "Output": {},
+                "Output": {
+                    "in": {
+                        "value": 0.0,
+                        "df": "[{'index': 'in', 'max_pressure': 10.0, 'limit': None, 'collected': 100.0}, {'index': 'out', 'max_pressure': nan, 'limit': None, 'collected': 100.0}]",
+                        "transactions": "[[0, 5, 50.0], [5, 10.0, 50.0], [5, 10.0, -50.0], [10.0, 15.0, -50.0]]",
+                    },
+                    "out": {
+                        "value": 200.0,
+                        "df": "[{'index': 'in', 'max_pressure': None, 'limit': None, 'collected': 200.0}, {'index': 'out', 'max_pressure': None, 'limit': None, 'collected': 0.0}]",
+                        "transactions": "[[5, 10.0, 100.0], [10.0, 15.0, 100.0]]",
+                    },
+                },
                 "4": {},
                 "Top": {},
             },
@@ -239,7 +267,18 @@ Flow:
                     "transactions": "[]",
                 },
                 "5": {},
-                "Output": {},
+                "Output": {
+                    "in": {
+                        "value": 0,
+                        "df": "[{'index': 'in', 'max_pressure': 0.0, 'limit': None, 'collected': 0.0}, {'index': 'out', 'max_pressure': nan, 'limit': None, 'collected': 0.0}]",
+                        "transactions": "[]",
+                    },
+                    "out": {
+                        "value": 0,
+                        "df": "[{'index': 'in', 'max_pressure': nan, 'limit': None, 'collected': 0.0}, {'index': 'out', 'max_pressure': 0.0, 'limit': None, 'collected': 0.0}]",
+                        "transactions": "[]",
+                    },
+                },
                 "6": {},
                 "Top": {},
             },
@@ -268,7 +307,18 @@ Flow:
                     "transactions": "[[0, 5.0, -50.0]]",
                 },
                 "7": {},
-                "Output": {},
+                "Output": {
+                    "in": {
+                        "value": 0.0,
+                        "df": "[{'index': 'in', 'max_pressure': None, 'limit': 50.0, 'collected': 50.0}, {'index': 'out', 'max_pressure': None, 'limit': nan, 'collected': 50.0}]",
+                        "transactions": "[[0, 5.0, 50.0], [0, 5.0, -50.0]]",
+                    },
+                    "out": {
+                        "value": 50.0,
+                        "df": "[{'index': 'in', 'max_pressure': None, 'limit': None, 'collected': 50.0}, {'index': 'out', 'max_pressure': None, 'limit': None, 'collected': 0.0}]",
+                        "transactions": "[[0, 5.0, 50.0]]",
+                    },
+                },
                 "8": {},
                 "Top": {},
             },

@@ -42,7 +42,7 @@ class Pipe(Actor):
             self.current_speed = 0
 
     def __str__(self):
-        return f"Pipe {self.name}"
+        return f"Pipe ({self.name})"
 
     def stats(self):
         return {"current_speed": self.current_speed, "pressures": self.pressures}
