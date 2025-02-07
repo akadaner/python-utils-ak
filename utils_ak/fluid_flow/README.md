@@ -33,7 +33,3 @@ To better understand the capabilities of the library, review the tests in the fo
 - Sequence
 - Queue
 - Hub
-
----
-
-Now, everything is grammatically correct and properly structured. Let me know if you need any further adjustments! 😊
