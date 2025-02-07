@@ -42,7 +42,7 @@ class Pipe(Actor):
             self.current_speed = 0
 
     def __str__(self):
-        return "Pipe" # todo later: make properly, it is this way for schema to be prettier in dag node
+        return f"Pipe {self.name}"
 
     def stats(self):
         return {"current_speed": self.current_speed, "pressures": self.pressures}
@@ -82,7 +82,9 @@ class PipeMixin:
 
 def pipe_connect(node1, node2, pipe=None):
     if not pipe:
-        pipe = cast_pipe(f"[{node1} -> {node2}]")
+        # todo later: hardcode, make properly. This way it's easier to navigate between them all
+        setattr(pipe_connect, "counter", getattr(pipe_connect, "counter", 0) + 1)
+        pipe = cast_pipe(str(pipe_connect.counter))
     else:
         pipe = cast_pipe(pipe)
     connect(node1, pipe)
@@ -137,35 +139,36 @@ def test():
 
     pipe_connect(ci1, co1, "1")
     pipe_connect(ci2, co2, "2")
-
-    for node in ci1.iterate():
-        print(node)
-    for node in ci2.iterate():
-        print(node)
-    print()
-
-    pipe_switch(co1, co2, "in")
-
-    for node in ci1.iterate():
-        print(node)
-    for node in ci2.iterate():
-        print(node)
-    print()
+    assert ci1.schema() == snapshot("""\
+Container (I1) -> Pipe 1 -> Container (O1) -> [None]
+""")
+    assert ci2.schema() == snapshot("""\
+Container (I2) -> Pipe 2 -> Container (O2) -> [None]
+""")
 
     pipe_switch(co1, co2, "in")
-    for node in ci1.iterate():
-        print(node)
-    for node in ci2.iterate():
-        print(node)
-    print()
+    assert ci1.schema() == snapshot("""\
+Container (I1) -> Pipe 1 -> Container (O2) -> [None]
+""")
+    assert ci2.schema() == snapshot("""\
+Container (I2) -> Pipe 2 -> Container (O1) -> [None]
+""")
+
+    pipe_switch(co1, co2, "in")
+    assert ci1.schema() == snapshot("""\
+Container (I1) -> Pipe 1 -> Container (O1) -> [None]
+""")
+    assert ci2.schema() == snapshot("""\
+Container (I2) -> Pipe 2 -> Container (O2) -> [None]
+""")
 
     pipe_switch(ci1, ci2, "out")
-
-    for node in ci1.iterate():
-        print(node)
-    for node in ci2.iterate():
-        print(node)
-    print()
+    assert ci1.schema() == snapshot("""\
+Container (I1) -> Pipe 2 -> Container (O2) -> [None]
+""")
+    assert ci2.schema() == snapshot("""\
+Container (I2) -> Pipe 1 -> Container (O1) -> [None]
+""")
 
     # - Test pipe switch 2
 
@@ -175,15 +178,16 @@ def test():
 
     pipe_connect(ci1, co1)
 
-    for node in ci1.iterate():
-        print(node)
-    print()
+    assert ci1.schema() == snapshot("""\
+Container (I1) -> Pipe 1 -> Container (O1) -> [None]
+""")
+
     pipe_switch(co1, co2, "in")
 
-    for node in ci1.iterate():
-        print(node)
-    print()
+    assert ci1.schema() == snapshot("""\
+Container (I1) -> Pipe 1 -> Container (O2) -> [None]
+""")
 
 
 if __name__ == "__main__":
-    test()
+    run_inline_snapshot_tests(mode="update_all")

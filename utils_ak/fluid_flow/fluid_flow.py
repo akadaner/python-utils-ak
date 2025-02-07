@@ -29,7 +29,7 @@ class FluidFlow:
 
         top = Stub("Top")
         for i, leaf in enumerate(self.root.leaves()):
-            pipe_connect(leaf, top, f"[Top parent {i}]")
+            pipe_connect(leaf, top)
 
     def __str__(self):
         values = ["Flow:"]

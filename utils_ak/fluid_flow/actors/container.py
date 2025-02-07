@@ -158,7 +158,7 @@ def test():
     assert flow.state_snapshot() == snapshot(
         {
             "schema": """\
-Container (Input) -> Pipe -> Container (Output) -> Pipe -> Stub Top -> [None]
+Container (Input) -> Pipe 1 -> Container (Output) -> Pipe 2 -> Stub Top -> [None]
 """,
             "str(flow)": """\
 Flow:
@@ -169,13 +169,13 @@ Flow:
                 "df": "[{'index': 'in', 'max_pressure': nan, 'limit': None, 'collected': 0.0}, {'index': 'out', 'max_pressure': 50.0, 'limit': None, 'collected': 100.0}]",
                 "transactions": "[[0, 2.0, -100.0]]",
             },
-            "[Container (Input) -> Container (Output)]": {},
+            "1": {},
             "Output": {
                 "value": 100.0,
                 "df": "[{'index': 'in', 'max_pressure': None, 'limit': None, 'collected': 100.0}, {'index': 'out', 'max_pressure': None, 'limit': None, 'collected': 0.0}]",
                 "transactions": "[[0, 2.0, 100.0]]",
             },
-            "[Top parent 0]": {},
+            "2": {},
             "Top": {},
         }
     )
@@ -193,7 +193,7 @@ Flow:
     assert flow.state_snapshot() == snapshot(
         {
             "schema": """\
-Container (Input) -> Pipe -> Container (Output) -> Pipe -> Stub Top -> [None]
+Container (Input) -> Pipe 3 -> Container (Output) -> Pipe 4 -> Stub Top -> [None]
 """,
             "str(flow)": """\
 Flow:
@@ -204,13 +204,13 @@ Flow:
                 "df": "[{'index': 'in', 'max_pressure': nan, 'limit': None, 'collected': 0.0}, {'index': 'out', 'max_pressure': 50.0, 'limit': None, 'collected': 100.0}]",
                 "transactions": "[[0, 2.0, -100.0]]",
             },
-            "[Container (Input) -> Container (Output)]": {},
+            "3": {},
+            "4": {},
             "Output": {
                 "value": 100.0,
                 "df": "[{'index': 'in', 'max_pressure': None, 'limit': None, 'collected': 100.0}, {'index': 'out', 'max_pressure': None, 'limit': None, 'collected': 0.0}]",
                 "transactions": "[[0, 2.0, 100.0]]",
             },
-            "[Top parent 0]": {},
             "Top": {},
         }
     )
@@ -228,7 +228,7 @@ Flow:
     assert flow.state_snapshot() == snapshot(
         {
             "schema": """\
-Container (Input) -> Pipe -> Container (Output) -> Pipe -> Stub Top -> [None]
+Container (Input) -> Pipe 5 -> Container (Output) -> Pipe 6 -> Stub Top -> [None]
 """,
             "str(flow)": """\
 Flow:
@@ -240,13 +240,13 @@ Flow:
                 "df": "[{'index': 'in', 'max_pressure': nan, 'limit': nan, 'collected': 0.0}, {'index': 'out', 'max_pressure': 50.0, 'limit': 30.0, 'collected': 30.0}]",
                 "transactions": "[[0, 0.6, -30.0]]",
             },
-            "[Container (Input) -> Container (Output)]": {},
+            "5": {},
+            "6": {},
             "Output": {
                 "value": 30.0,
                 "df": "[{'index': 'in', 'max_pressure': None, 'limit': None, 'collected': 30.0}, {'index': 'out', 'max_pressure': None, 'limit': None, 'collected': 0.0}]",
                 "transactions": "[[0, 0.6, 30.0]]",
             },
-            "[Top parent 0]": {},
             "Top": {},
         }
     )
@@ -264,7 +264,7 @@ Flow:
     assert flow.state_snapshot() == snapshot(
         {
             "schema": """\
-Container (Input) -> Pipe -> Container (Output) -> Pipe -> Stub Top -> [None]
+Container (Input) -> Pipe 7 -> Container (Output) -> Pipe 8 -> Stub Top -> [None]
 """,
             "str(flow)": """\
 Flow:
@@ -276,13 +276,13 @@ Flow:
                 "df": "[{'index': 'in', 'max_pressure': nan, 'limit': nan, 'collected': 0.0}, {'index': 'out', 'max_pressure': 50.0, 'limit': 30.0, 'collected': 20.0}]",
                 "transactions": "[[0, 4.0, -20.0]]",
             },
-            "[Container (Input) -> Container (Output)]": {},
+            "7": {},
+            "8": {},
             "Output": {
                 "value": 20.0,
                 "df": "[{'index': 'in', 'max_pressure': 5.0, 'limit': 20.0, 'collected': 20.0}, {'index': 'out', 'max_pressure': nan, 'limit': nan, 'collected': 0.0}]",
                 "transactions": "[[0, 4.0, 20.0]]",
             },
-            "[Top parent 0]": {},
             "Top": {},
         }
     )
