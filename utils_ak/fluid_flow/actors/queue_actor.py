@@ -203,7 +203,7 @@ def test():
             "schema": """\
 Container (Parent) -> Queue (Queue)
 """,
-            "str(flow)": """\
+            "str(self)": """\
 Flow:
     Container (Parent): 10.0
     Queue (Queue): [["Child1", 40.0], ["Child2", 50.0]]\
@@ -247,7 +247,7 @@ Flow:
             "schema": """\
 Queue (Parent) -> Container (Child)
 """,
-            "str(flow)": """\
+            "str(self)": """\
 Flow:
     Queue (Parent): [["Parent1", 0.0], ["Parent2", 0.0]]
     Container (Child): 200.0\

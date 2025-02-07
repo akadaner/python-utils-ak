@@ -160,7 +160,7 @@ def test():
             "schema": """\
 Container (Input) -> Container (Output)
 """,
-            "str(flow)": """\
+            "str(self)": """\
 Flow:
     Container (Output): 100.0\
 """,
@@ -191,7 +191,7 @@ Flow:
             "schema": """\
 Container (Input) -> Container (Output)
 """,
-            "str(flow)": """\
+            "str(self)": """\
 Flow:
     Container (Input): 70.0
     Container (Output): 30.0\
@@ -225,7 +225,7 @@ Flow:
             "schema": """\
 Container (C1) -> Container (C2) -> Container (C3)
 """,
-            "str(flow)": """\
+            "str(self)": """\
 Flow:
     Container (C1): 80.0
     Container (C3): 20.0\

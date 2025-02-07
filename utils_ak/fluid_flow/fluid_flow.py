@@ -59,7 +59,7 @@ class FluidFlow:
     def state_snapshot(self):
         result = {
             "schema": self.root.schema(skip_rule=lambda node: isinstance(node, Pipe) or isinstance(node, Plug)),
-            "str(flow)": str(self),
+            "str(self)": str(self),
             "nodes": {},
         }
 

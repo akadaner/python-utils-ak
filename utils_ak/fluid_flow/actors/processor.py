@@ -179,7 +179,7 @@ def test():
             "schema": """\
 Container (Input) -> Processor: Output
 """,
-            "str(flow)": """\
+            "str(self)": """\
 Flow:
     Processor: Output: [0.0, 100.0]\
 """,
@@ -215,7 +215,7 @@ Flow:
             "schema": """\
 Container (Input) -> Processor: Output
 """,
-            "str(flow)": """\
+            "str(self)": """\
 Flow:
     Processor: Output: [0.0, 200.0]\
 """,
@@ -251,7 +251,7 @@ Flow:
             "schema": """\
 Container (Input) -> Processor: Output
 """,
-            "str(flow)": """\
+            "str(self)": """\
 Flow:
     Container (Input): 100
     Processor: Output: [0, 0]\
@@ -288,7 +288,7 @@ Flow:
             "schema": """\
 Container (Input) -> Processor: Output
 """,
-            "str(flow)": """\
+            "str(self)": """\
 Flow:
     Container (Input): 50.0
     Processor: Output: [0.0, 50.0]\

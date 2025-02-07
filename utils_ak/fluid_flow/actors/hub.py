@@ -107,7 +107,7 @@ Container (Parent) -> Hub (Hub) -> [Pipe (2), Pipe (3)]
 Pipe (2) -> Container (Child1) -> [Plug (Bottom)]
 Pipe (3) -> Container (Child2) -> [Plug (Bottom)]
 """,
-            "str(flow)": """\
+            "str(self)": """\
 Flow:
     Container (Child1): 75.0
     Container (Child2): 25.0\
@@ -152,7 +152,7 @@ Container (Parent) -> Hub (Hub) -> [Pipe (7), Pipe (8)]
 Pipe (7) -> Container (Child1) -> [Plug (Bottom)]
 Pipe (8) -> Container (Child2) -> [Plug (Bottom)]
 """,
-            "str(flow)": """\
+            "str(self)": """\
 Flow:
     Container (Child1): 30.0
     Container (Child2): 70.0\
@@ -197,7 +197,7 @@ Container (Parent:a) -> Hub (Hub) -> [Pipe (12), Pipe (13)]
 Pipe (12) -> Container (Child1:b) -> [Plug (Bottom)]
 Pipe (13) -> Container (Child2:a) -> [Plug (Bottom)]
 """,
-            "str(flow)": """\
+            "str(self)": """\
 Flow:
     Container (Child2:a): 100.0\
 """,

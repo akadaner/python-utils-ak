@@ -124,7 +124,7 @@ def test():
             "schema": """\
 Container (Input) -> Sequence (Sequence) -> Container (Ouput)
 """,
-            "str(flow)": """\
+            "str(self)": """\
 Flow:
     Sequence (Sequence): [0.0, 0.0, 0.0]
     Container (Ouput): 100.0\
@@ -185,7 +185,7 @@ Flow:
             "schema": """\
 Container (Input) -> Sequence (Sequence) -> Container (Output)
 """,
-            "str(flow)": """\
+            "str(self)": """\
 Flow:
     Sequence (Sequence): [0.0, 0.0]
     Container (Output): 100.0\
