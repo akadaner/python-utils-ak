@@ -53,7 +53,7 @@ class Container(Actor, PipeMixin):
         return [[self.item, self.transactions[0][0], self.transactions[-1][1]]]
 
     def __str__(self):
-        return f"Container {self.name}:{self.item}"
+        return f"Container ({self.name}{':' + self.item if self.item != 'default' else ''})"
 
     def stats(self):
         return {"value": self.value}
@@ -158,21 +158,24 @@ def test():
     assert flow.state_snapshot() == snapshot(
         {
             "schema": """\
+Container (Input) -> Pipe -> Container (Output) -> Pipe -> Stub Top -> [None]
+""",
+            "str(flow)": """\
 Flow:
-    Container Output:default: 100.0\
+    Container (Output): 100.0\
 """,
             "Input": {
                 "value": 0.0,
                 "df": "[{'index': 'in', 'max_pressure': nan, 'limit': None, 'collected': 0.0}, {'index': 'out', 'max_pressure': 50.0, 'limit': None, 'collected': 100.0}]",
                 "transactions": "[[0, 2.0, -100.0]]",
             },
-            "Container Input:default -> Container Output:default": {},
+            "[Container (Input) -> Container (Output)]": {},
             "Output": {
                 "value": 100.0,
                 "df": "[{'index': 'in', 'max_pressure': None, 'limit': None, 'collected': 100.0}, {'index': 'out', 'max_pressure': None, 'limit': None, 'collected': 0.0}]",
                 "transactions": "[[0, 2.0, 100.0]]",
             },
-            "Top parent 0": {},
+            "[Top parent 0]": {},
             "Top": {},
         }
     )
@@ -190,21 +193,24 @@ Flow:
     assert flow.state_snapshot() == snapshot(
         {
             "schema": """\
+Container (Input) -> Pipe -> Container (Output) -> Pipe -> Stub Top -> [None]
+""",
+            "str(flow)": """\
 Flow:
-    Container Output:default: 100.0\
+    Container (Output): 100.0\
 """,
             "Input": {
                 "value": 0.0,
                 "df": "[{'index': 'in', 'max_pressure': nan, 'limit': None, 'collected': 0.0}, {'index': 'out', 'max_pressure': 50.0, 'limit': None, 'collected': 100.0}]",
                 "transactions": "[[0, 2.0, -100.0]]",
             },
-            "Container Input:default -> Container Output:default": {},
+            "[Container (Input) -> Container (Output)]": {},
             "Output": {
                 "value": 100.0,
                 "df": "[{'index': 'in', 'max_pressure': None, 'limit': None, 'collected': 100.0}, {'index': 'out', 'max_pressure': None, 'limit': None, 'collected': 0.0}]",
                 "transactions": "[[0, 2.0, 100.0]]",
             },
-            "Top parent 0": {},
+            "[Top parent 0]": {},
             "Top": {},
         }
     )
@@ -222,22 +228,25 @@ Flow:
     assert flow.state_snapshot() == snapshot(
         {
             "schema": """\
+Container (Input) -> Pipe -> Container (Output) -> Pipe -> Stub Top -> [None]
+""",
+            "str(flow)": """\
 Flow:
-    Container Input:default: 70.0
-    Container Output:default: 30.0\
+    Container (Input): 70.0
+    Container (Output): 30.0\
 """,
             "Input": {
                 "value": 70.0,
                 "df": "[{'index': 'in', 'max_pressure': nan, 'limit': nan, 'collected': 0.0}, {'index': 'out', 'max_pressure': 50.0, 'limit': 30.0, 'collected': 30.0}]",
                 "transactions": "[[0, 0.6, -30.0]]",
             },
-            "Container Input:default -> Container Output:default": {},
+            "[Container (Input) -> Container (Output)]": {},
             "Output": {
                 "value": 30.0,
                 "df": "[{'index': 'in', 'max_pressure': None, 'limit': None, 'collected': 30.0}, {'index': 'out', 'max_pressure': None, 'limit': None, 'collected': 0.0}]",
                 "transactions": "[[0, 0.6, 30.0]]",
             },
-            "Top parent 0": {},
+            "[Top parent 0]": {},
             "Top": {},
         }
     )
@@ -255,22 +264,25 @@ Flow:
     assert flow.state_snapshot() == snapshot(
         {
             "schema": """\
+Container (Input) -> Pipe -> Container (Output) -> Pipe -> Stub Top -> [None]
+""",
+            "str(flow)": """\
 Flow:
-    Container Input:default: 80.0
-    Container Output:default: 20.0\
+    Container (Input): 80.0
+    Container (Output): 20.0\
 """,
             "Input": {
                 "value": 80.0,
                 "df": "[{'index': 'in', 'max_pressure': nan, 'limit': nan, 'collected': 0.0}, {'index': 'out', 'max_pressure': 50.0, 'limit': 30.0, 'collected': 20.0}]",
                 "transactions": "[[0, 4.0, -20.0]]",
             },
-            "Container Input:default -> Container Output:default": {},
+            "[Container (Input) -> Container (Output)]": {},
             "Output": {
                 "value": 20.0,
                 "df": "[{'index': 'in', 'max_pressure': 5.0, 'limit': 20.0, 'collected': 20.0}, {'index': 'out', 'max_pressure': nan, 'limit': nan, 'collected': 0.0}]",
                 "transactions": "[[0, 4.0, 20.0]]",
             },
-            "Top parent 0": {},
+            "[Top parent 0]": {},
             "Top": {},
         }
     )

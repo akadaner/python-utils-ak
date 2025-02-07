@@ -1,5 +1,11 @@
 """LEGACY CODE (2025-02-07)"""
 
+from collections import deque
+
+from inline_snapshot import snapshot
+
+from app.lessmore.utils.run_snapshot_tests.run_inline_snapshot_tests import run_inline_snapshot_tests
+
 
 class DAGNode:
     def __init__(self):
@@ -92,6 +98,33 @@ class DAGNode:
         for node in self._iter_node_as_tree_recursive(self):
             yield node
 
+    def schema(self):
+        """Prints the entire DAG from this node using BFS with proper chain handling."""
+        result = ""
+        visited = set()
+        queue = deque([self])
+
+        while queue:
+            node = queue.popleft()
+            if node in visited:
+                continue
+
+            visited.add(node)
+            chain = [str(node)]
+
+            while len(node.children) == 1 and len(node.children[0].parents) == 1:
+                node = node.children[0]
+                chain.append(str(node))
+                visited.add(node)
+
+            child_names = ", ".join(str(c) for c in node.children) if node.children else "None"
+            result += f"{' -> '.join(chain)} -> [{child_names}]\n"
+
+            for child in node.children:
+                if child not in visited:
+                    queue.append(child)
+        return result
+
 
 def connect(parent, child, safe=True):
     if safe and (not parent or not child):
@@ -121,6 +154,21 @@ def test():
         def __repr__(self):
             return self.name
 
+    # - Test chain
+
+    root = NamedNode("root")
+    node1 = NamedNode("1")
+    node2 = NamedNode("2")
+    node3 = NamedNode("3")
+    node4 = NamedNode("4")
+
+    connect(root, node1)
+    connect(node1, node2)
+    connect(node2, node3)
+    connect(node3, node4)
+
+    assert root.schema() == snapshot("root -> 1 -> 2 -> 3 -> 4 -> [None]\n")
+
     # - Test diamond: root_up -> node1, node2 -> root_down
 
     # -- Init diamond
@@ -134,6 +182,13 @@ def test():
     connect(root_up, node2)
     connect(node1, root_down)
     connect(node2, root_down)
+
+    assert root_up.schema() == snapshot("""\
+root_up -> [1, 2]
+1 -> [root_down]
+2 -> [root_down]
+root_down -> [None]
+""")
 
     # -- Test iteration
 
@@ -168,6 +223,12 @@ def test():
     connect(root_up, node1)
     connect(root_up, node2)
 
+    assert root_up.schema() == snapshot("""\
+root_up -> [1, 2]
+1 -> [None]
+2 -> [None]
+""")
+
     # -- Test leaves
 
     assert list(root_up.leaves()) == [node1, node2]
@@ -189,4 +250,4 @@ def test():
 
 
 if __name__ == "__main__":
-    test()
+    run_inline_snapshot_tests()

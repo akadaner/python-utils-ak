@@ -29,7 +29,7 @@ class FluidFlow:
 
         top = Stub("Top")
         for i, leaf in enumerate(self.root.leaves()):
-            pipe_connect(leaf, top, f"Top parent {i}")
+            pipe_connect(leaf, top, f"[Top parent {i}]")
 
     def __str__(self):
         values = ["Flow:"]
@@ -63,7 +63,7 @@ class FluidFlow:
                 print(self)
 
     def state_snapshot(self):
-        result = {"str(flow)": str(self)}
+        result = {"schema": self.root.schema(), "str(flow)": str(self)}
 
         for node in self.root.iterate("down"):
             result[node.name] = node.state_snapshot()

@@ -42,7 +42,7 @@ class Pipe(Actor):
             self.current_speed = 0
 
     def __str__(self):
-        return f"Pipe {self.name}"
+        return "Pipe" # todo later: make properly, it is this way for schema to be prettier in dag node
 
     def stats(self):
         return {"current_speed": self.current_speed, "pressures": self.pressures}
@@ -82,7 +82,7 @@ class PipeMixin:
 
 def pipe_connect(node1, node2, pipe=None):
     if not pipe:
-        pipe = cast_pipe(f"{node1} -> {node2}")
+        pipe = cast_pipe(f"[{node1} -> {node2}]")
     else:
         pipe = cast_pipe(pipe)
     connect(node1, pipe)
@@ -123,3 +123,67 @@ def pipe_switch(node1, node2, orient="in"):
         disconnect(node2, pipe2)
         connect(node2, pipe1)
         connect(node1, pipe2)
+
+
+def test():
+    # - Test pipe switch
+
+    from utils_ak.fluid_flow.actors.container import Container
+
+    ci1 = Container("I1")
+    ci2 = Container("I2")
+    co1 = Container("O1")
+    co2 = Container("O2")
+
+    pipe_connect(ci1, co1, "1")
+    pipe_connect(ci2, co2, "2")
+
+    for node in ci1.iterate():
+        print(node)
+    for node in ci2.iterate():
+        print(node)
+    print()
+
+    pipe_switch(co1, co2, "in")
+
+    for node in ci1.iterate():
+        print(node)
+    for node in ci2.iterate():
+        print(node)
+    print()
+
+    pipe_switch(co1, co2, "in")
+    for node in ci1.iterate():
+        print(node)
+    for node in ci2.iterate():
+        print(node)
+    print()
+
+    pipe_switch(ci1, ci2, "out")
+
+    for node in ci1.iterate():
+        print(node)
+    for node in ci2.iterate():
+        print(node)
+    print()
+
+    # - Test pipe switch 2
+
+    ci1 = Container("I1")
+    co1 = Container("O1")
+    co2 = Container("O2")
+
+    pipe_connect(ci1, co1)
+
+    for node in ci1.iterate():
+        print(node)
+    print()
+    pipe_switch(co1, co2, "in")
+
+    for node in ci1.iterate():
+        print(node)
+    print()
+
+
+if __name__ == "__main__":
+    test()
