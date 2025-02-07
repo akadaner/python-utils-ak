@@ -41,9 +41,9 @@ class Sequence(Actor, PipeMixin):
         return self.nodes
 
     @switch
-    def update_value(self, ts):
+    def update_values(self, ts):
         for node in self.containers:
-            node.update_value(ts)
+            node.update_values(ts)
 
     @switch
     def update_pressure(self, ts):

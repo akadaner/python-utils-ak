@@ -49,6 +49,18 @@ class Actor(DAGNode):
 
     # - Updaters
 
+    def update_values(self, ts):
+        pass
+
+    def update_pressure(self, ts):
+        pass
+
+    def update_speed(self, ts):
+        pass
+
+    def update_triggers(self, ts):
+        pass
+
     def update_last_ts(self, ts):
         self.last_ts = ts
         for actor in self.inner_actors():

@@ -30,20 +30,31 @@ def switch(f):
 
 
 class Queue(Actor, PipeMixin):
-    def __init__(self, name, lines, break_funcs=None):
+    """Queue receives or outputs values sequentially."""
+
+    def __init__(self, name: str, lines: list[Actor], break_funcs_by_orient: dict = {}):
+        # - Arguments
+
         super().__init__(name)
         self.lines = lines
 
-        self.df = pd.DataFrame(index=["in", "out"], columns=["iterators", "break_funcs", "paused"])
-        self.df["iterator"] = [SimpleIterator(lines, 0) for _ in range(2)]
+        # - State dataframe
+
+        self.df = pd.DataFrame(index=["in", "out"], columns=["iterator", "break_func", "paused"])
+        self.df["iterator"] = [
+            SimpleIterator(lines, 0) for _ in range(2)
+        ]  # current line that's receiving or giving the value
         self.df["break_func"] = self.default_break_func
         self.df["paused"] = False
 
-        break_funcs = break_funcs or {}
-        for orient, break_func in break_funcs.items():
+        for orient, break_func in break_funcs_by_orient.items():
             self.df.at[orient, "break_func"] = break_func
 
+        # - Init breaks
+
         self.breaks = []  # ts_beg, ts_end
+
+    # - Private methods
 
     def default_break_func(self, old, new):
         return 0
@@ -51,13 +62,54 @@ class Queue(Actor, PipeMixin):
     def current(self, orient):
         return self.df.at[orient, "iterator"].current()
 
+    # - Generic overrides
+
     def inner_actors(self):
         return self.lines
 
+    def __str__(self):
+        return f"Queue: {self.name}"
+
+    def stats(self):
+        return [[node.name, node.stats()] for node in self.lines]
+
+    def display_stats(self):
+        return [(node.name, node.display_stats()) for node in self.lines]
+
+    def active_periods(self, orient="in"):
+        return sum([node.active_periods(orient) for node in self.lines], [])
+
     @switch
-    def update_value(self, ts):
+    def _on_resume(self, topic, ts, event):
+        self.df.at[event["orient"], "paused"] = False
+        old = self.current(event["orient"])
+        new = self.df.at[event["orient"], "iterator"].next(return_out_strategy="last", update_index=True)
+        pipe_switch(old, new, event["orient"])
+
+    def subscribe(self):
+        super().subscribe()
+        self.event_manager.subscribe(f"queue.resume.{self.id}", self._on_resume)
+
+    def reset(self):
+        super().reset()
+        self.breaks = []
+
+    def state_snapshot(self):
+        return {
+            "queue": [line.state_snapshot() for line in self.lines],
+            "breaks": self.breaks,
+        }
+
+    # - Updaters
+
+    @switch
+    def update_values(self, ts):
+        # - Update value for children
+
         for line in self.lines:
-            line.update_value(ts)
+            line.update_values(ts)
+
+        # -
 
         for orient in ["in", "out"]:
             if self.current(orient).is_limit_reached(orient):
@@ -84,13 +136,6 @@ class Queue(Actor, PipeMixin):
             # print('Current', self.id, orient, self.current(orient), self.current(orient).is_limit_reached(orient), self.current(orient).containers['out'].df)
 
     @switch
-    def on_resume(self, topic, ts, event):
-        self.df.at[event["orient"], "paused"] = False
-        old = self.current(event["orient"])
-        new = self.df.at[event["orient"], "iterator"].next(return_out_strategy="last", update_index=True)
-        pipe_switch(old, new, event["orient"])
-
-    @switch
     def update_pressure(self, ts):
         for node in self.inner_actors():
             node.update_pressure(ts)
@@ -105,29 +150,9 @@ class Queue(Actor, PipeMixin):
         for node in self.inner_actors():
             node.update_triggers(ts)
 
-    def __str__(self):
-        return f"Queue: {self.name}"
-
-    def stats(self):
-        return [[node.name, node.stats()] for node in self.lines]
-
-    def display_stats(self):
-        return [(node.name, node.display_stats()) for node in self.lines]
-
-    def active_periods(self, orient="in"):
-        return sum([node.active_periods(orient) for node in self.lines], [])
-
-    def subscribe(self):
-        super().subscribe()
-        self.event_manager.subscribe(f"queue.resume.{self.id}", self.on_resume)
-
-    def reset(self):
-        super().reset()
-        self.breaks = []
-
 
 def test():
-    # - Test  1
+    # - Test 1: in
 
     parent = Container("Parent", value=100, max_pressures=[None, 20])
 
@@ -143,7 +168,7 @@ def test():
         "parent-queue",
     )
 
-    flow = FluidFlow(parent, verbose=True)
+    flow = FluidFlow(parent)
     run_fluid_flow(flow)
 
     assert flow.state_snapshot() == snapshot(
@@ -156,29 +181,84 @@ Flow:
     Container (Parent): 10.0
     Queue: Queue: [["Child1", 40.0], ["Child2", 50.0]]\
 """,
-            "Parent": {
-                "value": 10.0,
-                "df": "[{'index': 'in', 'max_pressure': nan, 'limit': None, 'collected': 0.0}, {'index': 'out', 'max_pressure': 20.0, 'limit': None, 'collected': 90.0}]",
-                "transactions": "[[0, 2.0, -40.0], [2.0, 5.0, -30.0], [5.0, 7.0, -20.0]]",
+            "nodes": {
+                "Parent": {
+                    "value": 10.0,
+                    "df": "[{'index': 'in', 'max_pressure': nan, 'limit': None, 'collected': 0.0}, {'index': 'out', 'max_pressure': 20.0, 'limit': None, 'collected': 90.0}]",
+                    "transactions": "[[0, 2.0, -40.0], [2.0, 5.0, -30.0], [5.0, 7.0, -20.0]]",
+                },
+                "parent-queue": {},
+                "Queue": {
+                    "queue": [
+                        {
+                            "value": 40.0,
+                            "df": "[{'index': 'in', 'max_pressure': 20.0, 'limit': 40.0, 'collected': 40.0}, {'index': 'out', 'max_pressure': nan, 'limit': nan, 'collected': 0.0}]",
+                            "transactions": "[[0, 2.0, 40.0]]",
+                        },
+                        {
+                            "value": 50.0,
+                            "df": "[{'index': 'in', 'max_pressure': 10.0, 'limit': 50.0, 'collected': 50.0}, {'index': 'out', 'max_pressure': nan, 'limit': nan, 'collected': 0.0}]",
+                            "transactions": "[[2.0, 5.0, 30.0], [5.0, 7.0, 20.0]]",
+                        },
+                    ],
+                    "breaks": [],
+                },
+                "1": {},
+                "Top": {},
             },
-            "parent-queue": {},
-            "Queue": {},
-            "1": {},
-            "Top": {},
         }
     )
-    #
-    # # - Test 2
-    #
-    # parent1 = Container("Parent1", value=100, max_pressures=[None, 10], limits=[None, 100])
-    # parent2 = Container("Parent2", value=100, max_pressures=[None, 20], limits=[None, 100])
-    # queue = Queue("Parent", [parent1, parent2])
-    #
-    # child = Container("Child", max_pressures=[None, None])
-    # pipe_connect(queue, child, "parent-queue")
-    #
-    # flow = FluidFlow(queue, verbose=True)
-    # run_fluid_flow(flow)
+
+    # - Test 2: out
+
+    parent1 = Container("Parent1", value=100, max_pressures=[None, 10], limits=[None, 100])
+    parent2 = Container("Parent2", value=100, max_pressures=[None, 20], limits=[None, 100])
+    queue = Queue("Parent", [parent1, parent2])
+
+    child = Container("Child", max_pressures=[None, None])
+    pipe_connect(queue, child, "parent-queue")
+
+    flow = FluidFlow(queue)
+    run_fluid_flow(flow)
+
+    assert flow.state_snapshot() == snapshot(
+        {
+            "schema": """\
+Queue: Parent -> Pipe parent-queue -> Container (Child) -> Pipe 2 -> Stub Top -> [None]
+""",
+            "str(flow)": """\
+Flow:
+    Queue: Parent: [["Parent1", 0.0], ["Parent2", 0.0]]
+    Container (Child): 200.0\
+""",
+            "nodes": {
+                "Parent": {
+                    "queue": [
+                        {
+                            "value": 0.0,
+                            "df": "[{'index': 'in', 'max_pressure': nan, 'limit': nan, 'collected': 0.0}, {'index': 'out', 'max_pressure': 10.0, 'limit': 100.0, 'collected': 100.0}]",
+                            "transactions": "[[0, 10.0, -100.0]]",
+                        },
+                        {
+                            "value": 0.0,
+                            "df": "[{'index': 'in', 'max_pressure': nan, 'limit': nan, 'collected': 0.0}, {'index': 'out', 'max_pressure': 20.0, 'limit': 100.0, 'collected': 100.0}]",
+                            "transactions": "[[10.0, 15.0, -100.0]]",
+                        },
+                    ],
+                    "breaks": [],
+                },
+                "parent-queue": {},
+                "Child": {
+                    "value": 200.0,
+                    "df": "[{'index': 'in', 'max_pressure': None, 'limit': None, 'collected': 200.0}, {'index': 'out', 'max_pressure': None, 'limit': None, 'collected': 0.0}]",
+                    "transactions": "[[0, 10.0, 100.0], [10.0, 15.0, 100.0]]",
+                },
+                "2": {},
+                "Top": {},
+            },
+        }
+    )
+
     #
     # # - Test 3
     #

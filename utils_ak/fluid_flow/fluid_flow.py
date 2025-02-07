@@ -64,10 +64,10 @@ class FluidFlow:
                 print(self)
 
     def state_snapshot(self):
-        result = {"schema": self.root.schema(), "str(flow)": str(self)}
+        result = {"schema": self.root.schema(), "str(flow)": str(self), "nodes": {}}
 
         for node in self.root.iterate("down"):
-            result[node.name] = node.state_snapshot()
+            result["nodes"][node.name] = node.state_snapshot()
 
         return result
 

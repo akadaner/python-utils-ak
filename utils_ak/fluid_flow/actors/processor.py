@@ -72,9 +72,9 @@ class Processor(Actor, PipeMixin):
         )
 
     @switch
-    def update_value(self, ts):
-        self.io_containers["in"].update_value(ts)
-        self.io_containers["out"].update_value(ts, factor=self.transformation_factor)
+    def update_values(self, ts):
+        self.io_containers["in"].update_values(ts)
+        self.io_containers["out"].update_values(ts, factor=self.transformation_factor)
 
     @switch
     def update_pressure(self, ts):
