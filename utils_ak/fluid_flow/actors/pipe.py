@@ -13,7 +13,11 @@ def cast_pipe(pipe_obj):
 
 
 class Pipe(Actor):
-    """Connects one actor to another."""
+    """Connects one actor to another.
+
+    Pipe has pressures: in, out. Difference between them is the speed of the flow.
+
+    """
 
     def __init__(self, name=None):
         super().__init__(name)
@@ -52,7 +56,7 @@ class Pipe(Actor):
         self.current_item = item
 
 
-class PipeMixin:
+class Piped:
     def pipe(self, orient):
         if orient == "in":
             nodes = self.parents

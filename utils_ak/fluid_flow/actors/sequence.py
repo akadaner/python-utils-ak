@@ -3,7 +3,7 @@ from inline_snapshot import snapshot
 from app.lessmore.utils.run_snapshot_tests.run_inline_snapshot_tests import run_inline_snapshot_tests
 from utils_ak.fluid_flow.actor import Actor
 from utils_ak.fluid_flow.actors.container import Container
-from utils_ak.fluid_flow.actors.pipe import pipe_switch, PipeMixin, pipe_connect
+from utils_ak.fluid_flow.actors.pipe import pipe_switch, Piped, pipe_connect
 from utils_ak.fluid_flow.fluid_flow import FluidFlow
 from utils_ak.iteration import SimpleIterator
 
@@ -34,7 +34,7 @@ def switch(f):
     return inner
 
 
-class Sequence(Actor, PipeMixin):
+class Sequence(Actor, Piped):
     def __init__(self, name: str, containers: list[Actor]):
         # - Init
 
@@ -65,7 +65,7 @@ class Sequence(Actor, PipeMixin):
         return self.nodes
 
     def __str__(self):
-        return f"Sequence: {self.name}"
+        return f"Sequence ({self.name})"
 
     def stats(self):
         return {node.name: node.stats() for node in self.nodes}

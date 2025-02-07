@@ -7,7 +7,7 @@ from app.lessmore.utils.run_snapshot_tests.run_inline_snapshot_tests import run_
 from utils_ak.fluid_flow.actor import Actor
 
 from utils_ak.fluid_flow.actors.container import Container
-from utils_ak.fluid_flow.actors.pipe import pipe_switch, PipeMixin, pipe_connect
+from utils_ak.fluid_flow.actors.pipe import pipe_switch, Piped, pipe_connect
 from utils_ak.fluid_flow.fluid_flow import FluidFlow, run_fluid_flow
 from utils_ak.iteration import SimpleIterator
 
@@ -38,7 +38,7 @@ def switch(f):
     return inner
 
 
-class Queue(Actor, PipeMixin):
+class Queue(Actor, Piped):
     """Queue receives or outputs values sequentially."""
 
     def __init__(
@@ -82,7 +82,7 @@ class Queue(Actor, PipeMixin):
         return self.lines
 
     def __str__(self):
-        return f"Queue: {self.name}"
+        return f"Queue ({self.name})"
 
     def stats(self):
         return [[node.name, node.stats()] for node in self.lines]

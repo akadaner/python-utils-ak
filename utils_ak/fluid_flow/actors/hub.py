@@ -1,5 +1,5 @@
 from utils_ak.fluid_flow.actor import Actor
-from utils_ak.fluid_flow.actors.pipe import PipeMixin, Pipe
+from utils_ak.fluid_flow.actors.pipe import Piped, Pipe
 from utils_ak.fluid_flow.calculations import *
 
 

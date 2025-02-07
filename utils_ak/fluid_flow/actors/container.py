@@ -6,14 +6,14 @@ from numpy import nan
 from app.lessmore.utils.run_snapshot_tests.run_inline_snapshot_tests import run_inline_snapshot_tests
 from utils_ak.fluid_flow.calculations import ERROR, nanmin
 from utils_ak.fluid_flow.actor import Actor
-from utils_ak.fluid_flow.actors.pipe import PipeMixin, pipe_connect
+from utils_ak.fluid_flow.actors.pipe import Piped, pipe_connect
 import pandas as pd
 
 from utils_ak.fluid_flow.fluid_flow import FluidFlow
 
 
-class Container(Actor, PipeMixin):
-    """A container can have ONE input and ONE output. Container is connected to them via one pipe per each."""
+class Container(Actor, Piped):
+    """A container can have ONE input pipe and ONE output pipe."""
 
     def __init__(
         self,
@@ -70,6 +70,13 @@ class Container(Actor, PipeMixin):
             "transactions": str(self.transactions),
         }
 
+    # - Private methods
+
+    def is_limit_reached(self, orient):
+        return (
+            self.df.at[orient, "limit"] and abs(self.df.at[orient, "collected"] - self.df.at[orient, "limit"]) < ERROR
+        )
+
     # - Updaters
 
     def update_values(self, ts, input_factor=1):
@@ -86,11 +93,6 @@ class Container(Actor, PipeMixin):
 
         add_value(ts, "in", (ts - self.last_ts) * self.speed("in") * input_factor)
         add_value(ts, "out", -(ts - self.last_ts) * self.speed("out"))
-
-    def is_limit_reached(self, orient):
-        return (
-            self.df.at[orient, "limit"] and abs(self.df.at[orient, "collected"] - self.df.at[orient, "limit"]) < ERROR
-        )
 
     def update_pressure(self, ts, orients=("in", "out")):
         """Disable pressure if limit is specified and limit is reached"""
@@ -153,12 +155,9 @@ def test():
     assert FluidFlow(container1).run().state_snapshot() == snapshot(
         {
             "schema": """\
-Container (Input) -> Pipe (1) -> Container (Output) -> Pipe (2) -> Stub Top -> [None]
+Container (Input) -> Pipe (1) -> Container (Output) -> Pipe (2) -> Stub (Top) -> [None]
 """,
-            "str(flow)": """\
-Flow:
-    Container (Output): 100.0\
-""",
+            "str(flow)": "Flow:",
             "nodes": {
                 "Container (Input)": {
                     "value": 0.0,
@@ -167,12 +166,12 @@ Flow:
                 },
                 "Pipe (1)": {},
                 "Container (Output)": {
-                    "value": 100.0,
-                    "df": "[{'index': 'in', 'max_pressure': None, 'limit': None, 'collected': 100.0}, {'index': 'out', 'max_pressure': None, 'limit': None, 'collected': 0.0}]",
-                    "transactions": "[[0, 2.0, 100.0]]",
+                    "value": 0.0,
+                    "df": "[{'index': 'in', 'max_pressure': None, 'limit': None, 'collected': 100.0}, {'index': 'out', 'max_pressure': None, 'limit': None, 'collected': 100.0}]",
+                    "transactions": "[[0, 2.0, 100.0], [0, 2.0, -100.0]]",
                 },
                 "Pipe (2)": {},
-                "Stub Top": {},
+                "Stub (Top)": {},
             },
         }
     )
@@ -187,12 +186,11 @@ Flow:
     assert FluidFlow(container1).run().state_snapshot() == snapshot(
         {
             "schema": """\
-Container (Input) -> Pipe (3) -> Container (Output) -> Pipe (4) -> Stub Top -> [None]
+Container (Input) -> Pipe (3) -> Container (Output) -> Pipe (4) -> Stub (Top) -> [None]
 """,
             "str(flow)": """\
 Flow:
-    Container (Input): 70.0
-    Container (Output): 30.0\
+    Container (Input): 70.0\
 """,
             "nodes": {
                 "Container (Input)": {
@@ -202,12 +200,12 @@ Flow:
                 },
                 "Pipe (3)": {},
                 "Container (Output)": {
-                    "value": 30.0,
-                    "df": "[{'index': 'in', 'max_pressure': None, 'limit': None, 'collected': 30.0}, {'index': 'out', 'max_pressure': None, 'limit': None, 'collected': 0.0}]",
-                    "transactions": "[[0, 0.6, 30.0]]",
+                    "value": 0.0,
+                    "df": "[{'index': 'in', 'max_pressure': None, 'limit': None, 'collected': 30.0}, {'index': 'out', 'max_pressure': None, 'limit': None, 'collected': 30.0}]",
+                    "transactions": "[[0, 0.6, 30.0], [0, 0.6, -30.0]]",
                 },
                 "Pipe (4)": {},
-                "Stub Top": {},
+                "Stub (Top)": {},
             },
         }
     )
@@ -224,12 +222,11 @@ Flow:
     assert FluidFlow(container1).run().state_snapshot() == snapshot(
         {
             "schema": """\
-Container (C1) -> Pipe (5) -> Container (C2) -> Pipe (6) -> Container (C3) -> Pipe (7) -> Stub Top -> [None]
+Container (C1) -> Pipe (5) -> Container (C2) -> Pipe (6) -> Container (C3) -> Pipe (7) -> Stub (Top) -> [None]
 """,
             "str(flow)": """\
 Flow:
-    Container (C1): 80.0
-    Container (C3): 20.0\
+    Container (C1): 80.0\
 """,
             "nodes": {
                 "Container (C1)": {
@@ -245,12 +242,12 @@ Flow:
                 },
                 "Pipe (6)": {},
                 "Container (C3)": {
-                    "value": 20.0,
-                    "df": "[{'index': 'in', 'max_pressure': None, 'limit': None, 'collected': 20.0}, {'index': 'out', 'max_pressure': None, 'limit': None, 'collected': 0.0}]",
-                    "transactions": "[[0, 4.0, 20.0]]",
+                    "value": 0.0,
+                    "df": "[{'index': 'in', 'max_pressure': None, 'limit': None, 'collected': 20.0}, {'index': 'out', 'max_pressure': None, 'limit': None, 'collected': 20.0}]",
+                    "transactions": "[[0, 4.0, 20.0], [0, 4.0, -20.0]]",
                 },
                 "Pipe (7)": {},
-                "Stub Top": {},
+                "Stub (Top)": {},
             },
         }
     )

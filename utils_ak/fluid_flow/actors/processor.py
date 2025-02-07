@@ -6,7 +6,7 @@ from utils_ak.fluid_flow.actors.container import Container
 
 from functools import wraps
 
-from utils_ak.fluid_flow.actors.pipe import pipe_switch, PipeMixin, pipe_connect
+from utils_ak.fluid_flow.actors.pipe import pipe_switch, Piped, pipe_connect
 from utils_ak.fluid_flow.fluid_flow import FluidFlow
 
 
@@ -33,7 +33,7 @@ def switch(f):
     return inner
 
 
-class Processor(Actor, PipeMixin):
+class Processor(Actor, Piped):
     """Receives value in an input container and converts its to the output container."""
 
     def __init__(
