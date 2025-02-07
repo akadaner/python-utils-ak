@@ -1,6 +1,10 @@
+from inline_snapshot import snapshot
+
+from app.lessmore.utils.run_snapshot_tests.run_inline_snapshot_tests import run_inline_snapshot_tests
 from utils_ak.fluid_flow.actor import Actor
 from utils_ak.fluid_flow.actors.container import Container
 from utils_ak.fluid_flow.actors.pipe import pipe_switch, PipeMixin, pipe_connect
+from utils_ak.fluid_flow.fluid_flow import FluidFlow
 from utils_ak.iteration import SimpleIterator
 
 from functools import wraps
@@ -9,24 +13,40 @@ from functools import wraps
 def switch(f):
     @wraps(f)
     def inner(self, *args, **kwargs):
+        # - Switch the pipes to the inner containers temporarily
+
         pipe_switch(self, self.io_containers["in"], "in")
         pipe_switch(self, self.io_containers["out"], "out")
+
+        # - Run function
 
         res = f(self, *args, **kwargs)
 
+        # - Switch the pipes back
+
         pipe_switch(self, self.io_containers["in"], "in")
         pipe_switch(self, self.io_containers["out"], "out")
+
+        # - Return decorated function result
+
         return res
 
     return inner
 
 
 class Sequence(Actor, PipeMixin):
-    def __init__(self, name, containers):
+    def __init__(self, name: str, containers: list[Actor]):
+        # - Init
+
         super().__init__(name)
         assert len(containers) >= 2
         self.containers = containers
+
+        # - Set IO containers
+
         self.io_containers = {"in": containers[0], "out": containers[-1]}
+
+        # - Create the chain
 
         self.nodes = [self.containers[0]]
         for c1, c2 in SimpleIterator(self.containers).iter_sequences(2):
@@ -34,11 +54,32 @@ class Sequence(Actor, PipeMixin):
             self.nodes.append(pipe)
             self.nodes.append(c2)
 
+    # - Private methods
+
     def is_limit_reached(self, orient):
         return self.io_containers[orient].is_limit_reached(orient)
 
+    # - Generic overrides
+
     def inner_actors(self):
         return self.nodes
+
+    def __str__(self):
+        return f"Sequence: {self.name}"
+
+    def stats(self):
+        return {node.name: node.stats() for node in self.nodes}
+
+    def display_stats(self):
+        return [node.display_stats() for node in self.containers]
+
+    def active_periods(self, orient="in"):
+        return self.io_containers[orient].active_periods(orient=orient)
+
+    def state_snapshot(self):
+        return [node.state_snapshot() for node in self.nodes]
+
+    # - Updaters
 
     @switch
     def update_values(self, ts):
@@ -60,14 +101,129 @@ class Sequence(Actor, PipeMixin):
         for node in self.containers:
             node.update_triggers(ts)
 
-    def __str__(self):
-        return f"Sequence: {self.name}"
 
-    def stats(self):
-        return {node.name: node.stats() for node in self.nodes}
+def test():
+    # - Test 1
 
-    def display_stats(self):
-        return [node.display_stats() for node in self.containers]
+    c1 = Container("Input", value=100, max_pressures=[None, 10])
 
-    def active_periods(self, orient="in"):
-        return self.io_containers[orient].active_periods(orient=orient)
+    sequence = Sequence(
+        "Sequence",
+        containers=[Container(str(i), max_pressures=[5, None]) for i in range(3)],
+    )
+
+    c2 = Container("Ouput", max_pressures=[None, None])
+
+    pipe_connect(c1, sequence)
+    pipe_connect(sequence, c2)
+
+    assert FluidFlow(c1).run().state_snapshot() == snapshot(
+        {
+            "schema": """\
+Container (Input) -> Pipe (3) -> Sequence: Sequence -> Pipe (4) -> Container (Ouput) -> Pipe (5) -> Stub Top -> [None]
+""",
+            "str(flow)": """\
+Flow:
+    Sequence: Sequence: [0.0, 0.0, 0.0]
+    Container (Ouput): 100.0\
+""",
+            "nodes": {
+                "Container (Input)": {
+                    "value": 0.0,
+                    "df": "[{'index': 'in', 'max_pressure': nan, 'limit': None, 'collected': 0.0}, {'index': 'out', 'max_pressure': 10.0, 'limit': None, 'collected': 100.0}]",
+                    "transactions": "[[0, 20.0, -100.0]]",
+                },
+                "Pipe (3)": {},
+                "Pipe (4)": {},
+                "Sequence: Sequence": [
+                    {
+                        "value": 0.0,
+                        "df": "[{'index': 'in', 'max_pressure': 5.0, 'limit': None, 'collected': 100.0}, {'index': 'out', 'max_pressure': nan, 'limit': None, 'collected': 100.0}]",
+                        "transactions": "[[0, 20.0, 100.0], [0, 20.0, -100.0]]",
+                    },
+                    {},
+                    {
+                        "value": 0.0,
+                        "df": "[{'index': 'in', 'max_pressure': 5.0, 'limit': None, 'collected': 100.0}, {'index': 'out', 'max_pressure': nan, 'limit': None, 'collected': 100.0}]",
+                        "transactions": "[[0, 20.0, 100.0], [0, 20.0, -100.0]]",
+                    },
+                    {},
+                    {
+                        "value": 0.0,
+                        "df": "[{'index': 'in', 'max_pressure': 5.0, 'limit': None, 'collected': 100.0}, {'index': 'out', 'max_pressure': nan, 'limit': None, 'collected': 100.0}]",
+                        "transactions": "[[0, 20.0, 100.0], [0, 20.0, -100.0]]",
+                    },
+                ],
+                "Pipe (5)": {},
+                "Container (Ouput)": {
+                    "value": 100.0,
+                    "df": "[{'index': 'in', 'max_pressure': None, 'limit': None, 'collected': 100.0}, {'index': 'out', 'max_pressure': None, 'limit': None, 'collected': 0.0}]",
+                    "transactions": "[[0, 20.0, 100.0]]",
+                },
+                "Stub Top": {},
+            },
+        }
+    )
+
+    # - Test 2
+
+    c1 = Container("Input", value=100, max_pressures=[None, 10])
+
+    sequence = Sequence(
+        "Sequence",
+        containers=[
+            Container("0", max_pressures=[2, None]),
+            Container("1", max_pressures=[1, None]),  # slow one
+        ],
+    )
+
+    c2 = Container("Output", max_pressures=[None, None])
+
+    pipe_connect(c1, sequence)
+    pipe_connect(sequence, c2)
+
+    assert FluidFlow(c1).run().state_snapshot() == snapshot(
+        {
+            "schema": """\
+Container (Input) -> Pipe (7) -> Sequence: Sequence -> Pipe (8) -> Container (Output) -> Pipe (9) -> Stub Top -> [None]
+""",
+            "str(flow)": """\
+Flow:
+    Sequence: Sequence: [0.0, 0.0]
+    Container (Output): 100.0\
+""",
+            "nodes": {
+                "Container (Input)": {
+                    "value": 0.0,
+                    "df": "[{'index': 'in', 'max_pressure': nan, 'limit': None, 'collected': 0.0}, {'index': 'out', 'max_pressure': 10.0, 'limit': None, 'collected': 100.0}]",
+                    "transactions": "[[0, 50.0, -100.0]]",
+                },
+                "Pipe (7)": {},
+                "Pipe (8)": {},
+                "Sequence: Sequence": [
+                    {
+                        "value": 0.0,
+                        "df": "[{'index': 'in', 'max_pressure': 2.0, 'limit': None, 'collected': 100.0}, {'index': 'out', 'max_pressure': nan, 'limit': None, 'collected': 100.0}]",
+                        "transactions": "[[0, 50.0, 100.0], [0, 50.0, -50.0], [50.0, 100.0, -50.0]]",
+                    },
+                    {},
+                    {
+                        "value": 0.0,
+                        "df": "[{'index': 'in', 'max_pressure': 1.0, 'limit': None, 'collected': 100.0}, {'index': 'out', 'max_pressure': nan, 'limit': None, 'collected': 100.0}]",
+                        "transactions": "[[0, 50.0, 50.0], [0, 50.0, -50.0], [50.0, 100.0, 50.0], [50.0, 100.0, -50.0]]",
+                    },
+                ],
+                "Container (Output)": {
+                    "value": 100.0,
+                    "df": "[{'index': 'in', 'max_pressure': None, 'limit': None, 'collected': 100.0}, {'index': 'out', 'max_pressure': None, 'limit': None, 'collected': 0.0}]",
+                    "transactions": "[[0, 50.0, 50.0], [50.0, 100.0, 50.0]]",
+                },
+                "Pipe (9)": {},
+                "Stub Top": {},
+            },
+        }
+    )
+
+
+if __name__ == "__main__":
+    run_inline_snapshot_tests(mode="update_all")
