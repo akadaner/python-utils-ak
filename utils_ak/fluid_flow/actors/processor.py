@@ -1,3 +1,5 @@
+from typing import Optional
+
 from inline_snapshot import snapshot
 
 from app.lessmore.utils.run_snapshot_tests.run_inline_snapshot_tests import run_inline_snapshot_tests
@@ -42,8 +44,8 @@ class Processor(Actor, Piped):
         items: list[str] = ["default", "default"],
         lag: float = 0,
         transformation_factor: float = 1,
-        max_pressures: list[float] = [None, None],
-        limits: list[float] = [None, None],
+        max_pressures: list[Optional[float]] = [None, None],
+        limits: list[Optional[float]] = [None, None],
     ):
         # - Init
 
