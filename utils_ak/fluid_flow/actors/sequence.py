@@ -1,6 +1,6 @@
 from utils_ak.fluid_flow.actor import Actor
-from utils_ak.fluid_flow.actors import pipe_switch, PipeMixin, pipe_connect
 from utils_ak.fluid_flow.actors.container import Container
+from utils_ak.fluid_flow.actors.pipe import pipe_switch, PipeMixin, pipe_connect
 from utils_ak.iteration import SimpleIterator
 
 from functools import wraps

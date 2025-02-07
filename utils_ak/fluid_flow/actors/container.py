@@ -72,7 +72,7 @@ class Container(Actor, PipeMixin):
 
     # - Updaters
 
-    def update_values(self, ts, factor=1):
+    def update_values(self, ts, input_factor=1):
         """Something flowed in and out"""
         if self.last_ts is None:
             return
@@ -84,8 +84,8 @@ class Container(Actor, PipeMixin):
             self.df.at[orient, "collected"] += abs(value)
             self.transactions.append([self.last_ts, ts, value])
 
-        add_value(ts, "in", (ts - self.last_ts) * self.speed("in"))
-        add_value(ts, "out", -(ts - self.last_ts) * self.speed("out") * factor)
+        add_value(ts, "in", (ts - self.last_ts) * self.speed("in") * input_factor)
+        add_value(ts, "out", -(ts - self.last_ts) * self.speed("out"))
 
     def is_limit_reached(self, orient):
         return (
