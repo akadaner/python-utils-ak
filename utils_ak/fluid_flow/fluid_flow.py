@@ -16,13 +16,7 @@ Fluid flow runs a DAG of nodes (Actors) and updates them in a sequential manner:
 
 Each of the methods is defined within the Actor. 
 
-Main actors: 
-- Container and Pipe
-- Stub
-- Processor
-- Sequence
-- Hub
-- Queue
+
 """
 
 
