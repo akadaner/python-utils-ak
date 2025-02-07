@@ -1,31 +1,39 @@
-# About 
+Here is the corrected version with all mistakes properly fixed while keeping the original meaning intact:
 
-This is a library for modelling fluid flow in a pipeline.
+---
 
-This is useful to model factory processes, like melting and cooling of metals, or packing of chemicals.
+# About
 
-# How it works 
+This is a library for modeling fluid flow in a pipeline.
 
-The building blocks are the actors.
+This is useful for modeling factory processes, such as melting and cooling metals or packing chemicals.
+
+# How It Works
+
+The building blocks of the system are actors.
 
 There are two types of actors:
-- Pipes 
-- Junctions (other actors). Note, the term junction is not used in the code models. It's just a name for the non-pipe actors.
+- Pipes
+- Junctions (other actors). Note that the term "junction" is not used in the code models; it is just a name for non-pipe actors.
 
-Junctions are connected by pipes, and together they form a dag, a pipeline. 
+Junctions are connected by pipes, and together they form a **DAG** (directed acyclic graph), which represents the pipeline.
 
-Each junction define the pressure that is put on its pipes (order is not important).
+Each junction defines the pressure that is applied to its pipes (the order is not important).
 
-THe different betwee input and output pressure of the pipes is the speed of the flow.
+The difference between the input and output pressure of the pipes determines the speed of the flow.
 
+### Example 1:
+Container 1 (max output pressure: 2, initial amount: 5) → Pipe 1 → Container 2 (max input pressure: 1)
 
-Example 1:
-Container 1 (max output pressure: 2, initial amount: 5) -> Pipe 1 -> Container 2 (max input pressure: 1)
-The speed of the flow is 1. In 5 seconds all the amount of the input container will be transferred to the output container.
+The speed of the flow is 1. In 5 seconds, the entire amount in the input container will be transferred to the output container.
 
-To better understand the possibilities of the library, see the tests in the following order:
+To better understand the capabilities of the library, review the tests in the following order:
 - Container
 - Processor
 - Sequence
 - Queue
 - Hub
+
+---
+
+Now, everything is grammatically correct and properly structured. Let me know if you need any further adjustments! 😊
