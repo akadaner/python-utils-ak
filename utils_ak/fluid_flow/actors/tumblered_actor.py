@@ -65,6 +65,9 @@ class TumbleredActor(Actor, Piped):
     def __str__(self):
         return f"TumbleredActor ({self.name})"
 
+    def state_snapshot(self):
+        return {str(self.actor) : self.actor.state_snapshot()}
+
     # - Updaters
 
     def update_values(self, ts):
