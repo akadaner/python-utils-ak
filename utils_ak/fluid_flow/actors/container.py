@@ -77,7 +77,7 @@ class Container(Actor, Piped):
 
     def is_limit_reached(self, orient):
         return (
-            self.df.at[orient, "limit"] and abs(self.df.at[orient, "collected"] - self.df.at[orient, "limit"]) < ERROR
+            self.df.at[orient, "limit"] is not None and abs(self.df.at[orient, "collected"] - self.df.at[orient, "limit"]) < ERROR
         )
 
     # - Updaters
