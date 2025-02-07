@@ -29,3 +29,6 @@ To better understand the capabilities of the library, review the tests in the fo
 - Sequence
 - Queue
 - Hub
+
+# Todo 
+- Proper priorities for event manager processing

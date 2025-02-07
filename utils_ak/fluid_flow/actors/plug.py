@@ -1,7 +1,8 @@
 from utils_ak.fluid_flow.actor import Actor
+from utils_ak.fluid_flow.actors.pipe import Piped
 
 
-class Plug(Actor):
+class Plug(Actor, Piped):
     """No input and output, just a plug."""
 
     def __init__(self, name=None):
