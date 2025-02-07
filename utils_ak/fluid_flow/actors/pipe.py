@@ -1,3 +1,7 @@
+from typing import Literal, Optional
+
+from more_itertools import only
+
 from utils_ak.dag import *
 from utils_ak.fluid_flow.actor import Actor
 from utils_ak.fluid_flow.calculations import *
@@ -57,19 +61,18 @@ class Pipe(Actor):
 
 
 class Piped:
-    def pipe(self, orient):
-        if orient == "in":
-            nodes = self.parents
-        elif orient == "out":
-            nodes = self.children
+    """Piped actor has one input and one output pipe."""
+
+    def pipe(self, orient: Literal["in", "out"]) -> Optional[Pipe]:
+        assert orient in ["in", "out"]
+        nodes = self.parents if orient == "in" else self.children
 
         if not nodes:
             return
-        else:
-            assert len(nodes) == 1
-            return nodes[0]
 
-    def speed(self, orient):
+        return only(nodes)
+
+    def speed(self, orient: Literal["in", "out"]) -> float:
         if orient == "in":
             if not self.pipe("in"):
                 return 0
@@ -79,7 +82,7 @@ class Piped:
                 return 0
             return self.pipe("out").current_speed
 
-    def excess_speed(self):
+    def excess_speed(self) -> float:
         """Excess flow"""
         return self.speed("in") - self.speed("out")
 

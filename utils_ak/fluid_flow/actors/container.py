@@ -13,7 +13,10 @@ from utils_ak.fluid_flow.fluid_flow import FluidFlow
 
 
 class Container(Actor, Piped):
-    """A container can have ONE input pipe and ONE output pipe."""
+    """A container receives and outputs value with input and output pipes.
+
+    Pipes define pressures. Difference between them is the speed of the flow.
+    """
 
     def __init__(
         self,
