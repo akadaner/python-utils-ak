@@ -40,7 +40,7 @@ class TumbleredActor(Actor, Piped):
         self,
         name: str,
         actor: Actor,
-        tumbler_func: Callable,  # if returns None, tumbler is disabled
+        tumbler_func: Callable,  # if returns None, tumbler is disabled. Be careful, if you don't stop the tumbler, the event manager will run forever
         working_on_start: bool = False,
     ):
         super().__init__(name)
