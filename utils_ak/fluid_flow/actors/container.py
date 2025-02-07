@@ -160,21 +160,21 @@ def test():
             "schema": """\
 Container (Input) -> Pipe (1) -> Container (Output) -> Pipe (2) -> Stub (Top) -> [None]
 """,
-            "str(flow)": "Flow:",
+            "str(flow)": """\
+Flow:
+    Container (Output): 100.0\
+""",
             "nodes": {
                 "Container (Input)": {
                     "value": 0.0,
                     "df": "[{'index': 'in', 'max_pressure': nan, 'limit': None, 'collected': 0.0}, {'index': 'out', 'max_pressure': 50.0, 'limit': None, 'collected': 100.0}]",
                     "transactions": "[[0, 2.0, -100.0]]",
                 },
-                "Pipe (1)": {},
                 "Container (Output)": {
-                    "value": 0.0,
-                    "df": "[{'index': 'in', 'max_pressure': None, 'limit': None, 'collected': 100.0}, {'index': 'out', 'max_pressure': None, 'limit': None, 'collected': 100.0}]",
-                    "transactions": "[[0, 2.0, 100.0], [0, 2.0, -100.0]]",
+                    "value": 100.0,
+                    "df": "[{'index': 'in', 'max_pressure': None, 'limit': None, 'collected': 100.0}, {'index': 'out', 'max_pressure': None, 'limit': None, 'collected': 0.0}]",
+                    "transactions": "[[0, 2.0, 100.0]]",
                 },
-                "Pipe (2)": {},
-                "Stub (Top)": {},
             },
         }
     )
@@ -193,7 +193,8 @@ Container (Input) -> Pipe (3) -> Container (Output) -> Pipe (4) -> Stub (Top) ->
 """,
             "str(flow)": """\
 Flow:
-    Container (Input): 70.0\
+    Container (Input): 70.0
+    Container (Output): 30.0\
 """,
             "nodes": {
                 "Container (Input)": {
@@ -201,14 +202,11 @@ Flow:
                     "df": "[{'index': 'in', 'max_pressure': nan, 'limit': nan, 'collected': 0.0}, {'index': 'out', 'max_pressure': 50.0, 'limit': 30.0, 'collected': 30.0}]",
                     "transactions": "[[0, 0.6, -30.0]]",
                 },
-                "Pipe (3)": {},
                 "Container (Output)": {
-                    "value": 0.0,
-                    "df": "[{'index': 'in', 'max_pressure': None, 'limit': None, 'collected': 30.0}, {'index': 'out', 'max_pressure': None, 'limit': None, 'collected': 30.0}]",
-                    "transactions": "[[0, 0.6, 30.0], [0, 0.6, -30.0]]",
+                    "value": 30.0,
+                    "df": "[{'index': 'in', 'max_pressure': None, 'limit': None, 'collected': 30.0}, {'index': 'out', 'max_pressure': None, 'limit': None, 'collected': 0.0}]",
+                    "transactions": "[[0, 0.6, 30.0]]",
                 },
-                "Pipe (4)": {},
-                "Stub (Top)": {},
             },
         }
     )
@@ -229,7 +227,8 @@ Container (C1) -> Pipe (5) -> Container (C2) -> Pipe (6) -> Container (C3) -> Pi
 """,
             "str(flow)": """\
 Flow:
-    Container (C1): 80.0\
+    Container (C1): 80.0
+    Container (C3): 20.0\
 """,
             "nodes": {
                 "Container (C1)": {
@@ -237,20 +236,16 @@ Flow:
                     "df": "[{'index': 'in', 'max_pressure': nan, 'limit': nan, 'collected': 0.0}, {'index': 'out', 'max_pressure': 50.0, 'limit': 30.0, 'collected': 20.0}]",
                     "transactions": "[[0, 4.0, -20.0]]",
                 },
-                "Pipe (5)": {},
                 "Container (C2)": {
                     "value": 0.0,
                     "df": "[{'index': 'in', 'max_pressure': 5.0, 'limit': 20.0, 'collected': 20.0}, {'index': 'out', 'max_pressure': nan, 'limit': nan, 'collected': 20.0}]",
                     "transactions": "[[0, 4.0, 20.0], [0, 4.0, -20.0]]",
                 },
-                "Pipe (6)": {},
                 "Container (C3)": {
-                    "value": 0.0,
-                    "df": "[{'index': 'in', 'max_pressure': None, 'limit': None, 'collected': 20.0}, {'index': 'out', 'max_pressure': None, 'limit': None, 'collected': 20.0}]",
-                    "transactions": "[[0, 4.0, 20.0], [0, 4.0, -20.0]]",
+                    "value": 20.0,
+                    "df": "[{'index': 'in', 'max_pressure': None, 'limit': None, 'collected': 20.0}, {'index': 'out', 'max_pressure': None, 'limit': None, 'collected': 0.0}]",
+                    "transactions": "[[0, 4.0, 20.0]]",
                 },
-                "Pipe (7)": {},
-                "Stub (Top)": {},
             },
         }
     )

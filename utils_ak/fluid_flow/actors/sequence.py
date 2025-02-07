@@ -35,6 +35,8 @@ def switch(f):
 
 
 class Sequence(Actor, Piped):
+    """A chain of actors piped together"""
+
     def __init__(self, name: str, containers: list[Actor]):
         # - Init
 

@@ -18,13 +18,11 @@ Each of the methods is defined within the Actor.
 
 Main actors: 
 - Container and Pipe
+- Stub
 - Processor
-- Queue
 - Sequence
 - Hub
-- Stub
-
-
+- Queue
 """
 
 
@@ -68,7 +66,8 @@ class FluidFlow:
         result = {"schema": self.root.schema(), "str(flow)": str(self), "nodes": {}}
 
         for node in self.root.iterate("down"):
-            result["nodes"][str(node)] = node.state_snapshot()
+            if node.state_snapshot():
+                result["nodes"][str(node)] = node.state_snapshot()
 
         return result
 

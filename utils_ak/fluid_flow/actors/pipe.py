@@ -26,7 +26,7 @@ class Pipe(Actor):
     def __init__(self, name=None):
         super().__init__(name)
         self.current_speed = 0
-        self.current_item = None
+        self.current_item = None  # what's flowing through the pipe right now
         self.pressures = {"out": None, "in": None}
 
     @property

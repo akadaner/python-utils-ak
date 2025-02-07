@@ -175,20 +175,19 @@ def test():
     assert FluidFlow(container).run().state_snapshot() == snapshot(
         {
             "schema": """\
-Container (Input) -> Pipe 1 -> Processor: Output -> Pipe 2 -> Stub Top -> [None]
+Container (Input) -> Pipe (1) -> Processor: Output -> Pipe (2) -> Stub (Top) -> [None]
 """,
             "str(flow)": """\
 Flow:
     Processor: Output: [0.0, 100.0]\
 """,
             "nodes": {
-                "Input": {
+                "Container (Input)": {
                     "value": 0.0,
                     "df": "[{'index': 'in', 'max_pressure': nan, 'limit': None, 'collected': 0.0}, {'index': 'out', 'max_pressure': 10.0, 'limit': None, 'collected': 100.0}]",
                     "transactions": "[[0, 10.0, -100.0]]",
                 },
-                "1": {},
-                "Output": {
+                "Processor: Output": {
                     "in": {
                         "value": 0.0,
                         "df": "[{'index': 'in', 'max_pressure': None, 'limit': None, 'collected': 100.0}, {'index': 'out', 'max_pressure': None, 'limit': None, 'collected': 100.0}]",
@@ -200,8 +199,6 @@ Flow:
                         "transactions": "[[0, 10.0, 100.0]]",
                     },
                 },
-                "2": {},
-                "Top": {},
             },
         }
     )
@@ -214,20 +211,19 @@ Flow:
     assert FluidFlow(container).run().state_snapshot() == snapshot(
         {
             "schema": """\
-Container (Input) -> Pipe 3 -> Processor: Output -> Pipe 4 -> Stub Top -> [None]
+Container (Input) -> Pipe (3) -> Processor: Output -> Pipe (4) -> Stub (Top) -> [None]
 """,
             "str(flow)": """\
 Flow:
     Processor: Output: [0.0, 200.0]\
 """,
             "nodes": {
-                "Input": {
+                "Container (Input)": {
                     "value": 0.0,
                     "df": "[{'index': 'in', 'max_pressure': None, 'limit': None, 'collected': 0.0}, {'index': 'out', 'max_pressure': None, 'limit': None, 'collected': 100.0}]",
                     "transactions": "[[0, 5, -50.0], [5, 10.0, -50.0]]",
                 },
-                "3": {},
-                "Output": {
+                "Processor: Output": {
                     "in": {
                         "value": 0.0,
                         "df": "[{'index': 'in', 'max_pressure': 10.0, 'limit': None, 'collected': 100.0}, {'index': 'out', 'max_pressure': nan, 'limit': None, 'collected': 100.0}]",
@@ -239,8 +235,6 @@ Flow:
                         "transactions": "[[5, 10.0, 100.0], [10.0, 15.0, 100.0]]",
                     },
                 },
-                "4": {},
-                "Top": {},
             },
         }
     )
@@ -253,7 +247,7 @@ Flow:
     assert FluidFlow(container).run().state_snapshot() == snapshot(
         {
             "schema": """\
-Container (Input) -> Pipe 5 -> Processor: Output -> Pipe 6 -> Stub Top -> [None]
+Container (Input) -> Pipe (5) -> Processor: Output -> Pipe (6) -> Stub (Top) -> [None]
 """,
             "str(flow)": """\
 Flow:
@@ -261,13 +255,12 @@ Flow:
     Processor: Output: [0, 0]\
 """,
             "nodes": {
-                "Input": {
+                "Container (Input)": {
                     "value": 100,
                     "df": "[{'index': 'in', 'max_pressure': None, 'limit': None, 'collected': 0.0}, {'index': 'out', 'max_pressure': None, 'limit': None, 'collected': 0.0}]",
                     "transactions": "[]",
                 },
-                "5": {},
-                "Output": {
+                "Processor: Output": {
                     "in": {
                         "value": 0,
                         "df": "[{'index': 'in', 'max_pressure': 0.0, 'limit': None, 'collected': 0.0}, {'index': 'out', 'max_pressure': nan, 'limit': None, 'collected': 0.0}]",
@@ -279,8 +272,6 @@ Flow:
                         "transactions": "[]",
                     },
                 },
-                "6": {},
-                "Top": {},
             },
         }
     )
@@ -293,7 +284,7 @@ Flow:
     assert FluidFlow(container).run().state_snapshot() == snapshot(
         {
             "schema": """\
-Container (Input) -> Pipe 7 -> Processor: Output -> Pipe 8 -> Stub Top -> [None]
+Container (Input) -> Pipe (7) -> Processor: Output -> Pipe (8) -> Stub (Top) -> [None]
 """,
             "str(flow)": """\
 Flow:
@@ -301,13 +292,12 @@ Flow:
     Processor: Output: [0.0, 50.0]\
 """,
             "nodes": {
-                "Input": {
+                "Container (Input)": {
                     "value": 50.0,
                     "df": "[{'index': 'in', 'max_pressure': nan, 'limit': None, 'collected': 0.0}, {'index': 'out', 'max_pressure': 10.0, 'limit': None, 'collected': 50.0}]",
                     "transactions": "[[0, 5.0, -50.0]]",
                 },
-                "7": {},
-                "Output": {
+                "Processor: Output": {
                     "in": {
                         "value": 0.0,
                         "df": "[{'index': 'in', 'max_pressure': None, 'limit': 50.0, 'collected': 50.0}, {'index': 'out', 'max_pressure': None, 'limit': nan, 'collected': 50.0}]",
@@ -319,8 +309,6 @@ Flow:
                         "transactions": "[[0, 5.0, 50.0]]",
                     },
                 },
-                "8": {},
-                "Top": {},
             },
         }
     )
