@@ -1,13 +1,25 @@
 from utils_ak.coder import cast_js
-from utils_ak.dag import DAGNode
+from utils_ak.fluid_flow import Actor
 from utils_ak.simple_event_manager import SimpleEventManager
 
 from utils_ak.fluid_flow.actors import pipe_connect, Stub
 from loguru import logger
 
+"""
+Fluid flow runs a DAG of nodes (Actors) and updates them in a sequential manner:
+- Update value
+- Update pressure
+- Update speed
+- Update triggers
+- Update last_ts
+
+Each of the methods is defined within the Actor
+
+"""
+
 
 class FluidFlow:
-    def __init__(self, root: DAGNode):
+    def __init__(self, root: Actor):
         # - Set attributes
 
         self.root = root
@@ -30,6 +42,7 @@ class FluidFlow:
         return str(self)
 
     def update(self, topic: str, ts: float, event: dict):
+        """Iterate updates for all children nodes (BFS) sequentially for each method"""
         for method in [
             "update_value",
             "update_pressure",
