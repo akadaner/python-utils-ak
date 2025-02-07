@@ -59,10 +59,21 @@ def run_fluid_flow(flow: FluidFlow):
     # - Init event manager
 
     event_manager = SimpleEventManager()
+
+    # - Subscribe to all nodes of the flow
+
     for node in flow.root.iterate("down"):
         node.set_event_manager(event_manager)
         node.subscribe()
 
+    # - Subscribe to all events for flow.update
+
     event_manager.subscribe("", flow.update)
+
+    # - Add start event
+
     event_manager.add_event("update", 0, {})
+
+    # - Run event manager
+
     event_manager.run()

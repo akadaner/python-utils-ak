@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Callable
+from typing import Callable, Union
 
 from utils_ak.architecture import PrefixHandler
 from sortedcollections import SortedList
@@ -10,6 +10,8 @@ from loguru import logger
 
 
 class SimpleEventManager:
+    """Add and subscribe to events"""
+
     def __init__(self):
         self.events = SortedList(key=lambda v: v[1])  # sorted(topic, ts, event)])
         self.prefix_handler = PrefixHandler()  # run events on topics with the specified prefix
@@ -18,11 +20,18 @@ class SimpleEventManager:
     def subscribe(self, topic: str, callback: Callable):
         self.prefix_handler.add(topic, callback)
 
-    def add_event(self, topic: str, ts: float, event: dict, duplicates_allowed: bool = False):
-        if not duplicates_allowed:
-            if self.is_event_present(topic, ts, event):
-                return False
+    def add_event(self, topic: str, ts: float, event: dict, duplicates_allowed: bool = False) -> Union[bool, tuple]:
+        # - If duplicates are not allowed, return if event is already present
+
+        if not duplicates_allowed and self.is_event_present(topic, ts, event):
+            return False
+
+        # - Add event to the list
+
         self.events.add((topic, ts, event))
+
+        # - Return event
+
         return topic, ts, event
 
     def is_event_present(self, topic: str, ts: float, event: dict, ts_error: float = 1e-5):
@@ -50,7 +59,7 @@ class SimpleEventManager:
 
         return False
 
-    def run(self):
+    def run(self, skip_old_events: bool = False):
         while True:
             # - Return if no events left
 
@@ -64,7 +73,11 @@ class SimpleEventManager:
             # - Log warning if event is older than the last event
 
             if self.last_ts is not None and ts < self.last_ts:
-                logger.warning("Old event was added to the events timeline")
+                if skip_old_events:
+                    logger.warning("Old event was added to the events timeline, skipping")
+                    continue
+                else:
+                    logger.warning("Old event was added to the events timeline, processing it anyway")
 
             # - Process event with prefix handler
 
@@ -99,7 +112,6 @@ def test():
             logger.info("On count, before", topic=topic, ts=ts, event=event, value=self.value)
             self.value += event["num"]
             logger.info("On count, after ", topic=topic, ts=ts, event=event, value=self.value)
-
 
     counter = Counter()
 

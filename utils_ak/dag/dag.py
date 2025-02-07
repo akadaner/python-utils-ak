@@ -1,3 +1,6 @@
+"""LEGACY CODE (2025-02-07)"""
+
+
 class DAGNode:
     def __init__(self):
         self.parents = []
@@ -42,6 +45,7 @@ class DAGNode:
         return {"down": self.children, "up": self.parents}[orient]
 
     def iterate(self, orient="down"):
+        """BFS"""
         assert not self.oriented_parents(orient), "Can iterate only from root node"
         self.reset_iteration_state(orient, with_children=True)
 
@@ -49,9 +53,7 @@ class DAGNode:
 
         while True:
             unprocessed_parents = [
-                node
-                for node in cur_node.oriented_parents(orient)
-                if not node._iteration_state["is_processed"]
+                node for node in cur_node.oriented_parents(orient) if not node._iteration_state["is_processed"]
             ]
             if unprocessed_parents:
                 cur_node = unprocessed_parents[0]
@@ -61,9 +63,7 @@ class DAGNode:
             cur_node._iteration_state["is_processed"] = True
 
             unprocessed_children = [
-                node
-                for node in cur_node.oriented_children(orient)
-                if not node._iteration_state["is_processed"]
+                node for node in cur_node.oriented_children(orient) if not node._iteration_state["is_processed"]
             ]
 
             if unprocessed_children:
@@ -85,6 +85,7 @@ class DAGNode:
                 yield node
 
     def iterate_as_tree(self, orient="down"):
+        """DFS"""
         assert not self.oriented_parents(orient), "Can iterate only from root node"
         self.reset_iteration_state(orient, with_children=True)
 
@@ -106,7 +107,9 @@ def disconnect(parent, child, safe=True):
     child.parents.remove(parent)
 
 
-def test_dag_iteration():
+def test():
+    # - Init test dag node
+
     class NamedNode(DAGNode):
         def __init__(self, name):
             super().__init__()
@@ -118,6 +121,10 @@ def test_dag_iteration():
         def __repr__(self):
             return self.name
 
+    # - Test diamond: root_up -> node1, node2 -> root_down
+
+    # -- Init diamond
+
     root_up = NamedNode("root_up")
     node1 = NamedNode("1")
     node2 = NamedNode("2")
@@ -128,53 +135,58 @@ def test_dag_iteration():
     connect(node1, root_down)
     connect(node2, root_down)
 
-    print("Testing iteration")
-    for orient in ["down", "up"]:
-        print("Processing orientation", orient)
-        for node in [root_up, node1, node2, root_down]:
-            print("Processing node", node)
-            if orient == "down" and node == root_up:
-                for iter_node in node.iterate(orient):
-                    print(iter_node)
-            elif orient == "up" and node == root_down:
-                for iter_node in node.iterate(orient):
-                    print(iter_node)
-            else:
-                try:
-                    list(node.iterate(orient))
-                except AssertionError as e:
-                    print("AssertionError", e)
+    # -- Test iteration
 
-    print("Testing root")
-    for orient in ["down", "up"]:
-        print("Processing orientation", orient)
-        for node in [root_up, node1, node2, root_down]:
-            print(node.root(orient))
+    assert [str(node) for node in root_up.iterate(orient="down")] == ["root_up", "1", "2", "root_down"]
+    assert [str(node) for node in root_down.iterate(orient="up")] == ["root_down", "1", "2", "root_up"]
 
-    print("Testing Leaves, top, iterate as tree")
+    for node in [node1, node2]:
+        try:
+            node.iterate(orient="down")
+        except AssertionError as e:
+            assert str(e) == "Can iterate only from root node"
+
+        try:
+            node.iterate(orient="up")
+        except AssertionError as e:
+            assert str(e) == "Can iterate only from root node"
+
+    # -- Test root
+
+    for node in [root_up, node1, node2, root_down]:
+        assert node.root(orient="up") == root_up
+        assert node.root(orient="down") == root_down
+
+    # - Test tree
+
+    # -- Init tree
+
     root_up = NamedNode("root_up")
     node1 = NamedNode("1")
     node2 = NamedNode("2")
 
     connect(root_up, node1)
     connect(root_up, node2)
-    print(list(root_up.leaves()))
+
+    # -- Test leaves
+
+    assert list(root_up.leaves()) == [node1, node2]
+
+    # -- Test top
+
     try:
         print(root_up.top())
     except AssertionError as e:
-        print("AssertionError", e)
-    top = NamedNode("Top")
+        assert str(e) == "Top node not found"
+
+    root_down = NamedNode("root_down")
     for leaf in root_up.leaves():
-        connect(leaf, top)
-    print(root_up.top())
-    print(list(root_up.leaves()))
+        connect(leaf, root_down)
 
-    for node in root_up.iterate():
-        print(node)
-
-    for node in root_up.iterate_as_tree():
-        print(node)
+    assert root_up.top() == root_down
+    assert list(root_up.leaves()) == [root_down]
+    assert list(root_up.iterate_as_tree()) == [root_up, node1, root_down, node2]
 
 
 if __name__ == "__main__":
-    test_dag_iteration()
+    test()
