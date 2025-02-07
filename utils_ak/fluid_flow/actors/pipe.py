@@ -13,6 +13,8 @@ def cast_pipe(pipe_obj):
 
 
 class Pipe(Actor):
+    """Connects one actor to another."""
+
     def __init__(self, name=None):
         super().__init__(name)
         self.current_speed = 0

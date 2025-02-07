@@ -11,6 +11,8 @@ import pandas as pd
 
 
 class Container(Actor, PipeMixin):
+    """A container can have ONE input and ONE output. Container is connected to them via one pipe per each."""
+
     def __init__(
         self,
         name: str,
@@ -155,6 +157,42 @@ def test():
 
     assert flow.state_snapshot() == snapshot(
         {
+            "schema": """\
+Flow:
+    Container Output:default: 100.0\
+""",
+            "Input": {
+                "value": 0.0,
+                "df": "[{'index': 'in', 'max_pressure': nan, 'limit': None, 'collected': 0.0}, {'index': 'out', 'max_pressure': 50.0, 'limit': None, 'collected': 100.0}]",
+                "transactions": "[[0, 2.0, -100.0]]",
+            },
+            "Container Input:default -> Container Output:default": {},
+            "Output": {
+                "value": 100.0,
+                "df": "[{'index': 'in', 'max_pressure': None, 'limit': None, 'collected': 100.0}, {'index': 'out', 'max_pressure': None, 'limit': None, 'collected': 0.0}]",
+                "transactions": "[[0, 2.0, 100.0]]",
+            },
+            "Top parent 0": {},
+            "Top": {},
+        }
+    )
+
+    # - Test 1+
+
+    container1 = Container("Input", value=100, max_pressures=[None, 50])
+    container2 = Container("Output")
+
+    pipe_connect(container1, container2)
+
+    flow = FluidFlow(container1)
+    run_fluid_flow(flow)
+
+    assert flow.state_snapshot() == snapshot(
+        {
+            "schema": """\
+Flow:
+    Container Output:default: 100.0\
+""",
             "Input": {
                 "value": 0.0,
                 "df": "[{'index': 'in', 'max_pressure': nan, 'limit': None, 'collected': 0.0}, {'index': 'out', 'max_pressure': 50.0, 'limit': None, 'collected': 100.0}]",
@@ -183,6 +221,11 @@ def test():
 
     assert flow.state_snapshot() == snapshot(
         {
+            "schema": """\
+Flow:
+    Container Input:default: 70.0
+    Container Output:default: 30.0\
+""",
             "Input": {
                 "value": 70.0,
                 "df": "[{'index': 'in', 'max_pressure': nan, 'limit': nan, 'collected': 0.0}, {'index': 'out', 'max_pressure': 50.0, 'limit': 30.0, 'collected': 30.0}]",
@@ -211,6 +254,11 @@ def test():
 
     assert flow.state_snapshot() == snapshot(
         {
+            "schema": """\
+Flow:
+    Container Input:default: 80.0
+    Container Output:default: 20.0\
+""",
             "Input": {
                 "value": 80.0,
                 "df": "[{'index': 'in', 'max_pressure': nan, 'limit': nan, 'collected': 0.0}, {'index': 'out', 'max_pressure': 50.0, 'limit': 30.0, 'collected': 20.0}]",
