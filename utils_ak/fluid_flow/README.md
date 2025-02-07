@@ -29,6 +29,7 @@ To better understand the capabilities of the library, review the tests in the fo
 - Sequence
 - Queue
 - Hub
+- TumbleredActor
 
 # Todo 
 - Proper priorities for event manager processing
