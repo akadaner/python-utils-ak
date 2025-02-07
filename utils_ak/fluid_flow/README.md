@@ -1,7 +1,3 @@
-Here is the corrected version with all mistakes properly fixed while keeping the original meaning intact:
-
----
-
 # About
 
 This is a library for modeling fluid flow in a pipeline.
