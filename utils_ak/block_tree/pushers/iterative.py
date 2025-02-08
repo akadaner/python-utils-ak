@@ -44,7 +44,7 @@ class IterativePusher:
         # [DISJOINT TRACE]
         logger.trace(
             f"Pushing block",
-            name=block.props['cls'],
+            name=block.props["cls"],
             n_props=len(iter_props),
             iter_props=iter_props,
         )
@@ -61,10 +61,11 @@ class IterativePusher:
                     # success
 
                     # [DISJOINT TRACE]
-                    logger.trace(f"Successfully pushed", name=block.props['cls'])
+                    logger.trace(f"Successfully pushed", name=block.props["cls"], props=props)
                     return block
                 else:
                     assert isinstance(res, dict)
+                    res["props"] = props
                     results.append(res)
 
             # [DISJOINT TRACE]
@@ -157,7 +158,9 @@ class AxisPusher(IterativePusher):
         dispositions = [d for d in dispositions if d is not None]
         disposition = min(dispositions) if len(dispositions) == len(results) else 1
 
-        # logger.debug("Disposition", disposition=disposition)
+        result = ([result for result in results if result.get("disposition", None) == disposition] or [{}])[0]
+
+        logger.trace("Disposition", disposition=disposition, result=result)
         self.cur_x[self.axis] += disposition
         self.block.props.update(x=self.cur_x)
 
