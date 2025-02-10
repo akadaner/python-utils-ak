@@ -55,6 +55,8 @@ class IterativePusher:
                 # try to push
                 props = copy.deepcopy(props)
 
+                logger.trace(f"Pushing", name=block.props["cls"], props=props)
+
                 res = simple_push(parent, block, validator=validator, new_props=props)
 
                 if isinstance(res, Block):
