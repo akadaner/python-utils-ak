@@ -2,7 +2,6 @@ from typing import Optional
 
 from inline_snapshot import snapshot
 
-from app.lessmore.utils.run_snapshot_tests.run_inline_snapshot_tests import run_inline_snapshot_tests
 from utils_ak.fluid_flow.actor import Actor
 from utils_ak.fluid_flow.actors.container import Container
 
@@ -317,4 +316,6 @@ Flow:
 
 
 if __name__ == "__main__":
+    from app.lessmore.utils.run_snapshot_tests.run_inline_snapshot_tests import run_inline_snapshot_tests
+
     run_inline_snapshot_tests(mode="update_all")

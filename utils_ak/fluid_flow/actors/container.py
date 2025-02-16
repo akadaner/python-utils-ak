@@ -3,7 +3,6 @@ from typing import Optional
 from inline_snapshot import snapshot
 from numpy import nan
 
-from app.lessmore.utils.run_snapshot_tests.run_inline_snapshot_tests import run_inline_snapshot_tests
 from utils_ak.fluid_flow.calculations import ERROR, nanmin
 from utils_ak.fluid_flow.actor import Actor
 from utils_ak.fluid_flow.actors.pipe import Piped, pipe_connect
@@ -253,4 +252,6 @@ Flow:
 
 if __name__ == "__main__":
     # test()
+    from app.lessmore.utils.run_snapshot_tests.run_inline_snapshot_tests import run_inline_snapshot_tests
+
     run_inline_snapshot_tests(mode="update_all")
