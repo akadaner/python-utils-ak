@@ -166,7 +166,9 @@ class ParallelepipedBlock(Block):
         )
 
         if _displayed_props:
-            res += "\t\t\t" + json.dumps({prop: self.props[prop] for prop in _displayed_props}, default=str, ensure_ascii=False)
+            res += "\t\t\t" + json.dumps(
+                {prop: self.props[prop] for prop in _displayed_props}, default=str, ensure_ascii=False
+            )
 
         for child in self.children:
             for line in child.__str__(displayed_props=displayed_props).split("\n"):
