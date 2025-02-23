@@ -40,12 +40,11 @@ def display_with_image_thumbnails(df, shape=None):
         if ext not in [".png", ".jpg"]:
             return im
 
-        return '<img src="granular_storage:image/jpeg;base64,{}">'.format(
-            _image_base64(im, shape)
-        )
+        return '<img src="granular_storage:image/jpeg;base64,{}">'.format(_image_base64(im, shape))
 
     columns = df.columns
     formatters = {col: lambda x: _image_formatter(x, shape) for col in columns}
+
     # displaying PIL.Image objects embedded in dataframe
     display(HTML(df.to_html(formatters=formatters, escape=False)))
 
@@ -241,9 +240,10 @@ def mark_consecutive_groups(df, key, groups_key):
 
     values = []
     for i, row in df.iterrows():
-        if row[key] != cur_value:
+        _value = row[key] if isinstance(key, str) else str([row[subkey] for subkey in key])
+        if _value != cur_value:
             cur_i += 1
-            cur_value = row[key]
+            cur_value = _value
         values.append(cur_i)
     df[groups_key] = values
 
@@ -300,9 +300,7 @@ def df_to_ordered_tree(df, column=None, recursive=True, prune_last=True):
     pre_res = list(
         sorted(
             pre_res,
-            key=lambda obj: df[(df[column] == obj[0]) & (df["__key"] == obj[1])].iloc[
-                0
-            ]["__key"],
+            key=lambda obj: df[(df[column] == obj[0]) & (df["__key"] == obj[1])].iloc[0]["__key"],
         )
     )
     return [(x[0], x[2]) for x in pre_res]
@@ -434,9 +432,7 @@ def test_tree():
 def test_read_write():
     from datetime import datetime
 
-    df = pd.DataFrame.from_dict(
-        {"a": [datetime(2020, 1, 1)] * 3, "b": [4, 5, 6], "c": [1, 1, 1]}
-    )
+    df = pd.DataFrame.from_dict({"a": [datetime(2020, 1, 1)] * 3, "b": [4, 5, 6], "c": [1, 1, 1]})
 
     for fn in ["tmp.parquet", "tmp.csv", "tmp.msgpack"]:
         pd_write(df, fn)

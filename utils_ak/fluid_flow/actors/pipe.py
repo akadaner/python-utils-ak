@@ -1,3 +1,7 @@
+from typing import Literal, Optional
+
+from more_itertools import only
+
 from utils_ak.dag import *
 from utils_ak.fluid_flow.actor import Actor
 from utils_ak.fluid_flow.calculations import *
@@ -13,10 +17,16 @@ def cast_pipe(pipe_obj):
 
 
 class Pipe(Actor):
+    """Connects one actor to another.
+
+    Pipe has pressures: in, out. Difference between them is the speed of the flow.
+
+    """
+
     def __init__(self, name=None):
         super().__init__(name)
         self.current_speed = 0
-        self.current_item = None
+        self.current_item = None  # what's flowing through the pipe right now
         self.pressures = {"out": None, "in": None}
 
     @property
@@ -40,7 +50,7 @@ class Pipe(Actor):
             self.current_speed = 0
 
     def __str__(self):
-        return f"Pipe {self.name}"
+        return f"Pipe ({self.name})"
 
     def stats(self):
         return {"current_speed": self.current_speed, "pressures": self.pressures}
@@ -50,20 +60,19 @@ class Pipe(Actor):
         self.current_item = item
 
 
-class PipeMixin:
-    def pipe(self, orient):
-        if orient == "in":
-            nodes = self.parents
-        elif orient == "out":
-            nodes = self.children
+class Piped:
+    """Piped actor has one input and one output pipe."""
+
+    def pipe(self, orient: Literal["in", "out"]) -> Optional[Pipe]:
+        assert orient in ["in", "out"]
+        nodes = self.parents if orient == "in" else self.children
 
         if not nodes:
             return
-        else:
-            assert len(nodes) == 1
-            return nodes[0]
 
-    def speed(self, orient):
+        return only(nodes)
+
+    def speed(self, orient: Literal["in", "out"]) -> float:
         if orient == "in":
             if not self.pipe("in"):
                 return 0
@@ -73,13 +82,16 @@ class PipeMixin:
                 return 0
             return self.pipe("out").current_speed
 
-    def drain(self):
+    def excess_speed(self) -> float:
+        """Excess flow"""
         return self.speed("in") - self.speed("out")
 
 
 def pipe_connect(node1, node2, pipe=None):
     if not pipe:
-        pipe = cast_pipe(f"{node1} -> {node2}")
+        # todo later: hardcode, make properly. This way it's easier to navigate between them all
+        setattr(pipe_connect, "counter", getattr(pipe_connect, "counter", 0) + 1)
+        pipe = cast_pipe(str(pipe_connect.counter))
     else:
         pipe = cast_pipe(pipe)
     connect(node1, pipe)
@@ -120,3 +132,69 @@ def pipe_switch(node1, node2, orient="in"):
         disconnect(node2, pipe2)
         connect(node2, pipe1)
         connect(node1, pipe2)
+
+
+def test():
+    # - Test pipe switch
+
+    from utils_ak.fluid_flow.actors.container import Container
+
+    ci1 = Container("I1")
+    ci2 = Container("I2")
+    co1 = Container("O1")
+    co2 = Container("O2")
+
+    pipe_connect(ci1, co1, "1")
+    pipe_connect(ci2, co2, "2")
+    assert ci1.schema() == snapshot("""\
+Container (I1) -> Pipe 1 -> Container (O1) -> [None]
+""")
+    assert ci2.schema() == snapshot("""\
+Container (I2) -> Pipe 2 -> Container (O2) -> [None]
+""")
+
+    pipe_switch(co1, co2, "in")
+    assert ci1.schema() == snapshot("""\
+Container (I1) -> Pipe 1 -> Container (O2) -> [None]
+""")
+    assert ci2.schema() == snapshot("""\
+Container (I2) -> Pipe 2 -> Container (O1) -> [None]
+""")
+
+    pipe_switch(co1, co2, "in")
+    assert ci1.schema() == snapshot("""\
+Container (I1) -> Pipe 1 -> Container (O1) -> [None]
+""")
+    assert ci2.schema() == snapshot("""\
+Container (I2) -> Pipe 2 -> Container (O2) -> [None]
+""")
+
+    pipe_switch(ci1, ci2, "out")
+    assert ci1.schema() == snapshot("""\
+Container (I1) -> Pipe 2 -> Container (O2) -> [None]
+""")
+    assert ci2.schema() == snapshot("""\
+Container (I2) -> Pipe 1 -> Container (O1) -> [None]
+""")
+
+    # - Test pipe switch 2
+
+    ci1 = Container("I1")
+    co1 = Container("O1")
+    co2 = Container("O2")
+
+    pipe_connect(ci1, co1)
+
+    assert ci1.schema() == snapshot("""\
+Container (I1) -> Pipe 1 -> Container (O1) -> [None]
+""")
+
+    pipe_switch(co1, co2, "in")
+
+    assert ci1.schema() == snapshot("""\
+Container (I1) -> Pipe 1 -> Container (O2) -> [None]
+""")
+
+
+if __name__ == "__main__":
+    run_inline_snapshot_tests(mode="update_all")

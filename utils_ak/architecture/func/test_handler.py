@@ -36,9 +36,7 @@ def test():
     print(handler("foo.bar2"))
     print()
 
-    handler = Handler(
-        callback=[callback1, callback2], filter=filter, formatter=formatter
-    )
+    handler = Handler(callback=[callback1, callback2], filter=filter, formatter=formatter)
     print("Test 4")
     print(handler("foo.bar1"))
     print(handler("foo.bar2"))

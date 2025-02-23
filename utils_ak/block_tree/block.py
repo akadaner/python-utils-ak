@@ -122,9 +122,19 @@ class Block:
         self.props.remove_child(block.props)
         return block
 
-    def detach_from_parent(self):
+    def detach_from_parent(self, kept_props: list[str] = []):
+        # - Keep parent in the local context
+
+        _parent = self.parent
+
+        # - Detach
+
         if self.parent:
             self.parent.remove_child(self)
+
+        # - Keep props
+
+        self.props.update(**{k: _parent.props[k] for k in kept_props})
 
 
 def test_block():
@@ -132,9 +142,7 @@ def test_block():
         return Block(
             block_class,
             props_accumulators={
-                "t": lambda parent, child, key: cumsum_acc(
-                    parent, child, key, default=0, formatter=int
-                )
+                "t": lambda parent, child, key: cumsum_acc(parent, child, key, default=0, formatter=int)
             },
             **kwargs,
         )

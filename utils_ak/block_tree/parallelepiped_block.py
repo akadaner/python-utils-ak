@@ -132,7 +132,13 @@ class ParallelepipedBlock(Block):
             res["children"] = [child.to_dict(props, with_children=True) for child in self.children]
         return res
 
-    def __str__(self, props: list = []):
+    def __str__(self, displayed_props: list = []):
+        # - Build displayed props from inner displayed_props and provided
+
+        _displayed_props = (self.props["displayed_props"] or []) + displayed_props
+
+        # - Build res
+
         res = self.props["cls"]
 
         if self.props["label"]:
@@ -159,11 +165,13 @@ class ParallelepipedBlock(Block):
             ]
         )
 
-        if props:
-            res += " " + " ".join([f"{prop}: {self.props[prop]}" for prop in props])
+        if _displayed_props:
+            res += "\t\t\t" + json.dumps(
+                {prop: self.props[prop] for prop in _displayed_props}, default=str, ensure_ascii=False
+            )
 
         for child in self.children:
-            for line in child.__str__(props=props).split("\n"):
+            for line in child.__str__(displayed_props=displayed_props).split("\n"):
                 if not line:
                     continue
                 res += "\n  " + line
@@ -193,6 +201,9 @@ class ParallelepipedBlock(Block):
             res.add_child(ParallelepipedBlock.from_dict(child))
 
         return res
+
+    def children_classes(self):
+        return list(set([child.props["cls"] for child in self.children]))
 
 
 def test_parallelepiped_block():
