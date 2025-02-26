@@ -1,3 +1,4 @@
+from app.scheduler.common.time_utils import cast_time
 from utils_ak.block_tree import ParallelepipedBlock
 from utils_ak.block_tree.validation.validate_disjoint_by_intervals import validate_disjoint_by_intervals
 from utils_ak.lazy_tester import lazy_tester
@@ -51,8 +52,10 @@ def validate_disjoint(
             "Disjoint",
             b1=b1.props["cls"],
             b1_boiling_id=b1.props["boiling_id"],
+            b1_time=cast_time(b1.x[axis]),
             b2=b2.props["cls"],
             b2_boiling_id=b2.props["boiling_id"],
+            b2_time=cast_time(b2.x[axis]),
             label=label,
             disposition=json.loads(str(e))["disposition"],
             axis=axis,
