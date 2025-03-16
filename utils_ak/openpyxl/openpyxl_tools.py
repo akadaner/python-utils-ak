@@ -198,7 +198,7 @@ def read_merged_cells_df(
 
     df["cell"] = list(ws.merged_cells.ranges)
 
-    bound_names = ("x0", "x1", "y0", "y1")  # ("column_start", "row_start", "column_end", "row_end")
+    bound_names = ("x0", "x1", "y0", "y1")  # ("column_start", "row_start", "column_end", "row_end") # todo later: remove this naming from everywhere
     df["bounds"] = df["cell"].apply(lambda cell: cell.bounds)
     for i in range(4):
         df[bound_names[i]] = df["bounds"].apply(lambda bound: bound[i])
@@ -250,6 +250,13 @@ def read_merged_cells_df(
 
     if basic_features:
         df = df[["x0", "x1", "y0", "y1", "label"]]
+
+    # - Set proper naming
+
+    df['left'] = df['x0']
+    df['top'] = df['x1']
+    df['right'] = df['y0']
+    df['bottom'] = df['y1']
 
     return df
 
