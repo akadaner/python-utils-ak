@@ -1,4 +1,6 @@
 import os
+from pathlib import Path
+
 import openpyxl as opx
 import openpyxl.worksheet.worksheet
 import pandas as pd
@@ -24,6 +26,9 @@ def init_workbook(sheet_names=None, active_sheet_name=None):
 
 def cast_workbook(wb_obj):
     wb_obj = wb_obj or ["Sheet1"]
+    if isinstance(wb_obj, Path):
+        wb_obj = str(wb_obj)
+
     if isinstance(wb_obj, str):
         return opx.load_workbook(filename=wb_obj, data_only=True)
     elif isinstance(wb_obj, opx.Workbook):
