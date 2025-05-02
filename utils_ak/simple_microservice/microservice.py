@@ -127,7 +127,7 @@ class SimpleMicroservice:
         return handler
 
     def publish_raw(self, collection, topic, msg):
-        self.broker.publish(collection, topic, msg)
+        self.broker.produce_to_kafka(collection, topic, msg)
 
     def publish(self, collection, topic, **msg):
         self.publish_raw(collection, topic, self.coder.encode(msg))

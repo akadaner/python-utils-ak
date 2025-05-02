@@ -15,4 +15,4 @@ class ZMQLogHandler(logging.Handler):
             topic_list = [self.root_topic] + topic_list
         result_topic = ".".join(topic_list)
         result_msg = self.format(record)
-        self.publisher.publish(result_topic, result_msg)
+        self.publisher.produce_to_kafka(result_topic, result_msg)

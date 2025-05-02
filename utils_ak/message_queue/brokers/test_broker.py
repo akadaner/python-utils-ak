@@ -4,7 +4,7 @@ import time
 def test_broker(broker, collection="collection", topic=""):
     message = "message".encode("utf-8")
     for i in range(100):
-        broker.publish(collection, topic, message)
+        broker.produce_to_kafka(collection, topic, message)
 
     time.sleep(1)
     broker.subscribe(collection, topic)

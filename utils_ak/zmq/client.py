@@ -30,7 +30,7 @@ class ZMQClient:
             self.publishers[endpoint] = Publisher(
                 endpoint, context=self.context, conn_type=conn_type
             )
-        self.publishers[endpoint].publish(topic, msg)
+        self.publishers[endpoint].produce_to_kafka(topic, msg)
 
     def poll(self, timeout=0.0):
         if not self.subscribers:

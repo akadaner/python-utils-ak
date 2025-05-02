@@ -11,7 +11,7 @@ class MultiBroker(Broker):
         self.brokers_iterator = itertools.cycle(self.brokers)
 
     def publish(self, collection, topic, msg):
-        self.publish_broker.publish(collection, topic, msg)
+        self.publish_broker.produce_to_kafka(collection, topic, msg)
 
     def subscribe(self, collection, topic):
         self.subscribe_broker.subscribe(collection, topic)
