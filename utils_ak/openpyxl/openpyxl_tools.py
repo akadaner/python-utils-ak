@@ -127,17 +127,18 @@ def draw_merged_cell(
     text_rotation=None,
     font_size=None,
     alignment=None,
+    wrap_text=True,
     bold=False,
 ):
     color = color or cast_color("white")
     sheet.merge_cells(start_row=x2, start_column=x1, end_row=x2 + h2 - 1, end_column=x1 + h1 - 1)
     merged_cell = sheet.cell(row=x2, column=x1)
     merged_cell.font = Font(size=font_size, bold=bold)
-    if alignment == "center":
+    if alignment is not None:
         merged_cell.alignment = Alignment(
-            horizontal="center",
+            horizontal=alignment,
             vertical="center",
-            wrap_text=True,
+            wrap_text=wrap_text,
             text_rotation=text_rotation,
         )
     merged_cell.value = text
