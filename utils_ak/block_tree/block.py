@@ -11,6 +11,7 @@ class Block:
         block_class: Optional[str] = None,
         # added a comment
         default_block_class: str = "block",
+        # another comment
         props_formatters: Optional[dict] = None,
         props_accumulators: Optional[dict] = None,
         props_required_keys: Optional[list] = None,
