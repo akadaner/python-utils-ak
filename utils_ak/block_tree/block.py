@@ -9,6 +9,7 @@ class Block:
     def __init__(
         self,
         block_class: Optional[str] = None,
+        # added a comment
         default_block_class: str = "block",
         props_formatters: Optional[dict] = None,
         props_accumulators: Optional[dict] = None,
